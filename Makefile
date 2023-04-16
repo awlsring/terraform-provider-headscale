@@ -12,9 +12,10 @@ clean:
 	rm ${BINARY}
 
 gen:
-	swagger generate client -f ${SWAGGER_DOC} -A headscale -t ./internal
+	swagger generate client -f ${SWAGGER_DOC} -A headscale -t ./internal/gen
+	go mod tidy
 
-install:
+install: gen
 	go install .
 
 test: 

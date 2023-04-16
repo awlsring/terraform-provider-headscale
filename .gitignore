@@ -3,5 +3,3 @@ examples
 bin
 *.tfstate
 *.terraform
-internal/client
-internal/models

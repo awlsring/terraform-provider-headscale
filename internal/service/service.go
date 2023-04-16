@@ -4,38 +4,38 @@ import (
 	"context"
 	"net/url"
 
-	"github.com/awlsring/terraform-provider-headscale/internal/client"
-	"github.com/awlsring/terraform-provider-headscale/internal/client/headscale_service"
-	"github.com/awlsring/terraform-provider-headscale/internal/models"
+	"github.com/awlsring/terraform-provider-headscale/internal/gen/client"
+	"github.com/awlsring/terraform-provider-headscale/internal/gen/client/headscale_service"
+	"github.com/awlsring/terraform-provider-headscale/internal/gen/models"
 	httptransport "github.com/go-openapi/runtime/client"
 	"github.com/go-openapi/strfmt"
 )
 
 type Headscale interface {
-	ListAPIKeys(ctx context.Context) (*models.V1ListAPIKeysResponse, error)
-	CreateAPIKey(ctx context.Context, expiration *strfmt.DateTime) (*models.V1CreateAPIKeyResponse, error)
+	ListAPIKeys(ctx context.Context) ([]*models.V1APIKey, error)
+	CreateAPIKey(ctx context.Context, expiration *strfmt.DateTime) (string, error)
 	ExpireAPIKey(ctx context.Context, key string) error
 	ListDevices(ctx context.Context, user *string) ([]*models.V1Machine, error)
 	GetDevice(ctx context.Context, deviceId string) (*models.V1Machine, error)
-	CreateDevice(ctx context.Context, input CreateDeviceInput) (*models.V1RegisterMachineResponse, error)
-	ExpireDevice(ctx context.Context, deviceId string) (*models.V1ExpireMachineResponse, error)
+	CreateDevice(ctx context.Context, user string, key string) (*models.V1Machine, error)
+	ExpireDevice(ctx context.Context, deviceId string) (*models.V1Machine, error)
 	DeleteDevice(ctx context.Context, deviceId string) error
-	RenameDevice(ctx context.Context, deviceId string, newName string) (*models.V1RenameMachineResponse, error)
-	GetDeviceRoutes(ctx context.Context, deviceId string) (*models.V1GetMachineRoutesResponse, error)
-	TagDevice(ctx context.Context, deviceId string, tags []string) (*models.V1SetTagsResponse, error)
-	MoveDevice(ctx context.Context, deviceId string, newOwner string) (*models.V1MoveMachineResponse, error)
-	ListPreAuthKeys(ctx context.Context, user *string) (*models.V1ListPreAuthKeysResponse, error)
-	CreatePreAuthKey(ctx context.Context, input CreatePreAuthKeyInput) (*models.V1CreatePreAuthKeyResponse, error)
+	RenameDevice(ctx context.Context, deviceId string, newName string) (*models.V1Machine, error)
+	GetDeviceRoutes(ctx context.Context, deviceId string) ([]*models.V1Route, error)
+	TagDevice(ctx context.Context, deviceId string, tags []string) (*models.V1Machine, error)
+	MoveDevice(ctx context.Context, deviceId string, newOwner string) (*models.V1Machine, error)
+	ListPreAuthKeys(ctx context.Context, user *string) ([]*models.V1PreAuthKey, error)
+	CreatePreAuthKey(ctx context.Context, input CreatePreAuthKeyInput) (*models.V1PreAuthKey, error)
 	ExpirePreAuthKey(ctx context.Context, user string, key string) error
-	ListRoutes(ctx context.Context) (*models.V1GetRoutesResponse, error)
+	ListRoutes(ctx context.Context) ([]*models.V1Route, error)
 	DeleteRoute(ctx context.Context, routeId string) error
 	DisableRoute(ctx context.Context, routeId string) error
 	EnableRoute(ctx context.Context, routeId string) error
-	GetUser(ctx context.Context, userId string) (*models.V1GetUserResponse, error)
-	ListUsers(ctx context.Context) (*models.V1ListUsersResponse, error)
-	CreateUser(ctx context.Context, name string) (*models.V1CreateUserResponse, error)
+	GetUser(ctx context.Context, userId string) (*models.V1User, error)
+	ListUsers(ctx context.Context) ([]*models.V1User, error)
+	CreateUser(ctx context.Context, name string) (*models.V1User, error)
 	DeleteUser(ctx context.Context, userId string) error
-	RenameUser(ctx context.Context, oldName string, newName string) error
+	RenameUser(ctx context.Context, oldName string, newName string) (*models.V1User, error)
 }
 
 type HeadscaleService struct {
@@ -62,7 +62,7 @@ func New(c ClientConfig) (Headscale, error) {
 	}, nil
 }
 
-func (h *HeadscaleService) ListAPIKeys(ctx context.Context) (*models.V1ListAPIKeysResponse, error) {
+func (h *HeadscaleService) ListAPIKeys(ctx context.Context) ([]*models.V1APIKey, error) {
 	request := headscale_service.NewHeadscaleServiceListAPIKeysParams()
 	request.SetContext(ctx)
 
@@ -70,10 +70,16 @@ func (h *HeadscaleService) ListAPIKeys(ctx context.Context) (*models.V1ListAPIKe
 	if err != nil {
 		return nil, err
 	}
-	return resp.Payload, nil
+
+	err = resp.Payload.Validate(strfmt.Default)
+	if err != nil {
+		return nil, err
+	}
+
+	return resp.Payload.APIKeys, nil
 }
 
-func (h *HeadscaleService) CreateAPIKey(ctx context.Context, expiration *strfmt.DateTime) (*models.V1CreateAPIKeyResponse, error) {
+func (h *HeadscaleService) CreateAPIKey(ctx context.Context, expiration *strfmt.DateTime) (string, error) {
 	request := headscale_service.NewHeadscaleServiceCreateAPIKeyParams()
 	request.SetContext(ctx)
 	if expiration != nil {
@@ -84,9 +90,15 @@ func (h *HeadscaleService) CreateAPIKey(ctx context.Context, expiration *strfmt.
 
 	resp, err := h.client.HeadscaleService.HeadscaleServiceCreateAPIKey(request)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
-	return resp.Payload, nil
+
+	err = resp.Payload.Validate(strfmt.Default)
+	if err != nil {
+		return "", err
+	}
+
+	return resp.Payload.APIKey, nil
 }
 
 func (h *HeadscaleService) ExpireAPIKey(ctx context.Context, key string) error {
@@ -143,20 +155,26 @@ type CreateDeviceInput struct {
 	Key  *string
 }
 
-func (h *HeadscaleService) CreateDevice(ctx context.Context, input CreateDeviceInput) (*models.V1RegisterMachineResponse, error) {
+func (h *HeadscaleService) CreateDevice(ctx context.Context, user string, key string) (*models.V1Machine, error) {
 	request := headscale_service.NewHeadscaleServiceRegisterMachineParams()
 	request.SetContext(ctx)
-	request.SetKey(input.Key)
-	request.SetUser(input.User)
+	request.SetKey(&key)
+	request.SetUser(&user)
 
 	resp, err := h.client.HeadscaleService.HeadscaleServiceRegisterMachine(request)
 	if err != nil {
 		return nil, err
 	}
-	return resp.Payload, nil
+
+	err = resp.Payload.Validate(strfmt.Default)
+	if err != nil {
+		return nil, err
+	}
+
+	return resp.Payload.Machine, nil
 }
 
-func (h *HeadscaleService) ExpireDevice(ctx context.Context, deviceId string) (*models.V1ExpireMachineResponse, error) {
+func (h *HeadscaleService) ExpireDevice(ctx context.Context, deviceId string) (*models.V1Machine, error) {
 	request := headscale_service.NewHeadscaleServiceExpireMachineParams()
 	request.SetContext(ctx)
 	request.SetMachineID(deviceId)
@@ -165,7 +183,13 @@ func (h *HeadscaleService) ExpireDevice(ctx context.Context, deviceId string) (*
 	if err != nil {
 		return nil, err
 	}
-	return resp.Payload, nil
+
+	err = resp.Payload.Validate(strfmt.Default)
+	if err != nil {
+		return nil, err
+	}
+
+	return resp.Payload.Machine, nil
 }
 
 func (h *HeadscaleService) DeleteDevice(ctx context.Context, deviceId string) error {
@@ -180,7 +204,7 @@ func (h *HeadscaleService) DeleteDevice(ctx context.Context, deviceId string) er
 	return nil
 }
 
-func (h *HeadscaleService) RenameDevice(ctx context.Context, deviceId string, name string) (*models.V1RenameMachineResponse, error) {
+func (h *HeadscaleService) RenameDevice(ctx context.Context, deviceId string, name string) (*models.V1Machine, error) {
 	request := headscale_service.NewHeadscaleServiceRenameMachineParams()
 	request.SetContext(ctx)
 	request.SetMachineID(deviceId)
@@ -190,10 +214,16 @@ func (h *HeadscaleService) RenameDevice(ctx context.Context, deviceId string, na
 	if err != nil {
 		return nil, err
 	}
-	return resp.Payload, nil
+
+	err = resp.Payload.Validate(strfmt.Default)
+	if err != nil {
+		return nil, err
+	}
+
+	return resp.Payload.Machine, nil
 }
 
-func (h *HeadscaleService) GetDeviceRoutes(ctx context.Context, deviceId string) (*models.V1GetMachineRoutesResponse, error) {
+func (h *HeadscaleService) GetDeviceRoutes(ctx context.Context, deviceId string) ([]*models.V1Route, error) {
 	request := headscale_service.NewHeadscaleServiceGetMachineRoutesParams()
 	request.SetContext(ctx)
 	request.SetMachineID(deviceId)
@@ -202,10 +232,16 @@ func (h *HeadscaleService) GetDeviceRoutes(ctx context.Context, deviceId string)
 	if err != nil {
 		return nil, err
 	}
-	return resp.Payload, nil
+
+	err = resp.Payload.Validate(strfmt.Default)
+	if err != nil {
+		return nil, err
+	}
+
+	return resp.Payload.Routes, nil
 }
 
-func (h *HeadscaleService) TagDevice(ctx context.Context, deviceId string, tags []string) (*models.V1SetTagsResponse, error) {
+func (h *HeadscaleService) TagDevice(ctx context.Context, deviceId string, tags []string) (*models.V1Machine, error) {
 	request := headscale_service.NewHeadscaleServiceSetTagsParams()
 	request.SetContext(ctx)
 	request.SetMachineID(deviceId)
@@ -217,10 +253,16 @@ func (h *HeadscaleService) TagDevice(ctx context.Context, deviceId string, tags 
 	if err != nil {
 		return nil, err
 	}
-	return resp.Payload, nil
+
+	err = resp.Payload.Validate(strfmt.Default)
+	if err != nil {
+		return nil, err
+	}
+
+	return resp.Payload.Machine, nil
 }
 
-func (h *HeadscaleService) MoveDevice(ctx context.Context, deviceId string, user string) (*models.V1MoveMachineResponse, error) {
+func (h *HeadscaleService) MoveDevice(ctx context.Context, deviceId string, user string) (*models.V1Machine, error) {
 	request := headscale_service.NewHeadscaleServiceMoveMachineParams()
 	request.SetContext(ctx)
 	request.SetMachineID(deviceId)
@@ -230,10 +272,16 @@ func (h *HeadscaleService) MoveDevice(ctx context.Context, deviceId string, user
 	if err != nil {
 		return nil, err
 	}
-	return resp.Payload, nil
+
+	err = resp.Payload.Validate(strfmt.Default)
+	if err != nil {
+		return nil, err
+	}
+
+	return resp.Payload.Machine, nil
 }
 
-func (h *HeadscaleService) ListPreAuthKeys(ctx context.Context, user *string) (*models.V1ListPreAuthKeysResponse, error) {
+func (h *HeadscaleService) ListPreAuthKeys(ctx context.Context, user *string) ([]*models.V1PreAuthKey, error) {
 	request := headscale_service.NewHeadscaleServiceListPreAuthKeysParams()
 	request.SetContext(ctx)
 	request.SetUser(user)
@@ -242,7 +290,13 @@ func (h *HeadscaleService) ListPreAuthKeys(ctx context.Context, user *string) (*
 	if err != nil {
 		return nil, err
 	}
-	return resp.Payload, nil
+
+	err = resp.Payload.Validate(strfmt.Default)
+	if err != nil {
+		return nil, err
+	}
+
+	return resp.Payload.PreAuthKeys, nil
 }
 
 type CreatePreAuthKeyInput struct {
@@ -253,7 +307,7 @@ type CreatePreAuthKeyInput struct {
 	aclTags    []string
 }
 
-func (h *HeadscaleService) CreatePreAuthKey(ctx context.Context, input CreatePreAuthKeyInput) (*models.V1CreatePreAuthKeyResponse, error) {
+func (h *HeadscaleService) CreatePreAuthKey(ctx context.Context, input CreatePreAuthKeyInput) (*models.V1PreAuthKey, error) {
 	request := headscale_service.NewHeadscaleServiceCreatePreAuthKeyParams()
 	request.SetContext(ctx)
 	body := &models.V1CreatePreAuthKeyRequest{
@@ -262,6 +316,7 @@ func (h *HeadscaleService) CreatePreAuthKey(ctx context.Context, input CreatePre
 		Ephemeral: input.Ephermeral,
 		ACLTags:   input.aclTags,
 	}
+
 	if input.Expiration != nil {
 		body.Expiration = *input.Expiration
 	}
@@ -271,7 +326,13 @@ func (h *HeadscaleService) CreatePreAuthKey(ctx context.Context, input CreatePre
 	if err != nil {
 		return nil, err
 	}
-	return resp.Payload, nil
+
+	err = resp.Payload.Validate(strfmt.Default)
+	if err != nil {
+		return nil, err
+	}
+
+	return resp.Payload.PreAuthKey, nil
 }
 
 func (h *HeadscaleService) ExpirePreAuthKey(ctx context.Context, user string, key string) error {
@@ -289,7 +350,7 @@ func (h *HeadscaleService) ExpirePreAuthKey(ctx context.Context, user string, ke
 	return nil
 }
 
-func (h *HeadscaleService) ListRoutes(ctx context.Context) (*models.V1GetRoutesResponse, error) {
+func (h *HeadscaleService) ListRoutes(ctx context.Context) ([]*models.V1Route, error) {
 	request := headscale_service.NewHeadscaleServiceGetRoutesParams()
 	request.SetContext(ctx)
 
@@ -297,7 +358,13 @@ func (h *HeadscaleService) ListRoutes(ctx context.Context) (*models.V1GetRoutesR
 	if err != nil {
 		return nil, err
 	}
-	return resp.Payload, nil
+
+	err = resp.Payload.Validate(strfmt.Default)
+	if err != nil {
+		return nil, err
+	}
+
+	return resp.Payload.Routes, nil
 }
 
 func (h *HeadscaleService) DeleteRoute(ctx context.Context, route string) error {
@@ -338,7 +405,7 @@ func (h *HeadscaleService) EnableRoute(ctx context.Context, route string) error 
 	return nil
 }
 
-func (h *HeadscaleService) ListUsers(ctx context.Context) (*models.V1ListUsersResponse, error) {
+func (h *HeadscaleService) ListUsers(ctx context.Context) ([]*models.V1User, error) {
 	request := headscale_service.NewHeadscaleServiceListUsersParams()
 	request.SetContext(ctx)
 
@@ -346,10 +413,16 @@ func (h *HeadscaleService) ListUsers(ctx context.Context) (*models.V1ListUsersRe
 	if err != nil {
 		return nil, err
 	}
-	return resp.Payload, nil
+
+	err = resp.Payload.Validate(strfmt.Default)
+	if err != nil {
+		return nil, err
+	}
+
+	return resp.Payload.Users, nil
 }
 
-func (h *HeadscaleService) GetUser(ctx context.Context, name string) (*models.V1GetUserResponse, error) {
+func (h *HeadscaleService) GetUser(ctx context.Context, name string) (*models.V1User, error) {
 	request := headscale_service.NewHeadscaleServiceGetUserParams()
 	request.SetContext(ctx)
 	request.SetName(name)
@@ -358,10 +431,16 @@ func (h *HeadscaleService) GetUser(ctx context.Context, name string) (*models.V1
 	if err != nil {
 		return nil, err
 	}
-	return resp.Payload, nil
+
+	err = resp.Payload.Validate(strfmt.Default)
+	if err != nil {
+		return nil, err
+	}
+
+	return resp.Payload.User, nil
 }
 
-func (h *HeadscaleService) CreateUser(ctx context.Context, name string) (*models.V1CreateUserResponse, error) {
+func (h *HeadscaleService) CreateUser(ctx context.Context, name string) (*models.V1User, error) {
 	request := headscale_service.NewHeadscaleServiceCreateUserParams()
 	request.SetContext(ctx)
 	request.SetBody(&models.V1CreateUserRequest{
@@ -372,7 +451,13 @@ func (h *HeadscaleService) CreateUser(ctx context.Context, name string) (*models
 	if err != nil {
 		return nil, err
 	}
-	return resp.Payload, nil
+
+	err = resp.Payload.Validate(strfmt.Default)
+	if err != nil {
+		return nil, err
+	}
+
+	return resp.Payload.User, nil
 }
 
 func (h *HeadscaleService) DeleteUser(ctx context.Context, name string) error {
@@ -387,15 +472,21 @@ func (h *HeadscaleService) DeleteUser(ctx context.Context, name string) error {
 	return nil
 }
 
-func (h *HeadscaleService) RenameUser(ctx context.Context, oldName string, newName string) error {
+func (h *HeadscaleService) RenameUser(ctx context.Context, oldName string, newName string) (*models.V1User, error) {
 	request := headscale_service.NewHeadscaleServiceRenameUserParams()
 	request.SetContext(ctx)
 	request.SetNewName(newName)
 	request.SetOldName(oldName)
 
-	_, err := h.client.HeadscaleService.HeadscaleServiceRenameUser(request)
+	resp, err := h.client.HeadscaleService.HeadscaleServiceRenameUser(request)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+
+	err = resp.Payload.Validate(strfmt.Default)
+	if err != nil {
+		return nil, err
+	}
+
+	return resp.Payload.User, nil
 }
