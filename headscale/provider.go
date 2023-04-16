@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/awlsring/terraform-provider-headscale/headscale/device"
+	"github.com/awlsring/terraform-provider-headscale/headscale/tags"
 	"github.com/awlsring/terraform-provider-headscale/internal/service"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
@@ -39,12 +40,12 @@ func (p *HeadscaleProvider) Schema(ctx context.Context, req provider.SchemaReque
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"api_key": schema.StringAttribute{
-				Required:    true,
+				Optional:    true,
 				Description: "A Headscale api key.",
 				Sensitive:   true,
 			},
 			"endpoint": schema.StringAttribute{
-				Required:            true,
+				Optional:            true,
 				MarkdownDescription: "Headscale endpoint to connect to. (e.g. `https://headscale.example.com`)",
 			},
 		},
@@ -117,7 +118,9 @@ func (p *HeadscaleProvider) Configure(ctx context.Context, req provider.Configur
 }
 
 func (p *HeadscaleProvider) Resources(ctx context.Context) []func() resource.Resource {
-	return []func() resource.Resource{}
+	return []func() resource.Resource{
+		tags.Resource,
+	}
 }
 
 func (p *HeadscaleProvider) DataSources(ctx context.Context) []func() datasource.DataSource {

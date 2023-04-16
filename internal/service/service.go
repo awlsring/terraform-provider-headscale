@@ -245,6 +245,7 @@ func (h *HeadscaleService) TagDevice(ctx context.Context, deviceId string, tags 
 	request := headscale_service.NewHeadscaleServiceSetTagsParams()
 	request.SetContext(ctx)
 	request.SetMachineID(deviceId)
+
 	request.SetBody(headscale_service.HeadscaleServiceSetTagsBody{
 		Tags: tags,
 	})
