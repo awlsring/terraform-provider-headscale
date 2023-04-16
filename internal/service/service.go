@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"net/url"
 
 	"github.com/awlsring/terraform-provider-headscale/internal/client"
 	"github.com/awlsring/terraform-provider-headscale/internal/client/headscale_service"
@@ -15,7 +16,7 @@ type Headscale interface {
 	CreateAPIKey(ctx context.Context, expiration *strfmt.DateTime) (*models.V1CreateAPIKeyResponse, error)
 	ExpireAPIKey(ctx context.Context, key string) error
 	ListDevices(ctx context.Context, user *string) ([]*models.V1Machine, error)
-	GetDevice(ctx context.Context, deviceId string) (*models.V1GetMachineResponse, error)
+	GetDevice(ctx context.Context, deviceId string) (*models.V1Machine, error)
 	CreateDevice(ctx context.Context, input CreateDeviceInput) (*models.V1RegisterMachineResponse, error)
 	ExpireDevice(ctx context.Context, deviceId string) (*models.V1ExpireMachineResponse, error)
 	DeleteDevice(ctx context.Context, deviceId string) error
@@ -44,18 +45,21 @@ type HeadscaleService struct {
 type ClientConfig struct {
 	Endpoint string
 	Token    string
-	Protocol string
 }
 
-func New(c ClientConfig) Headscale {
-	transport := httptransport.New(c.Endpoint, "", []string{c.Protocol})
+func New(c ClientConfig) (Headscale, error) {
+	u, err := url.Parse(c.Endpoint)
+	if err != nil {
+		return nil, err
+	}
+	transport := httptransport.New(u.Host, u.Path, []string{u.Scheme})
 	transport.DefaultAuthentication = httptransport.BearerToken(c.Token)
 
 	client := client.New(transport, strfmt.Default)
 
 	return &HeadscaleService{
 		client: client,
-	}
+	}, nil
 }
 
 func (h *HeadscaleService) ListAPIKeys(ctx context.Context) (*models.V1ListAPIKeysResponse, error) {
@@ -116,7 +120,7 @@ func (h *HeadscaleService) ListDevices(ctx context.Context, user *string) ([]*mo
 	return resp.Payload.Machines, nil
 }
 
-func (h *HeadscaleService) GetDevice(ctx context.Context, deviceId string) (*models.V1GetMachineResponse, error) {
+func (h *HeadscaleService) GetDevice(ctx context.Context, deviceId string) (*models.V1Machine, error) {
 	request := headscale_service.NewHeadscaleServiceGetMachineParams()
 	request.SetContext(ctx)
 	request.SetMachineID(deviceId)
@@ -125,7 +129,13 @@ func (h *HeadscaleService) GetDevice(ctx context.Context, deviceId string) (*mod
 	if err != nil {
 		return nil, err
 	}
-	return resp.Payload, nil
+
+	err = resp.Payload.Validate(strfmt.Default)
+	if err != nil {
+		return nil, err
+	}
+
+	return resp.Payload.Machine, nil
 }
 
 type CreateDeviceInput struct {

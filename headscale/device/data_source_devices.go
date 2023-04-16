@@ -17,30 +17,12 @@ var (
 	_ datasource.DataSourceWithConfigure = &devicesDataSource{}
 )
 
-func DataSource() datasource.DataSource {
+func DataSourceMultiple() datasource.DataSource {
 	return &devicesDataSource{}
 }
 
 type devicesDataSource struct {
 	client service.Headscale
-}
-
-type dataSourceModel struct {
-	User       types.String  `tfsdk:"user"`
-	NamePrefix types.String  `tfsdk:"name_prefix"`
-	Devices    []deviceModel `tfsdk:"devices"`
-}
-
-type deviceModel struct {
-	Id             types.String   `tfsdk:"id"`
-	Addresses      []types.String `tfsdk:"addresses"`
-	Name           types.String   `tfsdk:"name"`
-	User           types.String   `tfsdk:"user"`
-	Expiry         types.String   `tfsdk:"expiry"`
-	CreatedAt      types.String   `tfsdk:"created_at"`
-	RegisterMethod types.String   `tfsdk:"register_method"`
-	GivenName      types.String   `tfsdk:"given_name"`
-	Tags           []types.String `tfsdk:"tags"`
 }
 
 func (d *devicesDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
@@ -60,11 +42,11 @@ func (d *devicesDataSource) Schema(_ context.Context, _ datasource.SchemaRequest
 		Attributes: map[string]schema.Attribute{
 			"user": schema.StringAttribute{
 				Optional:    true,
-				Description: "The id of the bond. Formatted as `{node}/{name}`.",
+				Description: "Fitlers the device list to elements belonging to the user with the provided ID.",
 			},
 			"name_prefix": schema.StringAttribute{
 				Optional:    true,
-				Description: "The id of the bond. Formatted as `{node}/{name}`.",
+				Description: "Filters the device list to elements whose name has the provided prefix.",
 			},
 			"devices": schema.ListNestedAttribute{
 				Computed: true,
@@ -72,39 +54,42 @@ func (d *devicesDataSource) Schema(_ context.Context, _ datasource.SchemaRequest
 					Attributes: map[string]schema.Attribute{
 						"id": schema.StringAttribute{
 							Computed:    true,
-							Description: "The id of the bridge. Formatted as /{node}/{name}.",
+							Description: "The id of the device",
 						},
 						"addresses": schema.ListAttribute{
 							Computed:    true,
 							ElementType: types.StringType,
-							Description: "List of physical network interfaces on the machine.",
+							Description: "List of the device's ip addresses.",
 						},
 						"name": schema.StringAttribute{
 							Computed:    true,
-							Description: "The SSL fingerprint of the node",
+							Description: "The device's name.",
 						},
 						"user": schema.StringAttribute{
 							Computed:    true,
-							Description: "The SSL fingerprint of the node",
+							Description: "The ID of the user who owns the device.",
 						},
 						"expiry": schema.StringAttribute{
 							Computed:    true,
-							Description: "The position of the network interface in the VM as an int. Used to determine the interface name (net0, net1, etc).",
+							Description: "The expiry date of the device.",
 						},
 						"created_at": schema.StringAttribute{
-							Computed: true,
+							Computed:    true,
+							Description: "The time the device entry was created.",
 						},
 						"register_method": schema.StringAttribute{
-							Computed: true,
-							Optional: true,
+							Computed:    true,
+							Optional:    true,
+							Description: "The method used to register the device.",
 						},
 						"tags": schema.ListAttribute{
 							Computed:    true,
 							ElementType: types.StringType,
-							Description: "List of physical network interfaces on the machine.",
+							Description: "The tags applied to the device.",
 						},
 						"given_name": schema.StringAttribute{
-							Computed: true,
+							Computed:    true,
+							Description: "The device's given name.",
 						},
 					},
 				},
@@ -114,7 +99,7 @@ func (d *devicesDataSource) Schema(_ context.Context, _ datasource.SchemaRequest
 }
 
 func (d *devicesDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var state dataSourceModel
+	var state deviceListModel
 	resp.Diagnostics.Append(req.Config.Get(ctx, &state)...)
 	if resp.Diagnostics.HasError() {
 		return

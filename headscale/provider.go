@@ -39,18 +39,14 @@ func (p *HeadscaleProvider) Schema(ctx context.Context, req provider.SchemaReque
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"api_key": schema.StringAttribute{
-				Optional:    true,
-				Description: "A headscale api key.",
+				Required:    true,
+				Description: "A Headscale api key.",
 				Sensitive:   true,
 			},
 			"endpoint": schema.StringAttribute{
 				Required:            true,
-				MarkdownDescription: "Headscale endpoint to connect to.",
+				MarkdownDescription: "Headscale endpoint to connect to. (e.g. `https://headscale.example.com`)",
 			},
-			// "insecure": schema.BoolAttribute{
-			// 	Optional:    true,
-			// 	Description: "Skip TLS verification. Defaults to true.",
-			// },
 		},
 	}
 }
@@ -98,14 +94,21 @@ func (p *HeadscaleProvider) Configure(ctx context.Context, req provider.Configur
 	scfg := service.ClientConfig{
 		Token:    apiKey,
 		Endpoint: endpoint,
-		Protocol: "https",
 	}
 
-	ctx = tflog.SetField(ctx, "proxmox_endpoint", endpoint)
-	ctx = tflog.MaskFieldValuesWithFieldKeys(ctx, "proxmox_api_key")
+	ctx = tflog.SetField(ctx, "headscale_endpoint", endpoint)
+	ctx = tflog.MaskFieldValuesWithFieldKeys(ctx, "headscale_api_key")
 
 	tflog.Debug(ctx, "Creating Headscale client")
-	client := service.New(scfg)
+	client, err := service.New(scfg)
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Uable to create Headscale client",
+			"An error was encountered configuring the client.\n"+
+				err.Error(),
+		)
+		return
+	}
 
 	resp.DataSourceData = client
 	resp.ResourceData = client
@@ -119,6 +122,7 @@ func (p *HeadscaleProvider) Resources(ctx context.Context) []func() resource.Res
 
 func (p *HeadscaleProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
+		device.DataSourceMultiple,
 		device.DataSource,
 	}
 }
