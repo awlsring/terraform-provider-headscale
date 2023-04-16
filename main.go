@@ -11,7 +11,7 @@ import (
 //go:generate go run github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs generate
 func main() {
 	err := providerserver.Serve(context.Background(), headscale.New, providerserver.ServeOpts{
-		Address: "tmp.terraform.io/awlsring/headscale",
+		Address: "registry.terraform.io/awlsring/headscale",
 	})
 
 	if err != nil {
