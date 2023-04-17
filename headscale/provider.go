@@ -8,6 +8,7 @@ import (
 	"github.com/awlsring/terraform-provider-headscale/headscale/route"
 	device_route "github.com/awlsring/terraform-provider-headscale/headscale/route/device"
 	"github.com/awlsring/terraform-provider-headscale/headscale/tags"
+	"github.com/awlsring/terraform-provider-headscale/headscale/user"
 	"github.com/awlsring/terraform-provider-headscale/internal/service"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
@@ -123,6 +124,7 @@ func (p *HeadscaleProvider) Resources(ctx context.Context) []func() resource.Res
 	return []func() resource.Resource{
 		tags.Resource,
 		device_route.Resource,
+		user.Resource,
 	}
 }
 
@@ -132,5 +134,7 @@ func (p *HeadscaleProvider) DataSources(ctx context.Context) []func() datasource
 		device.DataSource,
 		route.DataSource,
 		device_route.DataSource,
+		user.DataSource,
+		user.DataSourceMultiple,
 	}
 }
