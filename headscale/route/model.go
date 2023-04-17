@@ -3,6 +3,7 @@ package route
 import "github.com/hashicorp/terraform-plugin-framework/types"
 
 type dataSourceRouteModel struct {
+	Id       types.String `tfsdk:"id"`
 	DeviceId types.String `tfsdk:"device_id"`
 	Status   types.String `tfsdk:"status"`
 	Routes   []routeModel `tfsdk:"routes"`

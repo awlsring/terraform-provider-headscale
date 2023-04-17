@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/awlsring/terraform-provider-headscale/internal/service"
+	"github.com/awlsring/terraform-provider-headscale/internal/utils"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -40,9 +41,13 @@ func (d *devicesDataSource) Configure(_ context.Context, req datasource.Configur
 func (d *devicesDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
+			"id": schema.StringAttribute{
+				Optional:    true,
+				Description: "The ID of the resource.",
+			},
 			"user": schema.StringAttribute{
 				Optional:    true,
-				Description: "Fitlers the device list to elements belonging to the user with the provided ID.",
+				Description: "Filters the device list to elements belonging to the user with the provided ID.",
 			},
 			"name_prefix": schema.StringAttribute{
 				Optional:    true,
@@ -104,6 +109,8 @@ func (d *devicesDataSource) Read(ctx context.Context, req datasource.ReadRequest
 	if resp.Diagnostics.HasError() {
 		return
 	}
+
+	state.Id = types.StringValue(utils.CreateUUID())
 
 	var namePrefix *string
 	if state.NamePrefix.ValueString() != "" {

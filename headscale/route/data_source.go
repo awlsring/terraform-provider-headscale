@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/awlsring/terraform-provider-headscale/internal/service"
+	"github.com/awlsring/terraform-provider-headscale/internal/utils"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -43,6 +44,10 @@ func (d *deviceDataSource) Schema(_ context.Context, _ datasource.SchemaRequest,
 		Attributes: map[string]schema.Attribute{
 			"device_id": schema.StringAttribute{
 				Optional:    true,
+				Description: "Filters the route list to elements belonging to the device with the provided ID.",
+			},
+			"id": schema.StringAttribute{
+				Computed:    true,
 				Description: "Filters the route list to elements belonging to the device with the provided ID.",
 			},
 			"status": schema.StringAttribute{
@@ -93,6 +98,8 @@ func (d *deviceDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 	if resp.Diagnostics.HasError() {
 		return
 	}
+
+	state.Id = types.StringValue(utils.CreateUUID())
 
 	var device *string
 	if state.DeviceId.ValueString() != "" {

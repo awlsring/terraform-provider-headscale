@@ -3,6 +3,7 @@ package device
 import "github.com/hashicorp/terraform-plugin-framework/types"
 
 type deviceListModel struct {
+	Id         types.String  `tfsdk:"id"`
 	User       types.String  `tfsdk:"user"`
 	NamePrefix types.String  `tfsdk:"name_prefix"`
 	Devices    []deviceModel `tfsdk:"devices"`

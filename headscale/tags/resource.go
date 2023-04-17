@@ -45,9 +45,13 @@ func (d *deviceTagsResource) Configure(_ context.Context, req resource.Configure
 func (d *deviceTagsResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
+			"id": schema.StringAttribute{
+				Computed:    true,
+				Description: "The resolved id of the device.",
+			},
 			"device_id": schema.StringAttribute{
 				Required:    true,
-				Description: "The id of the device to set tags on",
+				Description: "The id of the device to set tags on.",
 			},
 			"tags": schema.ListAttribute{
 				Required:    true,
@@ -132,6 +136,7 @@ func (r *deviceTagsResource) tagDevice(ctx context.Context, m *deviceTagModel) (
 
 	dm := deviceTagModel{
 		DeviceId: types.StringValue(device.ID),
+		Id:       types.StringValue(device.ID),
 	}
 
 	allTags := []string{}
@@ -219,6 +224,7 @@ func (r *deviceTagsResource) readDevice(ctx context.Context, id string) (*device
 
 	dm := deviceTagModel{
 		DeviceId: types.StringValue(device.ID),
+		Id:       types.StringValue(device.ID),
 	}
 
 	allTags := []string{}

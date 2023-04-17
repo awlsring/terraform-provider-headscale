@@ -41,6 +41,10 @@ func (d *deviceDataSource) Configure(_ context.Context, req datasource.Configure
 func (d *deviceDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
+			"id": schema.StringAttribute{
+				Computed:    true,
+				Description: "The ID of the resource.",
+			},
 			"device_id": schema.StringAttribute{
 				Required:    true,
 				Description: "The device to get the routes of.",
@@ -83,6 +87,7 @@ func (d *deviceDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 	}
 
 	device := state.DeviceId.ValueString()
+	state.Id = types.StringValue(device)
 
 	var status *string
 	if state.Status.ValueString() != "" {

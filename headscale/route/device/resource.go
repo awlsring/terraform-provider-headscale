@@ -46,6 +46,10 @@ func (d *deviceRoutesResource) Configure(_ context.Context, req resource.Configu
 func (d *deviceRoutesResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
+			"id": schema.StringAttribute{
+				Computed:    true,
+				Description: "The id of teh resource.",
+			},
 			"device_id": schema.StringAttribute{
 				Required:    true,
 				Description: "The id of the device to get subnet routes from.",
@@ -211,6 +215,7 @@ func (r *deviceRoutesResource) enableRoutes(ctx context.Context, m *deviceRouteM
 
 	return &deviceRouteModel{
 		DeviceId: types.StringValue(deviceId),
+		Id:       types.StringValue(deviceId),
 		Routes:   m.Routes,
 	}, nil
 }
@@ -269,6 +274,7 @@ func (r *deviceRoutesResource) readDeviceRoutes(ctx context.Context, id string) 
 
 	dm := deviceRouteModel{
 		DeviceId: types.StringValue(id),
+		Id:       types.StringValue(id),
 	}
 
 	enabledRoutes := []string{}
