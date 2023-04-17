@@ -1,4 +1,4 @@
-package route
+package device_route
 
 import (
 	"context"
@@ -27,7 +27,7 @@ type deviceDataSource struct {
 }
 
 func (d *deviceDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_subnet_routes"
+	resp.TypeName = req.ProviderTypeName + "_device_subnet_routes"
 }
 
 func (d *deviceDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, _ *datasource.ConfigureResponse) {
@@ -42,8 +42,8 @@ func (d *deviceDataSource) Schema(_ context.Context, _ datasource.SchemaRequest,
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"device_id": schema.StringAttribute{
-				Optional:    true,
-				Description: "Filters the route list to elements belonging to the device with the provided ID.",
+				Required:    true,
+				Description: "The device to get the routes of.",
 			},
 			"status": schema.StringAttribute{
 				Optional:    true,
@@ -64,21 +64,9 @@ func (d *deviceDataSource) Schema(_ context.Context, _ datasource.SchemaRequest,
 							Computed:    true,
 							Description: "The subnet route",
 						},
-						"status": schema.StringAttribute{
+						"enabled": schema.BoolAttribute{
 							Computed:    true,
 							Description: "The status of the route",
-						},
-						"device_id": schema.StringAttribute{
-							Computed:    true,
-							Description: "The device id the route is advertised by.",
-						},
-						"user_id": schema.StringAttribute{
-							Computed:    true,
-							Description: "The ID of the user who owns the device the route belong to.",
-						},
-						"created_at": schema.StringAttribute{
-							Computed:    true,
-							Description: "The time the route entry was created.",
 						},
 					},
 				},
@@ -94,12 +82,7 @@ func (d *deviceDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 		return
 	}
 
-	var device *string
-	if state.DeviceId.ValueString() != "" {
-		d := state.DeviceId.ValueString()
-		device = &d
-		tflog.Debug(ctx, fmt.Sprintf("Device ID: %v", *device))
-	}
+	device := state.DeviceId.ValueString()
 
 	var status *string
 	if state.Status.ValueString() != "" {
@@ -108,7 +91,7 @@ func (d *deviceDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 		tflog.Debug(ctx, fmt.Sprintf("Status: %v", *status))
 	}
 
-	routes, err := d.client.ListRoutes(ctx)
+	routes, err := d.client.GetDeviceRoutes(ctx, device)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to get routes",
@@ -119,12 +102,6 @@ func (d *deviceDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 	}
 
 	for _, route := range routes {
-		if device != nil {
-			if route.Machine.ID != *device {
-				continue
-			}
-		}
-
 		stat := "disabled"
 		if route.Enabled {
 			stat = "enabled"
@@ -137,12 +114,9 @@ func (d *deviceDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 		}
 
 		r := routeModel{
-			Id:        types.StringValue(route.ID),
-			Route:     types.StringValue(route.Prefix),
-			Status:    types.StringValue(stat),
-			DeviceId:  types.StringValue(route.Machine.ID),
-			UserId:    types.StringValue(route.Machine.User.ID),
-			CreatedAt: types.StringValue(route.CreatedAt.DeepCopy().String()),
+			Id:      types.StringValue(route.ID),
+			Route:   types.StringValue(route.Prefix),
+			Enabled: types.BoolValue(route.Enabled),
 		}
 
 		state.Routes = append(state.Routes, r)

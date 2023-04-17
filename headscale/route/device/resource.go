@@ -1,4 +1,4 @@
-package route
+package device_route
 
 import (
 	"context"
@@ -12,8 +12,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -62,13 +60,6 @@ func (d *deviceRoutesResource) Schema(_ context.Context, _ resource.SchemaReques
 						stringvalidator.RegexMatches(regexp.MustCompile(`^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\/([0-9]|[1-2][0-9]|3[0-2])$`), "tag must follow scheme like `10.0.10.0/24`"),
 					),
 				},
-			},
-			"id": schema.StringAttribute{
-				Computed: true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
-				Description: "The resolved id of the device",
 			},
 		},
 	}
@@ -135,7 +126,7 @@ func (r *deviceRoutesResource) Delete(ctx context.Context, req resource.DeleteRe
 		return
 	}
 
-	routes, err := r.client.GetDeviceRoutes(ctx, state.Id.ValueString())
+	routes, err := r.client.GetDeviceRoutes(ctx, state.DeviceId.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error deleting device routes",
@@ -219,7 +210,6 @@ func (r *deviceRoutesResource) enableRoutes(ctx context.Context, m *deviceRouteM
 	}
 
 	return &deviceRouteModel{
-		Id:       types.StringValue(deviceId),
 		DeviceId: types.StringValue(deviceId),
 		Routes:   m.Routes,
 	}, nil
@@ -232,7 +222,7 @@ func (r *deviceRoutesResource) Read(ctx context.Context, req resource.ReadReques
 		return
 	}
 
-	deviceId := state.Id.ValueString()
+	deviceId := state.DeviceId.ValueString()
 
 	device, err := r.readDeviceRoutes(ctx, deviceId)
 	if err != nil {
@@ -278,7 +268,6 @@ func (r *deviceRoutesResource) readDeviceRoutes(ctx context.Context, id string) 
 	}
 
 	dm := deviceRouteModel{
-		Id:       types.StringValue(id),
 		DeviceId: types.StringValue(id),
 	}
 

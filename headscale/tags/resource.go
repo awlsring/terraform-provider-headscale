@@ -11,8 +11,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -62,13 +60,6 @@ func (d *deviceTagsResource) Schema(_ context.Context, _ resource.SchemaRequest,
 					),
 				},
 			},
-			"id": schema.StringAttribute{
-				Computed: true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
-				Description: "The resolved id of the device",
-			},
 		},
 	}
 }
@@ -90,7 +81,7 @@ func (r *deviceTagsResource) Create(ctx context.Context, req resource.CreateRequ
 		return
 	}
 
-	tflog.Debug(ctx, fmt.Sprintf("tagged device with id '%s'", device.Id.ValueString()))
+	tflog.Debug(ctx, fmt.Sprintf("tagged device with id '%s'", device.DeviceId.ValueString()))
 
 	diags = resp.State.Set(ctx, device)
 	resp.Diagnostics.Append(diags...)
@@ -116,7 +107,7 @@ func (r *deviceTagsResource) Update(ctx context.Context, req resource.UpdateRequ
 		return
 	}
 
-	tflog.Debug(ctx, fmt.Sprintf("tagged device with id '%s'", device.Id.ValueString()))
+	tflog.Debug(ctx, fmt.Sprintf("tagged device with id '%s'", device.DeviceId.ValueString()))
 
 	diags = resp.State.Set(ctx, device)
 	resp.Diagnostics.Append(diags...)
@@ -140,7 +131,6 @@ func (r *deviceTagsResource) tagDevice(ctx context.Context, m *deviceTagModel) (
 	}
 
 	dm := deviceTagModel{
-		Id:       types.StringValue(device.ID),
 		DeviceId: types.StringValue(device.ID),
 	}
 
@@ -165,7 +155,7 @@ func (r *deviceTagsResource) Delete(ctx context.Context, req resource.DeleteRequ
 		return
 	}
 
-	_, err := r.client.TagDevice(ctx, state.Id.ValueString(), []string{})
+	_, err := r.client.TagDevice(ctx, state.DeviceId.ValueString(), []string{})
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error deleting device tags",
@@ -182,7 +172,7 @@ func (r *deviceTagsResource) Read(ctx context.Context, req resource.ReadRequest,
 		return
 	}
 
-	deviceId := state.Id.ValueString()
+	deviceId := state.DeviceId.ValueString()
 
 	device, err := r.readDevice(ctx, deviceId)
 	if err != nil {
@@ -228,12 +218,10 @@ func (r *deviceTagsResource) readDevice(ctx context.Context, id string) (*device
 	}
 
 	dm := deviceTagModel{
-		Id:       types.StringValue(device.ID),
 		DeviceId: types.StringValue(device.ID),
 	}
 
 	allTags := []string{}
-	allTags = append(allTags, device.ValidTags...)
 	allTags = append(allTags, device.ForcedTags...)
 
 	c, diags := types.ListValueFrom(ctx, types.StringType, allTags)

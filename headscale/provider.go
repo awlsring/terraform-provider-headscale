@@ -131,5 +131,6 @@ func (p *HeadscaleProvider) DataSources(ctx context.Context) []func() datasource
 		device.DataSourceMultiple,
 		device.DataSource,
 		route.DataSource,
+		device_route.DataSource,
 	}
 }
