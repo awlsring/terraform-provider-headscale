@@ -145,7 +145,6 @@ func (r *deviceTagsResource) tagDevice(ctx context.Context, m *deviceTagModel) (
 	}
 
 	allTags := []string{}
-	allTags = append(allTags, device.ValidTags...)
 	allTags = append(allTags, device.ForcedTags...)
 
 	c, diags := types.ListValueFrom(ctx, types.StringType, allTags)
