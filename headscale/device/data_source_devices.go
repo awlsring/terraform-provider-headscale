@@ -40,7 +40,7 @@ func (d *devicesDataSource) Configure(_ context.Context, req datasource.Configur
 
 func (d *devicesDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description: "The devices data source allows you to get information about devices registered in Headscale instance.",
+		Description: "The devices data source allows you to get information about devices registered on the Headscale instance.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed:    true,
@@ -85,7 +85,6 @@ func (d *devicesDataSource) Schema(_ context.Context, _ datasource.SchemaRequest
 						},
 						"register_method": schema.StringAttribute{
 							Computed:    true,
-							Optional:    true,
 							Description: "The method used to register the device.",
 						},
 						"tags": schema.ListAttribute{
@@ -172,6 +171,8 @@ func (d *devicesDataSource) Read(ctx context.Context, req datasource.ReadRequest
 
 		if device.RegisterMethod != nil {
 			dm.RegisterMethod = types.StringValue(string(*device.RegisterMethod))
+		} else {
+			dm.RegisterMethod = types.StringValue("unknown")
 		}
 
 		state.Devices = append(state.Devices, dm)

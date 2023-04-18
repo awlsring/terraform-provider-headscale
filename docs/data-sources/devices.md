@@ -3,12 +3,12 @@
 page_title: "headscale_devices Data Source - terraform-provider-headscale"
 subcategory: ""
 description: |-
-  The devices data source allows you to get information about devices registered in Headscale instance.
+  The devices data source allows you to get information about devices registered on the Headscale instance.
 ---
 
 # headscale_devices (Data Source)
 
-The devices data source allows you to get information about devices registered in Headscale instance.
+The devices data source allows you to get information about devices registered on the Headscale instance.
 
 ## Example Usage
 
@@ -43,10 +43,6 @@ data "headscale_devices" "user_devices" {
 <a id="nestedatt--devices"></a>
 ### Nested Schema for `devices`
 
-Optional:
-
-- `register_method` (String) The method used to register the device.
-
 Read-Only:
 
 - `addresses` (List of String) List of the device's ip addresses.
@@ -55,6 +51,7 @@ Read-Only:
 - `given_name` (String) The device's given name.
 - `id` (String) The id of the device
 - `name` (String) The device's name.
+- `register_method` (String) The method used to register the device.
 - `tags` (List of String) The tags applied to the device.
 - `user` (String) The ID of the user who owns the device.
 

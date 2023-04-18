@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/awlsring/terraform-provider-headscale/internal/service"
+	"github.com/awlsring/terraform-provider-headscale/internal/utils"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -36,8 +37,12 @@ func (d *usersDataSource) Configure(_ context.Context, req datasource.ConfigureR
 
 func (d *usersDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description: "The users data source allows you to get information about users registered in the Headscale instance.",
+		Description: "The users data source allows you to get information about users registered on the Headscale instance.",
 		Attributes: map[string]schema.Attribute{
+			"id": schema.StringAttribute{
+				Computed:    true,
+				Description: "The Terraform ID of the resource.",
+			},
 			"users": schema.ListNestedAttribute{
 				Computed: true,
 				NestedObject: schema.NestedAttributeObject{
@@ -67,6 +72,8 @@ func (d *usersDataSource) Read(ctx context.Context, req datasource.ReadRequest, 
 	if resp.Diagnostics.HasError() {
 		return
 	}
+
+	state.Id = types.StringValue(utils.CreateUUID())
 
 	users, err := d.client.ListUsers(ctx)
 	if err != nil {

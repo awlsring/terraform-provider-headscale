@@ -43,7 +43,7 @@ func (d *apiKeyResource) Configure(_ context.Context, req resource.ConfigureRequ
 
 func (d *apiKeyResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description: "The API key resource allows you to create an API key that can be used to authenticate with the Headscale API. By default keys that are created with this resource will not expire. To create a key that expires, set the `days_to_expire` attribute to the number of days until the key expires. Keys cannot be modified, so any change to the input on this resource will cause the key to be expired and a new key to be created.",
+		MarkdownDescription: "The API key resource allows you to create an API key that can be used to interact with the Headscale API. By default keys that are created with this resource will expire in 90 days. Keys cannot be modified, so any change to the input on this resource will cause the key to be expired and a new key to be created.",
 		Attributes: map[string]schema.Attribute{
 			"time_to_expire": schema.StringAttribute{
 				Optional:            true,

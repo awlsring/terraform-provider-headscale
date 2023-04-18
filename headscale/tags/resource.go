@@ -44,7 +44,7 @@ func (d *deviceTagsResource) Configure(_ context.Context, req resource.Configure
 
 func (d *deviceTagsResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description: "The device tags resource allows setting tags on a device registered in Headscale instance. Utilizing this resource will reset any previous configuration for tags applied to the device. If a tag was previously applied, but is not present in the list of tags, it will be removed.",
+		Description: "The device tags resource allows setting tags on a device registered on the Headscale instance. Utilizing this resource will reset any previous configuration for tags applied to the device. If a tag was previously applied but is not present in the list of tags, it will be removed.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed:    true,

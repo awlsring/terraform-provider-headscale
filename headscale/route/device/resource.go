@@ -45,11 +45,11 @@ func (d *deviceRoutesResource) Configure(_ context.Context, req resource.Configu
 
 func (d *deviceRoutesResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description: "The device subnet routes resource allows enabling routes advertised by a device registered in Headscale instance. Utilizing this resource will reset any previous configuration for routes advertised by the device. If a route was previously enabled, but is not present in the list of routes, it will be disabled.",
+		Description: "The device subnet routes resource allows enabling routes advertised by a device registered on the Headscale instance. Utilizing this resource will reset any previous configuration for routes advertised by the device. If a route was previously enabled but is not present in the list of routes, it will be disabled.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed:    true,
-				Description: "The id of the resource.",
+				Description: "The Terrafrom Id of the resource.",
 			},
 			"device_id": schema.StringAttribute{
 				Required:    true,

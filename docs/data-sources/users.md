@@ -3,12 +3,12 @@
 page_title: "headscale_users Data Source - terraform-provider-headscale"
 subcategory: ""
 description: |-
-  The users data source allows you to get information about users registered in the Headscale instance.
+  The users data source allows you to get information about users registered on the Headscale instance.
 ---
 
 # headscale_users (Data Source)
 
-The users data source allows you to get information about users registered in the Headscale instance.
+The users data source allows you to get information about users registered on the Headscale instance.
 
 ## Example Usage
 
@@ -22,6 +22,7 @@ data "headscale_users" "all" {}
 
 ### Read-Only
 
+- `id` (String) The Terraform ID of the resource.
 - `users` (Attributes List) (see [below for nested schema](#nestedatt--users))
 
 <a id="nestedatt--users"></a>

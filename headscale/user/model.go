@@ -9,5 +9,6 @@ type userModel struct {
 }
 
 type dataSourceUsersModel struct {
-	Users []userModel `tfsdk:"users"`
+	Id    types.String `tfsdk:"id"`
+	Users []userModel  `tfsdk:"users"`
 }

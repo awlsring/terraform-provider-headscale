@@ -40,19 +40,19 @@ func (d *deviceDataSource) Configure(_ context.Context, req datasource.Configure
 
 func (d *deviceDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description: "The device subnet routes data source allows you to get information on routes a device registered in Headscale instance advertises.",
+		Description: "The device subnet routes data source allows you to get information on routes a device registered on the Headscale instance advertises.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed:    true,
-				Description: "The ID of the resource.",
+				Description: "The resolved ID of the device.",
 			},
 			"device_id": schema.StringAttribute{
 				Required:    true,
 				Description: "The device to get the routes of.",
 			},
 			"status": schema.StringAttribute{
-				Optional:    true,
-				Description: "Filters the route list to elements whose status matches what is provided. Can be enabled or disabled.",
+				Optional:            true,
+				MarkdownDescription: "Filters the route list to elements whose status matches what is provided. Can be `enabled` or `disabled`.",
 				Validators: []validator.String{
 					stringvalidator.OneOf("enabled", "disabled"),
 				},
@@ -63,15 +63,15 @@ func (d *deviceDataSource) Schema(_ context.Context, _ datasource.SchemaRequest,
 					Attributes: map[string]schema.Attribute{
 						"id": schema.StringAttribute{
 							Computed:    true,
-							Description: "The id of the route",
+							Description: "The id of the route.",
 						},
 						"route": schema.StringAttribute{
 							Computed:    true,
-							Description: "The subnet route",
+							Description: "The subnet route.",
 						},
 						"enabled": schema.BoolAttribute{
 							Computed:    true,
-							Description: "The status of the route",
+							Description: "The status of the route.",
 						},
 					},
 				},

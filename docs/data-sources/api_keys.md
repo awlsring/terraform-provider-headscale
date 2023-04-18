@@ -3,12 +3,12 @@
 page_title: "headscale_api_keys Data Source - terraform-provider-headscale"
 subcategory: ""
 description: |-
-  The API key data source allows you to list all API keys on Headscale instance. This will only return the API key metadata and not the actual key.
+  The API key data source allows you to list all API keys on the Headscale instance. This will only return the API key metadata and not the actual key.
 ---
 
 # headscale_api_keys (Data Source)
 
-The API key data source allows you to list all API keys on Headscale instance. This will only return the API key metadata and not the actual key.
+The API key data source allows you to list all API keys on the Headscale instance. This will only return the API key metadata and not the actual key.
 
 ## Example Usage
 

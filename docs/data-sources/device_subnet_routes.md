@@ -3,12 +3,12 @@
 page_title: "headscale_device_subnet_routes Data Source - terraform-provider-headscale"
 subcategory: ""
 description: |-
-  The device subnet routes data source allows you to get information on routes a device registered in Headscale instance advertises.
+  The device subnet routes data source allows you to get information on routes a device registered on the Headscale instance advertises.
 ---
 
 # headscale_device_subnet_routes (Data Source)
 
-The device subnet routes data source allows you to get information on routes a device registered in Headscale instance advertises.
+The device subnet routes data source allows you to get information on routes a device registered on the Headscale instance advertises.
 
 ## Example Usage
 
@@ -40,11 +40,11 @@ data "headscale_device_subnet_routes" "enabled_devices" {
 
 ### Optional
 
-- `status` (String) Filters the route list to elements whose status matches what is provided. Can be enabled or disabled.
+- `status` (String) Filters the route list to elements whose status matches what is provided. Can be `enabled` or `disabled`.
 
 ### Read-Only
 
-- `id` (String) The ID of the resource.
+- `id` (String) The resolved ID of the device.
 - `routes` (Attributes List) (see [below for nested schema](#nestedatt--routes))
 
 <a id="nestedatt--routes"></a>
@@ -52,8 +52,8 @@ data "headscale_device_subnet_routes" "enabled_devices" {
 
 Read-Only:
 
-- `enabled` (Boolean) The status of the route
-- `id` (String) The id of the route
-- `route` (String) The subnet route
+- `enabled` (Boolean) The status of the route.
+- `id` (String) The id of the route.
+- `route` (String) The subnet route.
 
 

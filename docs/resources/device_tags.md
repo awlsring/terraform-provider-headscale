@@ -3,12 +3,12 @@
 page_title: "headscale_device_tags Resource - terraform-provider-headscale"
 subcategory: ""
 description: |-
-  The device tags resource allows setting tags on a device registered in Headscale instance. Utilizing this resource will reset any previous configuration for tags applied to the device. If a tag was previously applied, but is not present in the list of tags, it will be removed.
+  The device tags resource allows setting tags on a device registered on the Headscale instance. Utilizing this resource will reset any previous configuration for tags applied to the device. If a tag was previously applied but is not present in the list of tags, it will be removed.
 ---
 
 # headscale_device_tags (Resource)
 
-The device tags resource allows setting tags on a device registered in Headscale instance. Utilizing this resource will reset any previous configuration for tags applied to the device. If a tag was previously applied, but is not present in the list of tags, it will be removed.
+The device tags resource allows setting tags on a device registered on the Headscale instance. Utilizing this resource will reset any previous configuration for tags applied to the device. If a tag was previously applied but is not present in the list of tags, it will be removed.
 
 ## Example Usage
 

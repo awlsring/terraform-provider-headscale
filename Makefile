@@ -3,7 +3,6 @@ HOSTNAME=github.com
 NAMESPACE=awlsring
 NAME=headscale
 BINARY=terraform-provider-${NAME}
-VERSION=0.1.1
 OS_ARCH=darwin_arm64
 
 default: install
@@ -15,7 +14,7 @@ gen:
 	swagger generate client -f ${SWAGGER_DOC} -A headscale -t ./internal/gen
 	go mod tidy
 
-install: gen
+install:
 	go install .
 
 test: 
