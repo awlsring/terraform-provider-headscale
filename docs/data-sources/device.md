@@ -3,12 +3,12 @@
 page_title: "headscale_device Data Source - terraform-provider-headscale"
 subcategory: ""
 description: |-
-  
+  The device data source allows you to get information about a device registered in Headscale instance.
 ---
 
 # headscale_device (Data Source)
 
-
+The device data source allows you to get information about a device registered in Headscale instance.
 
 ## Example Usage
 

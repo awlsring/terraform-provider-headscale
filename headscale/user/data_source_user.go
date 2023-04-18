@@ -36,6 +36,7 @@ func (d *userDataSource) Configure(_ context.Context, req datasource.ConfigureRe
 
 func (d *userDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
+		Description: "The user data source allows you to get information about a user registered in the Headscale instance.",
 		Attributes: map[string]schema.Attribute{
 			"name": schema.StringAttribute{
 				Required:    true,

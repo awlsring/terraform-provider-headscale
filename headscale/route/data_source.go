@@ -41,6 +41,7 @@ func (d *deviceDataSource) Configure(_ context.Context, req datasource.Configure
 
 func (d *deviceDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
+		Description: "The subnet routes data source allows you to get information on routes advertised by devices registered in the Headscale instance.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed:    true,

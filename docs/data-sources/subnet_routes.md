@@ -3,12 +3,12 @@
 page_title: "headscale_subnet_routes Data Source - terraform-provider-headscale"
 subcategory: ""
 description: |-
-  
+  The subnet routes data source allows you to get information on routes advertised by devices registered in the Headscale instance.
 ---
 
 # headscale_subnet_routes (Data Source)
 
-
+The subnet routes data source allows you to get information on routes advertised by devices registered in the Headscale instance.
 
 ## Example Usage
 

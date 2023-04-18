@@ -3,12 +3,15 @@
 page_title: "headscale Provider"
 subcategory: ""
 description: |-
-  
+  The Headscale provider allow you to manage various resources and retrieve data of existing resources on a Headscale instance. To utilize this provider, you must have a valid API key and a Headscale instance with a valid TLS certificate. You can generate an API key by running headscale apikey create on the Headscale instance.
+  The Headscale endpoint and API key can be specified in the provider block or by setting the HEADSCALE_ENDPOINT and HEADSCALE_API_KEY environment variables.
 ---
 
 # headscale Provider
 
+The Headscale provider allow you to manage various resources and retrieve data of existing resources on a Headscale instance. To utilize this provider, you must have a valid API key and a Headscale instance with a valid TLS certificate. You can generate an API key by running `headscale apikey create` on the Headscale instance.
 
+The Headscale endpoint and API key can be specified in the provider block or by setting the `HEADSCALE_ENDPOINT` and `HEADSCALE_API_KEY` environment variables.
 
 ## Example Usage
 

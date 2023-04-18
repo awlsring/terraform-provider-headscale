@@ -3,12 +3,12 @@
 page_title: "headscale_device_subnet_routes Resource - terraform-provider-headscale"
 subcategory: ""
 description: |-
-  
+  The device subnet routes resource allows enabling routes advertised by a device registered in Headscale instance. Utilizing this resource will reset any previous configuration for routes advertised by the device. If a route was previously enabled, but is not present in the list of routes, it will be disabled.
 ---
 
 # headscale_device_subnet_routes (Resource)
 
-
+The device subnet routes resource allows enabling routes advertised by a device registered in Headscale instance. Utilizing this resource will reset any previous configuration for routes advertised by the device. If a route was previously enabled, but is not present in the list of routes, it will be disabled.
 
 ## Example Usage
 

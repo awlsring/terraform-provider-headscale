@@ -38,6 +38,7 @@ func (d *apiKeyDataSource) Configure(_ context.Context, req datasource.Configure
 
 func (d *apiKeyDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
+		Description: "The API key data source allows you to list all API keys on Headscale instance. This will only return the API key metadata and not the actual key.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed:    true,

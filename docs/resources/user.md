@@ -3,12 +3,12 @@
 page_title: "headscale_user Resource - terraform-provider-headscale"
 subcategory: ""
 description: |-
-  A user registered in the Headscale instance.
+  The user resource allows you to register a user on the Headscale instance.
 ---
 
 # headscale_user (Resource)
 
-A user registered in the Headscale instance.
+The user resource allows you to register a user on the Headscale instance.
 
 ## Example Usage
 

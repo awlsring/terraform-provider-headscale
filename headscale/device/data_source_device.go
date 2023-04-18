@@ -36,6 +36,7 @@ func (d *deviceDataSource) Configure(_ context.Context, req datasource.Configure
 
 func (d *deviceDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
+		Description: "The device data source allows you to get information about a device registered in Headscale instance.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Required:    true,

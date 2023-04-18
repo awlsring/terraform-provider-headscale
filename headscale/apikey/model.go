@@ -19,6 +19,7 @@ type apikeyModel struct {
 type apikeyResourceModel struct {
 	DaysToExpire types.Int64  `tfsdk:"days_to_expire"`
 	Id           types.String `tfsdk:"id"`
+	Key          types.String `tfsdk:"key"`
 	Prefix       types.String `tfsdk:"prefix"`
 	Expiration   types.String `tfsdk:"expiration"`
 	Expired      types.Bool   `tfsdk:"expired"`

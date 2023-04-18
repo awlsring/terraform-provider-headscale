@@ -42,6 +42,7 @@ func (p *HeadscaleProvider) Metadata(_ context.Context, _ provider.MetadataReque
 
 func (p *HeadscaleProvider) Schema(ctx context.Context, req provider.SchemaRequest, resp *provider.SchemaResponse) {
 	resp.Schema = schema.Schema{
+		MarkdownDescription: "The Headscale provider allow you to manage various resources and retrieve data of existing resources on a Headscale instance. To utilize this provider, you must have a valid API key and a Headscale instance with a valid TLS certificate. You can generate an API key by running `headscale apikey create` on the Headscale instance.\n\nThe Headscale endpoint and API key can be specified in the provider block or by setting the `HEADSCALE_ENDPOINT` and `HEADSCALE_API_KEY` environment variables.",
 		Attributes: map[string]schema.Attribute{
 			"api_key": schema.StringAttribute{
 				Optional:    true,

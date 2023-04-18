@@ -3,12 +3,12 @@
 page_title: "headscale_user Data Source - terraform-provider-headscale"
 subcategory: ""
 description: |-
-  
+  The user data source allows you to get information about a user registered in the Headscale instance.
 ---
 
 # headscale_user (Data Source)
 
-
+The user data source allows you to get information about a user registered in the Headscale instance.
 
 ## Example Usage
 
