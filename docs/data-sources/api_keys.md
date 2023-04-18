@@ -16,7 +16,7 @@ The API key data source allows you to list all API keys on Headscale instance. T
 # Return only active API keys
 data "headscale_api_keys" "active_keys" {}
 
-# Return only all API keys
+# Return all API keys
 data "headscale_api_keys" "all_keys" {
     all = true
 }
@@ -39,7 +39,7 @@ data "headscale_api_keys" "all_keys" {
 
 Read-Only:
 
-- `created_at` (String) The time the device entry was created.
+- `created_at` (String) The time the key was created.
 - `expiration` (String) Expiration date of the api key.
 - `expired` (Boolean) If the api key is expired.
 - `id` (String) The id of the api key.

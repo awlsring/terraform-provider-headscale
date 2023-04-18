@@ -13,12 +13,12 @@ The API key resource allows you to create an API key that can be used to authent
 ## Example Usage
 
 ```terraform
-# An API Key that doesn't expire
-resource "headscale_api_key" "infinite" {}
+# An API Key that expires in the default 90 days
+resource "headscale_api_key" "default" {}
 
 # An API Key that expires in 1 week
 resource "headscale_api_key" "week" {
-    days_to_expire = 7
+    time_to_expire = "1w"
 }
 ```
 
@@ -27,11 +27,11 @@ resource "headscale_api_key" "week" {
 
 ### Optional
 
-- `days_to_expire` (Number) The number of days until the api key expires. No value creates a key that won't expire.
+- `time_to_expire` (String) The time until the key expires. This is a string in the format of `30m`, `3h`, `90d`, etc. Defaults to `90d`
 
 ### Read-Only
 
-- `created_at` (String) The time the device entry was created.
+- `created_at` (String) The time the key was created.
 - `expiration` (String) Expiration date of the api key.
 - `expired` (Boolean) If the api key is expired.
 - `id` (String) The id of the api key.

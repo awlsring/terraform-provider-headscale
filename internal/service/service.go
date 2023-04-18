@@ -24,7 +24,7 @@ type Headscale interface {
 	GetDeviceRoutes(ctx context.Context, deviceId string) ([]*models.V1Route, error)
 	TagDevice(ctx context.Context, deviceId string, tags []string) (*models.V1Machine, error)
 	MoveDevice(ctx context.Context, deviceId string, newOwner string) (*models.V1Machine, error)
-	ListPreAuthKeys(ctx context.Context, user *string) ([]*models.V1PreAuthKey, error)
+	ListPreAuthKeys(ctx context.Context, user string) ([]*models.V1PreAuthKey, error)
 	CreatePreAuthKey(ctx context.Context, input CreatePreAuthKeyInput) (*models.V1PreAuthKey, error)
 	ExpirePreAuthKey(ctx context.Context, user string, key string) error
 	ListRoutes(ctx context.Context) ([]*models.V1Route, error)
@@ -282,10 +282,10 @@ func (h *HeadscaleService) MoveDevice(ctx context.Context, deviceId string, user
 	return resp.Payload.Machine, nil
 }
 
-func (h *HeadscaleService) ListPreAuthKeys(ctx context.Context, user *string) ([]*models.V1PreAuthKey, error) {
+func (h *HeadscaleService) ListPreAuthKeys(ctx context.Context, user string) ([]*models.V1PreAuthKey, error) {
 	request := headscale_service.NewHeadscaleServiceListPreAuthKeysParams()
 	request.SetContext(ctx)
-	request.SetUser(user)
+	request.SetUser(&user)
 
 	resp, err := h.client.HeadscaleService.HeadscaleServiceListPreAuthKeys(request)
 	if err != nil {
@@ -303,9 +303,9 @@ func (h *HeadscaleService) ListPreAuthKeys(ctx context.Context, user *string) ([
 type CreatePreAuthKeyInput struct {
 	User       string
 	Reusable   bool
-	Ephermeral bool
+	Ephemeral  bool
 	Expiration *strfmt.DateTime
-	aclTags    []string
+	ACLTags    []string
 }
 
 func (h *HeadscaleService) CreatePreAuthKey(ctx context.Context, input CreatePreAuthKeyInput) (*models.V1PreAuthKey, error) {
@@ -314,8 +314,8 @@ func (h *HeadscaleService) CreatePreAuthKey(ctx context.Context, input CreatePre
 	body := &models.V1CreatePreAuthKeyRequest{
 		User:      input.User,
 		Reusable:  input.Reusable,
-		Ephemeral: input.Ephermeral,
-		ACLTags:   input.aclTags,
+		Ephemeral: input.Ephemeral,
+		ACLTags:   input.ACLTags,
 	}
 
 	if input.Expiration != nil {

@@ -6,6 +6,7 @@ import (
 
 	"github.com/awlsring/terraform-provider-headscale/headscale/apikey"
 	"github.com/awlsring/terraform-provider-headscale/headscale/device"
+	"github.com/awlsring/terraform-provider-headscale/headscale/preauthkey"
 	"github.com/awlsring/terraform-provider-headscale/headscale/route"
 	device_route "github.com/awlsring/terraform-provider-headscale/headscale/route/device"
 	"github.com/awlsring/terraform-provider-headscale/headscale/tags"
@@ -128,6 +129,7 @@ func (p *HeadscaleProvider) Resources(ctx context.Context) []func() resource.Res
 		device_route.Resource,
 		user.Resource,
 		apikey.Resource,
+		preauthkey.Resource,
 	}
 }
 
@@ -140,5 +142,6 @@ func (p *HeadscaleProvider) DataSources(ctx context.Context) []func() datasource
 		user.DataSource,
 		user.DataSourceMultiple,
 		apikey.DataSource,
+		preauthkey.DataSource,
 	}
 }

@@ -2,7 +2,6 @@ package apikey
 
 import (
 	"context"
-	"time"
 
 	"github.com/awlsring/terraform-provider-headscale/internal/service"
 	"github.com/awlsring/terraform-provider-headscale/internal/utils"
@@ -70,7 +69,7 @@ func (d *apiKeyDataSource) Schema(_ context.Context, _ datasource.SchemaRequest,
 						},
 						"created_at": schema.StringAttribute{
 							Computed:    true,
-							Description: "The time the device entry was created.",
+							Description: "The time the key was created.",
 						},
 					},
 				},
@@ -102,7 +101,7 @@ func (d *apiKeyDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 
 	for _, key := range apiKeys {
 		expireString := key.Expiration.DeepCopy().String()
-		isExpired, err := isExpired(expireString)
+		isExpired, err := utils.IsExpired(expireString)
 		if err != nil {
 			resp.Diagnostics.AddError(
 				"Unable to parse expiration date",
@@ -131,21 +130,4 @@ func (d *apiKeyDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 	if resp.Diagnostics.HasError() {
 		return
 	}
-}
-
-func isExpired(t string) (bool, error) {
-	if t == "0001-01-01T00:00:00.000Z" {
-		return false, nil
-	}
-
-	expireTime, err := time.Parse(time.RFC3339Nano, t)
-	if err != nil {
-		return false, err
-	}
-
-	if expireTime.Before(time.Now()) {
-		return true, nil
-	}
-
-	return false, nil
 }

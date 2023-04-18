@@ -1,7 +1,7 @@
-# An API Key that doesn't expire
-resource "headscale_api_key" "infinite" {}
+# An API Key that expires in the default 90 days
+resource "headscale_api_key" "default" {}
 
 # An API Key that expires in 1 week
 resource "headscale_api_key" "week" {
-    days_to_expire = 7
+    time_to_expire = "1w"
 }

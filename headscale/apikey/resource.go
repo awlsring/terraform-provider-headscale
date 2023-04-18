@@ -2,16 +2,17 @@ package apikey
 
 import (
 	"context"
+	"regexp"
 	"strings"
-	"time"
 
 	"github.com/awlsring/terraform-provider-headscale/internal/service"
-	"github.com/go-openapi/strfmt"
+	"github.com/awlsring/terraform-provider-headscale/internal/utils"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
@@ -44,11 +45,13 @@ func (d *apiKeyResource) Schema(_ context.Context, _ resource.SchemaRequest, res
 	resp.Schema = schema.Schema{
 		Description: "The API key resource allows you to create an API key that can be used to authenticate with the Headscale API. By default keys that are created with this resource will not expire. To create a key that expires, set the `days_to_expire` attribute to the number of days until the key expires. Keys cannot be modified, so any change to the input on this resource will cause the key to be expired and a new key to be created.",
 		Attributes: map[string]schema.Attribute{
-			"days_to_expire": schema.Int64Attribute{
-				Optional:    true,
-				Description: "The number of days until the api key expires. No value creates a key that won't expire.",
-				PlanModifiers: []planmodifier.Int64{
-					int64planmodifier.RequiresReplace(),
+			"time_to_expire": schema.StringAttribute{
+				Optional:            true,
+				MarkdownDescription: "The time until the key expires. This is a string in the format of `30m`, `3h`, `90d`, etc. Defaults to `90d`", PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
+				},
+				Validators: []validator.String{
+					stringvalidator.RegexMatches(regexp.MustCompile(`^-?\d+(\.\d+)?(ns|us|µs|ms|s|m|h|d|w|M|y)$`), "must be a valid duration string. (e.g. 30m, 3h, 90d, 4M, 1y, etc)"),
 				},
 			},
 			"id": schema.StringAttribute{
@@ -83,7 +86,7 @@ func (d *apiKeyResource) Schema(_ context.Context, _ resource.SchemaRequest, res
 			},
 			"created_at": schema.StringAttribute{
 				Computed:    true,
-				Description: "The time the device entry was created.",
+				Description: "The time the key was created.",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
@@ -100,7 +103,20 @@ func (r *apiKeyResource) Create(ctx context.Context, req resource.CreateRequest,
 		return
 	}
 
-	expireAt := makeExpiraryTime(int(plan.DaysToExpire.ValueInt64()))
+	expireDuration := "90d"
+	if plan.TimeToExpire.ValueString() != "" {
+		expireDuration = plan.TimeToExpire.ValueString()
+	}
+
+	expireAt, err := utils.MakeExpiraryTime(expireDuration)
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Error creating pre auth key",
+			"Could not create pre auth key, unexpected error: "+err.Error(),
+		)
+		return
+	}
+
 	apiKey, err := r.client.CreateAPIKey(ctx, expireAt)
 	if err != nil {
 		resp.Diagnostics.AddError(
@@ -123,7 +139,7 @@ func (r *apiKeyResource) Create(ctx context.Context, req resource.CreateRequest,
 	for _, key := range apiKeys {
 		if strings.Contains(apiKey, key.Prefix) {
 			expiresAt := key.Expiration.DeepCopy().String()
-			isExpired, err := isExpired(expiresAt)
+			isExpired, err := utils.IsExpired(expiresAt)
 			if err != nil {
 				resp.Diagnostics.AddError(
 					"Error creating api key",
@@ -133,7 +149,7 @@ func (r *apiKeyResource) Create(ctx context.Context, req resource.CreateRequest,
 			}
 
 			m = apikeyResourceModel{
-				DaysToExpire: plan.DaysToExpire,
+				TimeToExpire: plan.TimeToExpire,
 				Id:           types.StringValue(key.ID),
 				Prefix:       types.StringValue(key.Prefix),
 				Key:          types.StringValue(apiKey),
@@ -166,7 +182,7 @@ func (r *apiKeyResource) Delete(ctx context.Context, req resource.DeleteRequest,
 		return
 	}
 
-	err := r.client.ExpireAPIKey(ctx, state.Id.ValueString())
+	err := r.client.ExpireAPIKey(ctx, state.Prefix.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error deleting api key",
@@ -198,7 +214,7 @@ func (r *apiKeyResource) Read(ctx context.Context, req resource.ReadRequest, res
 	for _, key := range apiKeys {
 		if key.Prefix == apiKey {
 			expiresAt := key.Expiration.DeepCopy().String()
-			isExpired, err := isExpired(expiresAt)
+			isExpired, err := utils.IsExpired(expiresAt)
 			if err != nil {
 				resp.Diagnostics.AddError(
 					"Error creating api key",
@@ -208,7 +224,7 @@ func (r *apiKeyResource) Read(ctx context.Context, req resource.ReadRequest, res
 			}
 
 			m = apikeyResourceModel{
-				DaysToExpire: state.DaysToExpire,
+				TimeToExpire: state.TimeToExpire,
 				Id:           types.StringValue(key.ID),
 				Key:          state.Key,
 				Prefix:       types.StringValue(key.Prefix),
@@ -224,16 +240,4 @@ func (r *apiKeyResource) Read(ctx context.Context, req resource.ReadRequest, res
 	if resp.Diagnostics.HasError() {
 		return
 	}
-}
-
-func makeExpiraryTime(d int) *strfmt.DateTime {
-	if d == 0 {
-		return nil
-	}
-	now := time.Now()
-	h := 24 * d
-	then := now.Add(time.Duration(h) * time.Hour)
-
-	time := strfmt.DateTime(then)
-	return &time
 }
