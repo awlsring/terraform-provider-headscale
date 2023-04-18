@@ -42,8 +42,8 @@ func (d *devicesDataSource) Schema(_ context.Context, _ datasource.SchemaRequest
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
-				Optional:    true,
-				Description: "The ID of the resource.",
+				Computed:    true,
+				Description: "The ID of the Terraform resource.",
 			},
 			"user": schema.StringAttribute{
 				Optional:    true,

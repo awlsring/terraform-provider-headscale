@@ -4,3 +4,4 @@ bin
 *.tfstate
 *.terraform
 tmp
+examples/test

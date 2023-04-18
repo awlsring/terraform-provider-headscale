@@ -38,6 +38,7 @@ func (d *userResource) Configure(_ context.Context, req resource.ConfigureReques
 
 func (d *userResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
+		Description: "A user registered in the Headscale instance.",
 		Attributes: map[string]schema.Attribute{
 			"name": schema.StringAttribute{
 				Required:    true,
@@ -45,7 +46,7 @@ func (d *userResource) Schema(_ context.Context, _ resource.SchemaRequest, resp 
 			},
 			"id": schema.StringAttribute{
 				Computed:    true,
-				Description: "The user's name.",
+				Description: "The user's id.",
 			},
 			"created_at": schema.StringAttribute{
 				Computed:    true,
