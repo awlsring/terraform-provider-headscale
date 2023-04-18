@@ -15,23 +15,23 @@ import (
 )
 
 var (
-	_ datasource.DataSource              = &deviceDataSource{}
-	_ datasource.DataSourceWithConfigure = &deviceDataSource{}
+	_ datasource.DataSource              = &routeDataSource{}
+	_ datasource.DataSourceWithConfigure = &routeDataSource{}
 )
 
 func DataSource() datasource.DataSource {
-	return &deviceDataSource{}
+	return &routeDataSource{}
 }
 
-type deviceDataSource struct {
+type routeDataSource struct {
 	client service.Headscale
 }
 
-func (d *deviceDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+func (d *routeDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_subnet_routes"
 }
 
-func (d *deviceDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, _ *datasource.ConfigureResponse) {
+func (d *routeDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, _ *datasource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -39,7 +39,7 @@ func (d *deviceDataSource) Configure(_ context.Context, req datasource.Configure
 	d.client = req.ProviderData.(service.Headscale)
 }
 
-func (d *deviceDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+func (d *routeDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Description: "The subnet routes data source allows you to get information on routes advertised by devices registered in the Headscale instance.",
 		Attributes: map[string]schema.Attribute{
@@ -53,7 +53,7 @@ func (d *deviceDataSource) Schema(_ context.Context, _ datasource.SchemaRequest,
 			},
 			"status": schema.StringAttribute{
 				Optional:    true,
-				Description: "Filters the device list to elements whose status matches what is provided. Can be enabled or disabled.",
+				Description: "Filters the route list to elements whose status matches what is provided. Can be enabled or disabled.",
 				Validators: []validator.String{
 					stringvalidator.OneOf("enabled", "disabled"),
 				},
@@ -93,7 +93,7 @@ func (d *deviceDataSource) Schema(_ context.Context, _ datasource.SchemaRequest,
 	}
 }
 
-func (d *deviceDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+func (d *routeDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var state dataSourceRouteModel
 	resp.Diagnostics.Append(req.Config.Get(ctx, &state)...)
 	if resp.Diagnostics.HasError() {

@@ -140,10 +140,7 @@ func (r *deviceTagsResource) tagDevice(ctx context.Context, m *deviceTagModel) (
 		Id:       types.StringValue(device.ID),
 	}
 
-	allTags := []string{}
-	allTags = append(allTags, device.ForcedTags...)
-
-	c, diags := types.ListValueFrom(ctx, types.StringType, allTags)
+	c, diags := types.ListValueFrom(ctx, types.StringType, device.ForcedTags)
 	if diags.HasError() {
 		return nil, fmt.Errorf("error creating list of tags")
 	}
@@ -228,10 +225,7 @@ func (r *deviceTagsResource) readDevice(ctx context.Context, id string) (*device
 		Id:       types.StringValue(device.ID),
 	}
 
-	allTags := []string{}
-	allTags = append(allTags, device.ForcedTags...)
-
-	c, diags := types.ListValueFrom(ctx, types.StringType, allTags)
+	c, diags := types.ListValueFrom(ctx, types.StringType, device.ForcedTags)
 	if diags.HasError() {
 		return nil, fmt.Errorf("error creating list of tags")
 	}

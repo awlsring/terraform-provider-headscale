@@ -40,7 +40,7 @@ data "headscale_device_subnet_routes" "enabled_devices" {
 
 ### Optional
 
-- `status` (String) Filters the device list to elements whose status matches what is provided. Can be enabled or disabled.
+- `status` (String) Filters the route list to elements whose status matches what is provided. Can be enabled or disabled.
 
 ### Read-Only
 

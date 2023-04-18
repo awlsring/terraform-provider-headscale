@@ -52,7 +52,7 @@ func (d *deviceDataSource) Schema(_ context.Context, _ datasource.SchemaRequest,
 			},
 			"status": schema.StringAttribute{
 				Optional:    true,
-				Description: "Filters the device list to elements whose status matches what is provided. Can be enabled or disabled.",
+				Description: "Filters the route list to elements whose status matches what is provided. Can be enabled or disabled.",
 				Validators: []validator.String{
 					stringvalidator.OneOf("enabled", "disabled"),
 				},

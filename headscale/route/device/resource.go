@@ -49,7 +49,7 @@ func (d *deviceRoutesResource) Schema(_ context.Context, _ resource.SchemaReques
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed:    true,
-				Description: "The id of teh resource.",
+				Description: "The id of the resource.",
 			},
 			"device_id": schema.StringAttribute{
 				Required:    true,

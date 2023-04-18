@@ -30,6 +30,6 @@ resource "headscale_device_subnet_routes" "device_1" {
 
 ### Read-Only
 
-- `id` (String) The id of teh resource.
+- `id` (String) The id of the resource.
 
 

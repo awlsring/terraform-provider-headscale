@@ -44,7 +44,7 @@ data "headscale_subnet_routes" "device_1_enabled_routes" {
 ### Optional
 
 - `device_id` (String) Filters the route list to elements belonging to the device with the provided ID.
-- `status` (String) Filters the device list to elements whose status matches what is provided. Can be enabled or disabled.
+- `status` (String) Filters the route list to elements whose status matches what is provided. Can be enabled or disabled.
 
 ### Read-Only
 
