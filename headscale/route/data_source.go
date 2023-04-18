@@ -42,12 +42,12 @@ func (d *deviceDataSource) Configure(_ context.Context, req datasource.Configure
 func (d *deviceDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
-			"device_id": schema.StringAttribute{
-				Optional:    true,
-				Description: "Filters the route list to elements belonging to the device with the provided ID.",
-			},
 			"id": schema.StringAttribute{
 				Computed:    true,
+				Description: "The Terraform resource ID.",
+			},
+			"device_id": schema.StringAttribute{
+				Optional:    true,
 				Description: "Filters the route list to elements belonging to the device with the provided ID.",
 			},
 			"status": schema.StringAttribute{
