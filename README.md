@@ -1,4 +1,4 @@
-# Terraform Proxmox Headscale
+# Terraform Provider Headscale
 
 This is a Terraform provider for [Headscale](https://github.com/juanfont/headscale). This provider allows interaction with the Headscale API to manage and gather data on resources.
 
@@ -19,7 +19,7 @@ terraform {
   required_providers {
     headscale = {
       source = "awlsring/headscale"
-      version = "0.1.0"
+      version = "0.1.1"
     }
   }
 }
