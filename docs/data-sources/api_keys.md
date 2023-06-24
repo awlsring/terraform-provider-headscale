@@ -44,5 +44,3 @@ Read-Only:
 - `expired` (Boolean) If the api key is expired.
 - `id` (String) The id of the api key.
 - `prefix` (String) The api key's prefix.
-
-

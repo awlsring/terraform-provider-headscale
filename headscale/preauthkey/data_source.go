@@ -43,7 +43,7 @@ func (d *preAuthKeyDataSource) Schema(_ context.Context, _ datasource.SchemaRequ
 				Computed:    true,
 				Description: "The ID of the Terraform resource.",
 			},
-			"user": schema.BoolAttribute{
+			"user": schema.StringAttribute{
 				Required:            true,
 				MarkdownDescription: "The user to get pre auth keys for.",
 			},

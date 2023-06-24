@@ -33,5 +33,3 @@ Read-Only:
 - `created_at` (String) The time the user entry was created.
 - `id` (String) The user's id.
 - `name` (String) The name of the user.
-
-

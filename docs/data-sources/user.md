@@ -30,5 +30,3 @@ data "headscale_user" "awlsring" {
 
 - `created_at` (String) The time the user was created.
 - `id` (String) The user's id.
-
-

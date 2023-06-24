@@ -60,5 +60,3 @@ resource "headscale_pre_auth_key" "tags" {
 - `id` (String) The id of the pre auth key.
 - `key` (String, Sensitive) The pre auth key.
 - `used` (Boolean) If the key has been used.
-
-

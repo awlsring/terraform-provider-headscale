@@ -31,5 +31,3 @@ resource "headscale_device_tags" "device_1_tags" {
 ### Read-Only
 
 - `id` (String) The resolved id of the device.
-
-

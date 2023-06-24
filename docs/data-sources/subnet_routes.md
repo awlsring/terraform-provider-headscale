@@ -62,5 +62,3 @@ Read-Only:
 - `route` (String) The subnet route.
 - `status` (String) The status of the route.
 - `user_id` (String) The ID of the user who owns the device the route belong to.
-
-

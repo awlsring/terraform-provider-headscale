@@ -55,5 +55,3 @@ Read-Only:
 - `enabled` (Boolean) The status of the route.
 - `id` (String) The id of the route.
 - `route` (String) The subnet route.
-
-

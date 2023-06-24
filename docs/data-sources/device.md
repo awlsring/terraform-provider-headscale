@@ -36,5 +36,3 @@ data "headscale_device" "first_host" {
 - `register_method` (String) The method used to register the device.
 - `tags` (List of String) The tags applied to the device.
 - `user` (String) The ID of the user who owns the device.
-
-

@@ -37,5 +37,3 @@ resource "headscale_api_key" "week" {
 - `id` (String) The id of the api key.
 - `key` (String, Sensitive) The api key.
 - `prefix` (String) The api key's prefix.
-
-
