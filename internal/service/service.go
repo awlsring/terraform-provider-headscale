@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"net/url"
+	"strings"
 
 	"github.com/awlsring/terraform-provider-headscale/internal/gen/client"
 	"github.com/awlsring/terraform-provider-headscale/internal/gen/client/headscale_service"
@@ -346,6 +347,11 @@ func (h *HeadscaleService) ExpirePreAuthKey(ctx context.Context, user string, ke
 
 	_, err := h.client.HeadscaleService.HeadscaleServiceExpirePreAuthKey(request)
 	if err != nil {
+		if e, ok := err.(*headscale_service.HeadscaleServiceExpirePreAuthKeyDefault); ok {
+			if strings.Contains(e.Payload.Message, "AuthKey expired") {
+				return nil
+			}
+		}
 		return err
 	}
 	return nil
