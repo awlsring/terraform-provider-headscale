@@ -1,14 +1,17 @@
-TEST?=$$(go list ./... | grep -v 'vendor')
+TEST?=$$(go list ./... | grep -v 'vendor' | grep -v 'tools')
 HOSTNAME=github.com
 NAMESPACE=awlsring
 NAME=headscale
 BINARY=terraform-provider-${NAME}
 OS_ARCH=darwin_arm64
 
-default: install
+default: install terradocs
 
 clean:
 	rm ${BINARY}
+
+terradocs:
+	go generate
 
 gen:
 	swagger generate client -f ${SWAGGER_DOC} -A headscale -t ./internal/gen

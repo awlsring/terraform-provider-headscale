@@ -34,7 +34,7 @@ resource "headscale_pre_auth_key" "reusable" {
 resource "headscale_pre_auth_key" "tags" {
     user = "awlsring"
     ephemeral = true
-    tags = ["tag:test"]
+    acl_tags = ["tag:test"]
 }
 ```
 

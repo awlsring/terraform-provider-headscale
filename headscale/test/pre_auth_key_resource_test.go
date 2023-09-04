@@ -48,7 +48,7 @@ func Test_PreAuthKeyResource(t *testing.T) {
 			{
 				Config: ProviderConfig + `resource "headscale_pre_auth_key" "test" {
 					user = "terraform"
-					acl_tags = ["tag:terraform"]
+					acl_tags = ["tag:terraform", "tag:terra-form", "tag:terra_form"]
 				  }`,
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("headscale_pre_auth_key.test", "user", "terraform"),
@@ -56,6 +56,8 @@ func Test_PreAuthKeyResource(t *testing.T) {
 					resource.TestCheckResourceAttr("headscale_pre_auth_key.test", "expired", "false"),
 					resource.TestCheckResourceAttr("headscale_pre_auth_key.test", "ephemeral", "false"),
 					resource.TestCheckResourceAttr("headscale_pre_auth_key.test", "acl_tags.0", "tag:terraform"),
+					resource.TestCheckResourceAttr("headscale_pre_auth_key.test", "acl_tags.1", "tag:terra-form"),
+					resource.TestCheckResourceAttr("headscale_pre_auth_key.test", "acl_tags.2", "tag:terra_form"),
 				),
 			},
 		},
