@@ -352,6 +352,11 @@ func (h *HeadscaleService) ExpirePreAuthKey(ctx context.Context, user string, ke
 				return nil
 			}
 		}
+		if e, ok := err.(*headscale_service.HeadscaleServiceExpirePreAuthKeyDefault); ok {
+			if strings.Contains(e.Payload.Message, "AuthKey has already been used") {
+				return nil
+			}
+		}
 		return err
 	}
 	return nil
