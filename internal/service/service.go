@@ -69,7 +69,7 @@ func (h *HeadscaleService) ListAPIKeys(ctx context.Context) ([]*models.V1APIKey,
 
 	resp, err := h.client.HeadscaleService.HeadscaleServiceListAPIKeys(request)
 	if err != nil {
-		return nil, err
+		return nil, handleRequestError(err)
 	}
 
 	err = resp.Payload.Validate(strfmt.Default)
@@ -91,7 +91,7 @@ func (h *HeadscaleService) CreateAPIKey(ctx context.Context, expiration *strfmt.
 
 	resp, err := h.client.HeadscaleService.HeadscaleServiceCreateAPIKey(request)
 	if err != nil {
-		return "", err
+		return "", handleRequestError(err)
 	}
 
 	err = resp.Payload.Validate(strfmt.Default)
@@ -110,7 +110,7 @@ func (h *HeadscaleService) ExpireAPIKey(ctx context.Context, key string) error {
 	})
 	_, err := h.client.HeadscaleService.HeadscaleServiceExpireAPIKey(request)
 	if err != nil {
-		return err
+		return handleRequestError(err)
 	}
 	return nil
 }
@@ -122,7 +122,7 @@ func (h *HeadscaleService) ListDevices(ctx context.Context, user *string) ([]*mo
 
 	resp, err := h.client.HeadscaleService.HeadscaleServiceListMachines(request)
 	if err != nil {
-		return nil, err
+		return nil, handleRequestError(err)
 	}
 
 	err = resp.Payload.Validate(strfmt.Default)
@@ -140,7 +140,7 @@ func (h *HeadscaleService) GetDevice(ctx context.Context, deviceId string) (*mod
 
 	resp, err := h.client.HeadscaleService.HeadscaleServiceGetMachine(request)
 	if err != nil {
-		return nil, err
+		return nil, handleRequestError(err)
 	}
 
 	err = resp.Payload.Validate(strfmt.Default)
@@ -164,7 +164,7 @@ func (h *HeadscaleService) CreateDevice(ctx context.Context, user string, key st
 
 	resp, err := h.client.HeadscaleService.HeadscaleServiceRegisterMachine(request)
 	if err != nil {
-		return nil, err
+		return nil, handleRequestError(err)
 	}
 
 	err = resp.Payload.Validate(strfmt.Default)
@@ -182,7 +182,7 @@ func (h *HeadscaleService) ExpireDevice(ctx context.Context, deviceId string) (*
 
 	resp, err := h.client.HeadscaleService.HeadscaleServiceExpireMachine(request)
 	if err != nil {
-		return nil, err
+		return nil, handleRequestError(err)
 	}
 
 	err = resp.Payload.Validate(strfmt.Default)
@@ -200,7 +200,7 @@ func (h *HeadscaleService) DeleteDevice(ctx context.Context, deviceId string) er
 
 	_, err := h.client.HeadscaleService.HeadscaleServiceDeleteMachine(request)
 	if err != nil {
-		return err
+		return handleRequestError(err)
 	}
 	return nil
 }
@@ -213,7 +213,7 @@ func (h *HeadscaleService) RenameDevice(ctx context.Context, deviceId string, na
 
 	resp, err := h.client.HeadscaleService.HeadscaleServiceRenameMachine(request)
 	if err != nil {
-		return nil, err
+		return nil, handleRequestError(err)
 	}
 
 	err = resp.Payload.Validate(strfmt.Default)
@@ -231,7 +231,7 @@ func (h *HeadscaleService) GetDeviceRoutes(ctx context.Context, deviceId string)
 
 	resp, err := h.client.HeadscaleService.HeadscaleServiceGetMachineRoutes(request)
 	if err != nil {
-		return nil, err
+		return nil, handleRequestError(err)
 	}
 
 	err = resp.Payload.Validate(strfmt.Default)
@@ -253,7 +253,7 @@ func (h *HeadscaleService) TagDevice(ctx context.Context, deviceId string, tags 
 
 	resp, err := h.client.HeadscaleService.HeadscaleServiceSetTags(request)
 	if err != nil {
-		return nil, err
+		return nil, handleRequestError(err)
 	}
 
 	err = resp.Payload.Validate(strfmt.Default)
@@ -272,7 +272,7 @@ func (h *HeadscaleService) MoveDevice(ctx context.Context, deviceId string, user
 
 	resp, err := h.client.HeadscaleService.HeadscaleServiceMoveMachine(request)
 	if err != nil {
-		return nil, err
+		return nil, handleRequestError(err)
 	}
 
 	err = resp.Payload.Validate(strfmt.Default)
@@ -290,7 +290,7 @@ func (h *HeadscaleService) ListPreAuthKeys(ctx context.Context, user string) ([]
 
 	resp, err := h.client.HeadscaleService.HeadscaleServiceListPreAuthKeys(request)
 	if err != nil {
-		return nil, err
+		return nil, handleRequestError(err)
 	}
 
 	err = resp.Payload.Validate(strfmt.Default)
@@ -326,7 +326,7 @@ func (h *HeadscaleService) CreatePreAuthKey(ctx context.Context, input CreatePre
 
 	resp, err := h.client.HeadscaleService.HeadscaleServiceCreatePreAuthKey(request)
 	if err != nil {
-		return nil, err
+		return nil, handleRequestError(err)
 	}
 
 	err = resp.Payload.Validate(strfmt.Default)
@@ -357,7 +357,7 @@ func (h *HeadscaleService) ExpirePreAuthKey(ctx context.Context, user string, ke
 				return nil
 			}
 		}
-		return err
+		return handleRequestError(err)
 	}
 	return nil
 }
@@ -368,7 +368,7 @@ func (h *HeadscaleService) ListRoutes(ctx context.Context) ([]*models.V1Route, e
 
 	resp, err := h.client.HeadscaleService.HeadscaleServiceGetRoutes(request)
 	if err != nil {
-		return nil, err
+		return nil, handleRequestError(err)
 	}
 
 	err = resp.Payload.Validate(strfmt.Default)
@@ -386,7 +386,7 @@ func (h *HeadscaleService) DeleteRoute(ctx context.Context, route string) error 
 
 	_, err := h.client.HeadscaleService.HeadscaleServiceDeleteRoute(request)
 	if err != nil {
-		return err
+		return handleRequestError(err)
 	}
 	return nil
 }
@@ -398,7 +398,7 @@ func (h *HeadscaleService) DisableRoute(ctx context.Context, route string) error
 
 	_, err := h.client.HeadscaleService.HeadscaleServiceDisableRoute(request)
 	if err != nil {
-		return err
+		return handleRequestError(err)
 	}
 
 	return nil
@@ -411,7 +411,7 @@ func (h *HeadscaleService) EnableRoute(ctx context.Context, route string) error 
 
 	_, err := h.client.HeadscaleService.HeadscaleServiceEnableRoute(request)
 	if err != nil {
-		return err
+		return handleRequestError(err)
 	}
 
 	return nil
@@ -423,7 +423,7 @@ func (h *HeadscaleService) ListUsers(ctx context.Context) ([]*models.V1User, err
 
 	resp, err := h.client.HeadscaleService.HeadscaleServiceListUsers(request)
 	if err != nil {
-		return nil, err
+		return nil, handleRequestError(err)
 	}
 
 	err = resp.Payload.Validate(strfmt.Default)
@@ -441,7 +441,7 @@ func (h *HeadscaleService) GetUser(ctx context.Context, name string) (*models.V1
 
 	resp, err := h.client.HeadscaleService.HeadscaleServiceGetUser(request)
 	if err != nil {
-		return nil, err
+		return nil, handleRequestError(err)
 	}
 
 	err = resp.Payload.Validate(strfmt.Default)
@@ -461,7 +461,7 @@ func (h *HeadscaleService) CreateUser(ctx context.Context, name string) (*models
 
 	resp, err := h.client.HeadscaleService.HeadscaleServiceCreateUser(request)
 	if err != nil {
-		return nil, err
+		return nil, handleRequestError(err)
 	}
 
 	err = resp.Payload.Validate(strfmt.Default)
@@ -479,7 +479,7 @@ func (h *HeadscaleService) DeleteUser(ctx context.Context, name string) error {
 
 	_, err := h.client.HeadscaleService.HeadscaleServiceDeleteUser(request)
 	if err != nil {
-		return err
+		return handleRequestError(err)
 	}
 	return nil
 }
@@ -492,7 +492,7 @@ func (h *HeadscaleService) RenameUser(ctx context.Context, oldName string, newNa
 
 	resp, err := h.client.HeadscaleService.HeadscaleServiceRenameUser(request)
 	if err != nil {
-		return nil, err
+		return nil, handleRequestError(err)
 	}
 
 	err = resp.Payload.Validate(strfmt.Default)
