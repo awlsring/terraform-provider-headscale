@@ -17,8 +17,11 @@ gen:
 	swagger generate client -f ${SWAGGER_DOC} -A headscale -t ./internal/gen
 	go mod tidy
 
-install:
+install: install-tools
 	go install .
+
+install-tools:
+	go install github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs@latest
 
 test: 
 	go test -i $(TEST) || exit 1                                                   
