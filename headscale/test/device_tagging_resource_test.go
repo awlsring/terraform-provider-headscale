@@ -19,6 +19,15 @@ func Test_DeviceTaggingResource(t *testing.T) {
 					resource.TestCheckResourceAttr("headscale_device_tags.test", "device_id", "1"),
 				),
 			},
+			{
+				Config: ProviderConfig + `resource "headscale_device_tags" "test" {
+					device_id = 1
+					tags = ["tag:terraform:tests"]
+				  }`,
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("headscale_device_tags.test", "device_id", "1"),
+				),
+			},
 		},
 	})
 }
