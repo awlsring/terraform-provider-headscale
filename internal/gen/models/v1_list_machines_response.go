@@ -82,6 +82,11 @@ func (m *V1ListMachinesResponse) contextValidateMachines(ctx context.Context, fo
 	for i := 0; i < len(m.Machines); i++ {
 
 		if m.Machines[i] != nil {
+
+			if swag.IsZero(m.Machines[i]) { // not required
+				return nil
+			}
+
 			if err := m.Machines[i].ContextValidate(ctx, formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("machines" + "." + strconv.Itoa(i))

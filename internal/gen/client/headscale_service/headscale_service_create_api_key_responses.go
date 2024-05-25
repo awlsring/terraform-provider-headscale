@@ -6,6 +6,7 @@ package headscale_service
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 
@@ -80,12 +81,19 @@ func (o *HeadscaleServiceCreateAPIKeyOK) IsCode(code int) bool {
 	return code == 200
 }
 
+// Code gets the status code for the headscale service create Api key o k response
+func (o *HeadscaleServiceCreateAPIKeyOK) Code() int {
+	return 200
+}
+
 func (o *HeadscaleServiceCreateAPIKeyOK) Error() string {
-	return fmt.Sprintf("[POST /api/v1/apikey][%d] headscaleServiceCreateApiKeyOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /api/v1/apikey][%d] headscaleServiceCreateApiKeyOK %s", 200, payload)
 }
 
 func (o *HeadscaleServiceCreateAPIKeyOK) String() string {
-	return fmt.Sprintf("[POST /api/v1/apikey][%d] headscaleServiceCreateApiKeyOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /api/v1/apikey][%d] headscaleServiceCreateApiKeyOK %s", 200, payload)
 }
 
 func (o *HeadscaleServiceCreateAPIKeyOK) GetPayload() *models.V1CreateAPIKeyResponse {
@@ -122,11 +130,6 @@ type HeadscaleServiceCreateAPIKeyDefault struct {
 	Payload *models.RPCStatus
 }
 
-// Code gets the status code for the headscale service create Api key default response
-func (o *HeadscaleServiceCreateAPIKeyDefault) Code() int {
-	return o._statusCode
-}
-
 // IsSuccess returns true when this headscale service create Api key default response has a 2xx status code
 func (o *HeadscaleServiceCreateAPIKeyDefault) IsSuccess() bool {
 	return o._statusCode/100 == 2
@@ -152,12 +155,19 @@ func (o *HeadscaleServiceCreateAPIKeyDefault) IsCode(code int) bool {
 	return o._statusCode == code
 }
 
+// Code gets the status code for the headscale service create Api key default response
+func (o *HeadscaleServiceCreateAPIKeyDefault) Code() int {
+	return o._statusCode
+}
+
 func (o *HeadscaleServiceCreateAPIKeyDefault) Error() string {
-	return fmt.Sprintf("[POST /api/v1/apikey][%d] HeadscaleService_CreateApiKey default  %+v", o._statusCode, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /api/v1/apikey][%d] HeadscaleService_CreateApiKey default %s", o._statusCode, payload)
 }
 
 func (o *HeadscaleServiceCreateAPIKeyDefault) String() string {
-	return fmt.Sprintf("[POST /api/v1/apikey][%d] HeadscaleService_CreateApiKey default  %+v", o._statusCode, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /api/v1/apikey][%d] HeadscaleService_CreateApiKey default %s", o._statusCode, payload)
 }
 
 func (o *HeadscaleServiceCreateAPIKeyDefault) GetPayload() *models.RPCStatus {

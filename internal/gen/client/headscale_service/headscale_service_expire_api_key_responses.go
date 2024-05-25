@@ -6,6 +6,7 @@ package headscale_service
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 
@@ -80,12 +81,19 @@ func (o *HeadscaleServiceExpireAPIKeyOK) IsCode(code int) bool {
 	return code == 200
 }
 
+// Code gets the status code for the headscale service expire Api key o k response
+func (o *HeadscaleServiceExpireAPIKeyOK) Code() int {
+	return 200
+}
+
 func (o *HeadscaleServiceExpireAPIKeyOK) Error() string {
-	return fmt.Sprintf("[POST /api/v1/apikey/expire][%d] headscaleServiceExpireApiKeyOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /api/v1/apikey/expire][%d] headscaleServiceExpireApiKeyOK %s", 200, payload)
 }
 
 func (o *HeadscaleServiceExpireAPIKeyOK) String() string {
-	return fmt.Sprintf("[POST /api/v1/apikey/expire][%d] headscaleServiceExpireApiKeyOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /api/v1/apikey/expire][%d] headscaleServiceExpireApiKeyOK %s", 200, payload)
 }
 
 func (o *HeadscaleServiceExpireAPIKeyOK) GetPayload() models.V1ExpireAPIKeyResponse {
@@ -120,11 +128,6 @@ type HeadscaleServiceExpireAPIKeyDefault struct {
 	Payload *models.RPCStatus
 }
 
-// Code gets the status code for the headscale service expire Api key default response
-func (o *HeadscaleServiceExpireAPIKeyDefault) Code() int {
-	return o._statusCode
-}
-
 // IsSuccess returns true when this headscale service expire Api key default response has a 2xx status code
 func (o *HeadscaleServiceExpireAPIKeyDefault) IsSuccess() bool {
 	return o._statusCode/100 == 2
@@ -150,12 +153,19 @@ func (o *HeadscaleServiceExpireAPIKeyDefault) IsCode(code int) bool {
 	return o._statusCode == code
 }
 
+// Code gets the status code for the headscale service expire Api key default response
+func (o *HeadscaleServiceExpireAPIKeyDefault) Code() int {
+	return o._statusCode
+}
+
 func (o *HeadscaleServiceExpireAPIKeyDefault) Error() string {
-	return fmt.Sprintf("[POST /api/v1/apikey/expire][%d] HeadscaleService_ExpireApiKey default  %+v", o._statusCode, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /api/v1/apikey/expire][%d] HeadscaleService_ExpireApiKey default %s", o._statusCode, payload)
 }
 
 func (o *HeadscaleServiceExpireAPIKeyDefault) String() string {
-	return fmt.Sprintf("[POST /api/v1/apikey/expire][%d] HeadscaleService_ExpireApiKey default  %+v", o._statusCode, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /api/v1/apikey/expire][%d] HeadscaleService_ExpireApiKey default %s", o._statusCode, payload)
 }
 
 func (o *HeadscaleServiceExpireAPIKeyDefault) GetPayload() *models.RPCStatus {

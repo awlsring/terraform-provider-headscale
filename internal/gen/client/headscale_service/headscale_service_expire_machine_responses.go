@@ -6,6 +6,7 @@ package headscale_service
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 
@@ -80,12 +81,19 @@ func (o *HeadscaleServiceExpireMachineOK) IsCode(code int) bool {
 	return code == 200
 }
 
+// Code gets the status code for the headscale service expire machine o k response
+func (o *HeadscaleServiceExpireMachineOK) Code() int {
+	return 200
+}
+
 func (o *HeadscaleServiceExpireMachineOK) Error() string {
-	return fmt.Sprintf("[POST /api/v1/machine/{machineId}/expire][%d] headscaleServiceExpireMachineOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /api/v1/machine/{machineId}/expire][%d] headscaleServiceExpireMachineOK %s", 200, payload)
 }
 
 func (o *HeadscaleServiceExpireMachineOK) String() string {
-	return fmt.Sprintf("[POST /api/v1/machine/{machineId}/expire][%d] headscaleServiceExpireMachineOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /api/v1/machine/{machineId}/expire][%d] headscaleServiceExpireMachineOK %s", 200, payload)
 }
 
 func (o *HeadscaleServiceExpireMachineOK) GetPayload() *models.V1ExpireMachineResponse {
@@ -122,11 +130,6 @@ type HeadscaleServiceExpireMachineDefault struct {
 	Payload *models.RPCStatus
 }
 
-// Code gets the status code for the headscale service expire machine default response
-func (o *HeadscaleServiceExpireMachineDefault) Code() int {
-	return o._statusCode
-}
-
 // IsSuccess returns true when this headscale service expire machine default response has a 2xx status code
 func (o *HeadscaleServiceExpireMachineDefault) IsSuccess() bool {
 	return o._statusCode/100 == 2
@@ -152,12 +155,19 @@ func (o *HeadscaleServiceExpireMachineDefault) IsCode(code int) bool {
 	return o._statusCode == code
 }
 
+// Code gets the status code for the headscale service expire machine default response
+func (o *HeadscaleServiceExpireMachineDefault) Code() int {
+	return o._statusCode
+}
+
 func (o *HeadscaleServiceExpireMachineDefault) Error() string {
-	return fmt.Sprintf("[POST /api/v1/machine/{machineId}/expire][%d] HeadscaleService_ExpireMachine default  %+v", o._statusCode, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /api/v1/machine/{machineId}/expire][%d] HeadscaleService_ExpireMachine default %s", o._statusCode, payload)
 }
 
 func (o *HeadscaleServiceExpireMachineDefault) String() string {
-	return fmt.Sprintf("[POST /api/v1/machine/{machineId}/expire][%d] HeadscaleService_ExpireMachine default  %+v", o._statusCode, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /api/v1/machine/{machineId}/expire][%d] HeadscaleService_ExpireMachine default %s", o._statusCode, payload)
 }
 
 func (o *HeadscaleServiceExpireMachineDefault) GetPayload() *models.RPCStatus {

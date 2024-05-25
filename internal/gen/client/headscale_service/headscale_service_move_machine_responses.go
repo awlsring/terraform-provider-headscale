@@ -6,6 +6,7 @@ package headscale_service
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 
@@ -80,12 +81,19 @@ func (o *HeadscaleServiceMoveMachineOK) IsCode(code int) bool {
 	return code == 200
 }
 
+// Code gets the status code for the headscale service move machine o k response
+func (o *HeadscaleServiceMoveMachineOK) Code() int {
+	return 200
+}
+
 func (o *HeadscaleServiceMoveMachineOK) Error() string {
-	return fmt.Sprintf("[POST /api/v1/machine/{machineId}/user][%d] headscaleServiceMoveMachineOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /api/v1/machine/{machineId}/user][%d] headscaleServiceMoveMachineOK %s", 200, payload)
 }
 
 func (o *HeadscaleServiceMoveMachineOK) String() string {
-	return fmt.Sprintf("[POST /api/v1/machine/{machineId}/user][%d] headscaleServiceMoveMachineOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /api/v1/machine/{machineId}/user][%d] headscaleServiceMoveMachineOK %s", 200, payload)
 }
 
 func (o *HeadscaleServiceMoveMachineOK) GetPayload() *models.V1MoveMachineResponse {
@@ -122,11 +130,6 @@ type HeadscaleServiceMoveMachineDefault struct {
 	Payload *models.RPCStatus
 }
 
-// Code gets the status code for the headscale service move machine default response
-func (o *HeadscaleServiceMoveMachineDefault) Code() int {
-	return o._statusCode
-}
-
 // IsSuccess returns true when this headscale service move machine default response has a 2xx status code
 func (o *HeadscaleServiceMoveMachineDefault) IsSuccess() bool {
 	return o._statusCode/100 == 2
@@ -152,12 +155,19 @@ func (o *HeadscaleServiceMoveMachineDefault) IsCode(code int) bool {
 	return o._statusCode == code
 }
 
+// Code gets the status code for the headscale service move machine default response
+func (o *HeadscaleServiceMoveMachineDefault) Code() int {
+	return o._statusCode
+}
+
 func (o *HeadscaleServiceMoveMachineDefault) Error() string {
-	return fmt.Sprintf("[POST /api/v1/machine/{machineId}/user][%d] HeadscaleService_MoveMachine default  %+v", o._statusCode, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /api/v1/machine/{machineId}/user][%d] HeadscaleService_MoveMachine default %s", o._statusCode, payload)
 }
 
 func (o *HeadscaleServiceMoveMachineDefault) String() string {
-	return fmt.Sprintf("[POST /api/v1/machine/{machineId}/user][%d] HeadscaleService_MoveMachine default  %+v", o._statusCode, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /api/v1/machine/{machineId}/user][%d] HeadscaleService_MoveMachine default %s", o._statusCode, payload)
 }
 
 func (o *HeadscaleServiceMoveMachineDefault) GetPayload() *models.RPCStatus {

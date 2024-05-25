@@ -72,6 +72,11 @@ func (m *V1RegisterMachineResponse) ContextValidate(ctx context.Context, formats
 func (m *V1RegisterMachineResponse) contextValidateMachine(ctx context.Context, formats strfmt.Registry) error {
 
 	if m.Machine != nil {
+
+		if swag.IsZero(m.Machine) { // not required
+			return nil
+		}
+
 		if err := m.Machine.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("machine")

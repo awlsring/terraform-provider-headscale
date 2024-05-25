@@ -6,6 +6,7 @@ package headscale_service
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 
@@ -80,12 +81,19 @@ func (o *HeadscaleServiceRenameMachineOK) IsCode(code int) bool {
 	return code == 200
 }
 
+// Code gets the status code for the headscale service rename machine o k response
+func (o *HeadscaleServiceRenameMachineOK) Code() int {
+	return 200
+}
+
 func (o *HeadscaleServiceRenameMachineOK) Error() string {
-	return fmt.Sprintf("[POST /api/v1/machine/{machineId}/rename/{newName}][%d] headscaleServiceRenameMachineOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /api/v1/machine/{machineId}/rename/{newName}][%d] headscaleServiceRenameMachineOK %s", 200, payload)
 }
 
 func (o *HeadscaleServiceRenameMachineOK) String() string {
-	return fmt.Sprintf("[POST /api/v1/machine/{machineId}/rename/{newName}][%d] headscaleServiceRenameMachineOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /api/v1/machine/{machineId}/rename/{newName}][%d] headscaleServiceRenameMachineOK %s", 200, payload)
 }
 
 func (o *HeadscaleServiceRenameMachineOK) GetPayload() *models.V1RenameMachineResponse {
@@ -122,11 +130,6 @@ type HeadscaleServiceRenameMachineDefault struct {
 	Payload *models.RPCStatus
 }
 
-// Code gets the status code for the headscale service rename machine default response
-func (o *HeadscaleServiceRenameMachineDefault) Code() int {
-	return o._statusCode
-}
-
 // IsSuccess returns true when this headscale service rename machine default response has a 2xx status code
 func (o *HeadscaleServiceRenameMachineDefault) IsSuccess() bool {
 	return o._statusCode/100 == 2
@@ -152,12 +155,19 @@ func (o *HeadscaleServiceRenameMachineDefault) IsCode(code int) bool {
 	return o._statusCode == code
 }
 
+// Code gets the status code for the headscale service rename machine default response
+func (o *HeadscaleServiceRenameMachineDefault) Code() int {
+	return o._statusCode
+}
+
 func (o *HeadscaleServiceRenameMachineDefault) Error() string {
-	return fmt.Sprintf("[POST /api/v1/machine/{machineId}/rename/{newName}][%d] HeadscaleService_RenameMachine default  %+v", o._statusCode, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /api/v1/machine/{machineId}/rename/{newName}][%d] HeadscaleService_RenameMachine default %s", o._statusCode, payload)
 }
 
 func (o *HeadscaleServiceRenameMachineDefault) String() string {
-	return fmt.Sprintf("[POST /api/v1/machine/{machineId}/rename/{newName}][%d] HeadscaleService_RenameMachine default  %+v", o._statusCode, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /api/v1/machine/{machineId}/rename/{newName}][%d] HeadscaleService_RenameMachine default %s", o._statusCode, payload)
 }
 
 func (o *HeadscaleServiceRenameMachineDefault) GetPayload() *models.RPCStatus {

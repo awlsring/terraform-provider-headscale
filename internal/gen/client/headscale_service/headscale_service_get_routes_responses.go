@@ -6,6 +6,7 @@ package headscale_service
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 
@@ -80,12 +81,19 @@ func (o *HeadscaleServiceGetRoutesOK) IsCode(code int) bool {
 	return code == 200
 }
 
+// Code gets the status code for the headscale service get routes o k response
+func (o *HeadscaleServiceGetRoutesOK) Code() int {
+	return 200
+}
+
 func (o *HeadscaleServiceGetRoutesOK) Error() string {
-	return fmt.Sprintf("[GET /api/v1/routes][%d] headscaleServiceGetRoutesOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /api/v1/routes][%d] headscaleServiceGetRoutesOK %s", 200, payload)
 }
 
 func (o *HeadscaleServiceGetRoutesOK) String() string {
-	return fmt.Sprintf("[GET /api/v1/routes][%d] headscaleServiceGetRoutesOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /api/v1/routes][%d] headscaleServiceGetRoutesOK %s", 200, payload)
 }
 
 func (o *HeadscaleServiceGetRoutesOK) GetPayload() *models.V1GetRoutesResponse {
@@ -122,11 +130,6 @@ type HeadscaleServiceGetRoutesDefault struct {
 	Payload *models.RPCStatus
 }
 
-// Code gets the status code for the headscale service get routes default response
-func (o *HeadscaleServiceGetRoutesDefault) Code() int {
-	return o._statusCode
-}
-
 // IsSuccess returns true when this headscale service get routes default response has a 2xx status code
 func (o *HeadscaleServiceGetRoutesDefault) IsSuccess() bool {
 	return o._statusCode/100 == 2
@@ -152,12 +155,19 @@ func (o *HeadscaleServiceGetRoutesDefault) IsCode(code int) bool {
 	return o._statusCode == code
 }
 
+// Code gets the status code for the headscale service get routes default response
+func (o *HeadscaleServiceGetRoutesDefault) Code() int {
+	return o._statusCode
+}
+
 func (o *HeadscaleServiceGetRoutesDefault) Error() string {
-	return fmt.Sprintf("[GET /api/v1/routes][%d] HeadscaleService_GetRoutes default  %+v", o._statusCode, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /api/v1/routes][%d] HeadscaleService_GetRoutes default %s", o._statusCode, payload)
 }
 
 func (o *HeadscaleServiceGetRoutesDefault) String() string {
-	return fmt.Sprintf("[GET /api/v1/routes][%d] HeadscaleService_GetRoutes default  %+v", o._statusCode, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /api/v1/routes][%d] HeadscaleService_GetRoutes default %s", o._statusCode, payload)
 }
 
 func (o *HeadscaleServiceGetRoutesDefault) GetPayload() *models.RPCStatus {

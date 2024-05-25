@@ -6,6 +6,7 @@ package headscale_service
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 
@@ -80,12 +81,19 @@ func (o *HeadscaleServiceRegisterMachineOK) IsCode(code int) bool {
 	return code == 200
 }
 
+// Code gets the status code for the headscale service register machine o k response
+func (o *HeadscaleServiceRegisterMachineOK) Code() int {
+	return 200
+}
+
 func (o *HeadscaleServiceRegisterMachineOK) Error() string {
-	return fmt.Sprintf("[POST /api/v1/machine/register][%d] headscaleServiceRegisterMachineOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /api/v1/machine/register][%d] headscaleServiceRegisterMachineOK %s", 200, payload)
 }
 
 func (o *HeadscaleServiceRegisterMachineOK) String() string {
-	return fmt.Sprintf("[POST /api/v1/machine/register][%d] headscaleServiceRegisterMachineOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /api/v1/machine/register][%d] headscaleServiceRegisterMachineOK %s", 200, payload)
 }
 
 func (o *HeadscaleServiceRegisterMachineOK) GetPayload() *models.V1RegisterMachineResponse {
@@ -122,11 +130,6 @@ type HeadscaleServiceRegisterMachineDefault struct {
 	Payload *models.RPCStatus
 }
 
-// Code gets the status code for the headscale service register machine default response
-func (o *HeadscaleServiceRegisterMachineDefault) Code() int {
-	return o._statusCode
-}
-
 // IsSuccess returns true when this headscale service register machine default response has a 2xx status code
 func (o *HeadscaleServiceRegisterMachineDefault) IsSuccess() bool {
 	return o._statusCode/100 == 2
@@ -152,12 +155,19 @@ func (o *HeadscaleServiceRegisterMachineDefault) IsCode(code int) bool {
 	return o._statusCode == code
 }
 
+// Code gets the status code for the headscale service register machine default response
+func (o *HeadscaleServiceRegisterMachineDefault) Code() int {
+	return o._statusCode
+}
+
 func (o *HeadscaleServiceRegisterMachineDefault) Error() string {
-	return fmt.Sprintf("[POST /api/v1/machine/register][%d] HeadscaleService_RegisterMachine default  %+v", o._statusCode, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /api/v1/machine/register][%d] HeadscaleService_RegisterMachine default %s", o._statusCode, payload)
 }
 
 func (o *HeadscaleServiceRegisterMachineDefault) String() string {
-	return fmt.Sprintf("[POST /api/v1/machine/register][%d] HeadscaleService_RegisterMachine default  %+v", o._statusCode, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /api/v1/machine/register][%d] HeadscaleService_RegisterMachine default %s", o._statusCode, payload)
 }
 
 func (o *HeadscaleServiceRegisterMachineDefault) GetPayload() *models.RPCStatus {

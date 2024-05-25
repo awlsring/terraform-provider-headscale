@@ -6,6 +6,7 @@ package headscale_service
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 
@@ -80,12 +81,19 @@ func (o *HeadscaleServiceRenameUserOK) IsCode(code int) bool {
 	return code == 200
 }
 
+// Code gets the status code for the headscale service rename user o k response
+func (o *HeadscaleServiceRenameUserOK) Code() int {
+	return 200
+}
+
 func (o *HeadscaleServiceRenameUserOK) Error() string {
-	return fmt.Sprintf("[POST /api/v1/user/{oldName}/rename/{newName}][%d] headscaleServiceRenameUserOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /api/v1/user/{oldName}/rename/{newName}][%d] headscaleServiceRenameUserOK %s", 200, payload)
 }
 
 func (o *HeadscaleServiceRenameUserOK) String() string {
-	return fmt.Sprintf("[POST /api/v1/user/{oldName}/rename/{newName}][%d] headscaleServiceRenameUserOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /api/v1/user/{oldName}/rename/{newName}][%d] headscaleServiceRenameUserOK %s", 200, payload)
 }
 
 func (o *HeadscaleServiceRenameUserOK) GetPayload() *models.V1RenameUserResponse {
@@ -122,11 +130,6 @@ type HeadscaleServiceRenameUserDefault struct {
 	Payload *models.RPCStatus
 }
 
-// Code gets the status code for the headscale service rename user default response
-func (o *HeadscaleServiceRenameUserDefault) Code() int {
-	return o._statusCode
-}
-
 // IsSuccess returns true when this headscale service rename user default response has a 2xx status code
 func (o *HeadscaleServiceRenameUserDefault) IsSuccess() bool {
 	return o._statusCode/100 == 2
@@ -152,12 +155,19 @@ func (o *HeadscaleServiceRenameUserDefault) IsCode(code int) bool {
 	return o._statusCode == code
 }
 
+// Code gets the status code for the headscale service rename user default response
+func (o *HeadscaleServiceRenameUserDefault) Code() int {
+	return o._statusCode
+}
+
 func (o *HeadscaleServiceRenameUserDefault) Error() string {
-	return fmt.Sprintf("[POST /api/v1/user/{oldName}/rename/{newName}][%d] HeadscaleService_RenameUser default  %+v", o._statusCode, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /api/v1/user/{oldName}/rename/{newName}][%d] HeadscaleService_RenameUser default %s", o._statusCode, payload)
 }
 
 func (o *HeadscaleServiceRenameUserDefault) String() string {
-	return fmt.Sprintf("[POST /api/v1/user/{oldName}/rename/{newName}][%d] HeadscaleService_RenameUser default  %+v", o._statusCode, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /api/v1/user/{oldName}/rename/{newName}][%d] HeadscaleService_RenameUser default %s", o._statusCode, payload)
 }
 
 func (o *HeadscaleServiceRenameUserDefault) GetPayload() *models.RPCStatus {

@@ -6,6 +6,7 @@ package headscale_service
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 
@@ -80,12 +81,19 @@ func (o *HeadscaleServiceEnableRouteOK) IsCode(code int) bool {
 	return code == 200
 }
 
+// Code gets the status code for the headscale service enable route o k response
+func (o *HeadscaleServiceEnableRouteOK) Code() int {
+	return 200
+}
+
 func (o *HeadscaleServiceEnableRouteOK) Error() string {
-	return fmt.Sprintf("[POST /api/v1/routes/{routeId}/enable][%d] headscaleServiceEnableRouteOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /api/v1/routes/{routeId}/enable][%d] headscaleServiceEnableRouteOK %s", 200, payload)
 }
 
 func (o *HeadscaleServiceEnableRouteOK) String() string {
-	return fmt.Sprintf("[POST /api/v1/routes/{routeId}/enable][%d] headscaleServiceEnableRouteOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /api/v1/routes/{routeId}/enable][%d] headscaleServiceEnableRouteOK %s", 200, payload)
 }
 
 func (o *HeadscaleServiceEnableRouteOK) GetPayload() models.V1EnableRouteResponse {
@@ -120,11 +128,6 @@ type HeadscaleServiceEnableRouteDefault struct {
 	Payload *models.RPCStatus
 }
 
-// Code gets the status code for the headscale service enable route default response
-func (o *HeadscaleServiceEnableRouteDefault) Code() int {
-	return o._statusCode
-}
-
 // IsSuccess returns true when this headscale service enable route default response has a 2xx status code
 func (o *HeadscaleServiceEnableRouteDefault) IsSuccess() bool {
 	return o._statusCode/100 == 2
@@ -150,12 +153,19 @@ func (o *HeadscaleServiceEnableRouteDefault) IsCode(code int) bool {
 	return o._statusCode == code
 }
 
+// Code gets the status code for the headscale service enable route default response
+func (o *HeadscaleServiceEnableRouteDefault) Code() int {
+	return o._statusCode
+}
+
 func (o *HeadscaleServiceEnableRouteDefault) Error() string {
-	return fmt.Sprintf("[POST /api/v1/routes/{routeId}/enable][%d] HeadscaleService_EnableRoute default  %+v", o._statusCode, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /api/v1/routes/{routeId}/enable][%d] HeadscaleService_EnableRoute default %s", o._statusCode, payload)
 }
 
 func (o *HeadscaleServiceEnableRouteDefault) String() string {
-	return fmt.Sprintf("[POST /api/v1/routes/{routeId}/enable][%d] HeadscaleService_EnableRoute default  %+v", o._statusCode, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /api/v1/routes/{routeId}/enable][%d] HeadscaleService_EnableRoute default %s", o._statusCode, payload)
 }
 
 func (o *HeadscaleServiceEnableRouteDefault) GetPayload() *models.RPCStatus {

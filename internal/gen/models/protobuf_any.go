@@ -7,6 +7,7 @@ package models
 
 import (
 	"context"
+	"encoding/json"
 
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
@@ -19,6 +20,82 @@ type ProtobufAny struct {
 
 	// at type
 	AtType string `json:"@type,omitempty"`
+
+	// protobuf any
+	ProtobufAny map[string]interface{} `json:"-"`
+}
+
+// UnmarshalJSON unmarshals this object with additional properties from JSON
+func (m *ProtobufAny) UnmarshalJSON(data []byte) error {
+	// stage 1, bind the properties
+	var stage1 struct {
+
+		// at type
+		AtType string `json:"@type,omitempty"`
+	}
+	if err := json.Unmarshal(data, &stage1); err != nil {
+		return err
+	}
+	var rcv ProtobufAny
+
+	rcv.AtType = stage1.AtType
+	*m = rcv
+
+	// stage 2, remove properties and add to map
+	stage2 := make(map[string]json.RawMessage)
+	if err := json.Unmarshal(data, &stage2); err != nil {
+		return err
+	}
+
+	delete(stage2, "@type")
+	// stage 3, add additional properties values
+	if len(stage2) > 0 {
+		result := make(map[string]interface{})
+		for k, v := range stage2 {
+			var toadd interface{}
+			if err := json.Unmarshal(v, &toadd); err != nil {
+				return err
+			}
+			result[k] = toadd
+		}
+		m.ProtobufAny = result
+	}
+
+	return nil
+}
+
+// MarshalJSON marshals this object with additional properties into a JSON object
+func (m ProtobufAny) MarshalJSON() ([]byte, error) {
+	var stage1 struct {
+
+		// at type
+		AtType string `json:"@type,omitempty"`
+	}
+
+	stage1.AtType = m.AtType
+
+	// make JSON object for known properties
+	props, err := json.Marshal(stage1)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(m.ProtobufAny) == 0 { // no additional properties
+		return props, nil
+	}
+
+	// make JSON object for the additional properties
+	additional, err := json.Marshal(m.ProtobufAny)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(props) < 3 { // "{}": only additional properties
+		return additional, nil
+	}
+
+	// concatenate the 2 objects
+	return swag.ConcatJSON(props, additional), nil
 }
 
 // Validate validates this protobuf any

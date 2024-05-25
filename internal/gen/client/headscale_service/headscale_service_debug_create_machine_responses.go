@@ -6,6 +6,7 @@ package headscale_service
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 
@@ -80,12 +81,19 @@ func (o *HeadscaleServiceDebugCreateMachineOK) IsCode(code int) bool {
 	return code == 200
 }
 
+// Code gets the status code for the headscale service debug create machine o k response
+func (o *HeadscaleServiceDebugCreateMachineOK) Code() int {
+	return 200
+}
+
 func (o *HeadscaleServiceDebugCreateMachineOK) Error() string {
-	return fmt.Sprintf("[POST /api/v1/debug/machine][%d] headscaleServiceDebugCreateMachineOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /api/v1/debug/machine][%d] headscaleServiceDebugCreateMachineOK %s", 200, payload)
 }
 
 func (o *HeadscaleServiceDebugCreateMachineOK) String() string {
-	return fmt.Sprintf("[POST /api/v1/debug/machine][%d] headscaleServiceDebugCreateMachineOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /api/v1/debug/machine][%d] headscaleServiceDebugCreateMachineOK %s", 200, payload)
 }
 
 func (o *HeadscaleServiceDebugCreateMachineOK) GetPayload() *models.V1DebugCreateMachineResponse {
@@ -122,11 +130,6 @@ type HeadscaleServiceDebugCreateMachineDefault struct {
 	Payload *models.RPCStatus
 }
 
-// Code gets the status code for the headscale service debug create machine default response
-func (o *HeadscaleServiceDebugCreateMachineDefault) Code() int {
-	return o._statusCode
-}
-
 // IsSuccess returns true when this headscale service debug create machine default response has a 2xx status code
 func (o *HeadscaleServiceDebugCreateMachineDefault) IsSuccess() bool {
 	return o._statusCode/100 == 2
@@ -152,12 +155,19 @@ func (o *HeadscaleServiceDebugCreateMachineDefault) IsCode(code int) bool {
 	return o._statusCode == code
 }
 
+// Code gets the status code for the headscale service debug create machine default response
+func (o *HeadscaleServiceDebugCreateMachineDefault) Code() int {
+	return o._statusCode
+}
+
 func (o *HeadscaleServiceDebugCreateMachineDefault) Error() string {
-	return fmt.Sprintf("[POST /api/v1/debug/machine][%d] HeadscaleService_DebugCreateMachine default  %+v", o._statusCode, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /api/v1/debug/machine][%d] HeadscaleService_DebugCreateMachine default %s", o._statusCode, payload)
 }
 
 func (o *HeadscaleServiceDebugCreateMachineDefault) String() string {
-	return fmt.Sprintf("[POST /api/v1/debug/machine][%d] HeadscaleService_DebugCreateMachine default  %+v", o._statusCode, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /api/v1/debug/machine][%d] HeadscaleService_DebugCreateMachine default %s", o._statusCode, payload)
 }
 
 func (o *HeadscaleServiceDebugCreateMachineDefault) GetPayload() *models.RPCStatus {

@@ -6,6 +6,7 @@ package headscale_service
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 
@@ -80,12 +81,19 @@ func (o *HeadscaleServiceDeleteMachineOK) IsCode(code int) bool {
 	return code == 200
 }
 
+// Code gets the status code for the headscale service delete machine o k response
+func (o *HeadscaleServiceDeleteMachineOK) Code() int {
+	return 200
+}
+
 func (o *HeadscaleServiceDeleteMachineOK) Error() string {
-	return fmt.Sprintf("[DELETE /api/v1/machine/{machineId}][%d] headscaleServiceDeleteMachineOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[DELETE /api/v1/machine/{machineId}][%d] headscaleServiceDeleteMachineOK %s", 200, payload)
 }
 
 func (o *HeadscaleServiceDeleteMachineOK) String() string {
-	return fmt.Sprintf("[DELETE /api/v1/machine/{machineId}][%d] headscaleServiceDeleteMachineOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[DELETE /api/v1/machine/{machineId}][%d] headscaleServiceDeleteMachineOK %s", 200, payload)
 }
 
 func (o *HeadscaleServiceDeleteMachineOK) GetPayload() models.V1DeleteMachineResponse {
@@ -120,11 +128,6 @@ type HeadscaleServiceDeleteMachineDefault struct {
 	Payload *models.RPCStatus
 }
 
-// Code gets the status code for the headscale service delete machine default response
-func (o *HeadscaleServiceDeleteMachineDefault) Code() int {
-	return o._statusCode
-}
-
 // IsSuccess returns true when this headscale service delete machine default response has a 2xx status code
 func (o *HeadscaleServiceDeleteMachineDefault) IsSuccess() bool {
 	return o._statusCode/100 == 2
@@ -150,12 +153,19 @@ func (o *HeadscaleServiceDeleteMachineDefault) IsCode(code int) bool {
 	return o._statusCode == code
 }
 
+// Code gets the status code for the headscale service delete machine default response
+func (o *HeadscaleServiceDeleteMachineDefault) Code() int {
+	return o._statusCode
+}
+
 func (o *HeadscaleServiceDeleteMachineDefault) Error() string {
-	return fmt.Sprintf("[DELETE /api/v1/machine/{machineId}][%d] HeadscaleService_DeleteMachine default  %+v", o._statusCode, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[DELETE /api/v1/machine/{machineId}][%d] HeadscaleService_DeleteMachine default %s", o._statusCode, payload)
 }
 
 func (o *HeadscaleServiceDeleteMachineDefault) String() string {
-	return fmt.Sprintf("[DELETE /api/v1/machine/{machineId}][%d] HeadscaleService_DeleteMachine default  %+v", o._statusCode, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[DELETE /api/v1/machine/{machineId}][%d] HeadscaleService_DeleteMachine default %s", o._statusCode, payload)
 }
 
 func (o *HeadscaleServiceDeleteMachineDefault) GetPayload() *models.RPCStatus {

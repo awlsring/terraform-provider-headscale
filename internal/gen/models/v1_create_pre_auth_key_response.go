@@ -72,6 +72,11 @@ func (m *V1CreatePreAuthKeyResponse) ContextValidate(ctx context.Context, format
 func (m *V1CreatePreAuthKeyResponse) contextValidatePreAuthKey(ctx context.Context, formats strfmt.Registry) error {
 
 	if m.PreAuthKey != nil {
+
+		if swag.IsZero(m.PreAuthKey) { // not required
+			return nil
+		}
+
 		if err := m.PreAuthKey.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("preAuthKey")

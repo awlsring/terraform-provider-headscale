@@ -246,6 +246,11 @@ func (m *V1Machine) ContextValidate(ctx context.Context, formats strfmt.Registry
 func (m *V1Machine) contextValidatePreAuthKey(ctx context.Context, formats strfmt.Registry) error {
 
 	if m.PreAuthKey != nil {
+
+		if swag.IsZero(m.PreAuthKey) { // not required
+			return nil
+		}
+
 		if err := m.PreAuthKey.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("preAuthKey")
@@ -262,6 +267,11 @@ func (m *V1Machine) contextValidatePreAuthKey(ctx context.Context, formats strfm
 func (m *V1Machine) contextValidateRegisterMethod(ctx context.Context, formats strfmt.Registry) error {
 
 	if m.RegisterMethod != nil {
+
+		if swag.IsZero(m.RegisterMethod) { // not required
+			return nil
+		}
+
 		if err := m.RegisterMethod.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("registerMethod")
@@ -278,6 +288,11 @@ func (m *V1Machine) contextValidateRegisterMethod(ctx context.Context, formats s
 func (m *V1Machine) contextValidateUser(ctx context.Context, formats strfmt.Registry) error {
 
 	if m.User != nil {
+
+		if swag.IsZero(m.User) { // not required
+			return nil
+		}
+
 		if err := m.User.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("user")

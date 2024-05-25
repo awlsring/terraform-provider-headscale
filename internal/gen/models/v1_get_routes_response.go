@@ -82,6 +82,11 @@ func (m *V1GetRoutesResponse) contextValidateRoutes(ctx context.Context, formats
 	for i := 0; i < len(m.Routes); i++ {
 
 		if m.Routes[i] != nil {
+
+			if swag.IsZero(m.Routes[i]) { // not required
+				return nil
+			}
+
 			if err := m.Routes[i].ContextValidate(ctx, formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("routes" + "." + strconv.Itoa(i))

@@ -6,6 +6,7 @@ package headscale_service
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 
@@ -80,12 +81,19 @@ func (o *HeadscaleServiceCreatePreAuthKeyOK) IsCode(code int) bool {
 	return code == 200
 }
 
+// Code gets the status code for the headscale service create pre auth key o k response
+func (o *HeadscaleServiceCreatePreAuthKeyOK) Code() int {
+	return 200
+}
+
 func (o *HeadscaleServiceCreatePreAuthKeyOK) Error() string {
-	return fmt.Sprintf("[POST /api/v1/preauthkey][%d] headscaleServiceCreatePreAuthKeyOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /api/v1/preauthkey][%d] headscaleServiceCreatePreAuthKeyOK %s", 200, payload)
 }
 
 func (o *HeadscaleServiceCreatePreAuthKeyOK) String() string {
-	return fmt.Sprintf("[POST /api/v1/preauthkey][%d] headscaleServiceCreatePreAuthKeyOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /api/v1/preauthkey][%d] headscaleServiceCreatePreAuthKeyOK %s", 200, payload)
 }
 
 func (o *HeadscaleServiceCreatePreAuthKeyOK) GetPayload() *models.V1CreatePreAuthKeyResponse {
@@ -122,11 +130,6 @@ type HeadscaleServiceCreatePreAuthKeyDefault struct {
 	Payload *models.RPCStatus
 }
 
-// Code gets the status code for the headscale service create pre auth key default response
-func (o *HeadscaleServiceCreatePreAuthKeyDefault) Code() int {
-	return o._statusCode
-}
-
 // IsSuccess returns true when this headscale service create pre auth key default response has a 2xx status code
 func (o *HeadscaleServiceCreatePreAuthKeyDefault) IsSuccess() bool {
 	return o._statusCode/100 == 2
@@ -152,12 +155,19 @@ func (o *HeadscaleServiceCreatePreAuthKeyDefault) IsCode(code int) bool {
 	return o._statusCode == code
 }
 
+// Code gets the status code for the headscale service create pre auth key default response
+func (o *HeadscaleServiceCreatePreAuthKeyDefault) Code() int {
+	return o._statusCode
+}
+
 func (o *HeadscaleServiceCreatePreAuthKeyDefault) Error() string {
-	return fmt.Sprintf("[POST /api/v1/preauthkey][%d] HeadscaleService_CreatePreAuthKey default  %+v", o._statusCode, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /api/v1/preauthkey][%d] HeadscaleService_CreatePreAuthKey default %s", o._statusCode, payload)
 }
 
 func (o *HeadscaleServiceCreatePreAuthKeyDefault) String() string {
-	return fmt.Sprintf("[POST /api/v1/preauthkey][%d] HeadscaleService_CreatePreAuthKey default  %+v", o._statusCode, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /api/v1/preauthkey][%d] HeadscaleService_CreatePreAuthKey default %s", o._statusCode, payload)
 }
 
 func (o *HeadscaleServiceCreatePreAuthKeyDefault) GetPayload() *models.RPCStatus {

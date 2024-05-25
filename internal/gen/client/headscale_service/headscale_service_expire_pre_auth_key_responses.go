@@ -6,6 +6,7 @@ package headscale_service
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 
@@ -80,12 +81,19 @@ func (o *HeadscaleServiceExpirePreAuthKeyOK) IsCode(code int) bool {
 	return code == 200
 }
 
+// Code gets the status code for the headscale service expire pre auth key o k response
+func (o *HeadscaleServiceExpirePreAuthKeyOK) Code() int {
+	return 200
+}
+
 func (o *HeadscaleServiceExpirePreAuthKeyOK) Error() string {
-	return fmt.Sprintf("[POST /api/v1/preauthkey/expire][%d] headscaleServiceExpirePreAuthKeyOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /api/v1/preauthkey/expire][%d] headscaleServiceExpirePreAuthKeyOK %s", 200, payload)
 }
 
 func (o *HeadscaleServiceExpirePreAuthKeyOK) String() string {
-	return fmt.Sprintf("[POST /api/v1/preauthkey/expire][%d] headscaleServiceExpirePreAuthKeyOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /api/v1/preauthkey/expire][%d] headscaleServiceExpirePreAuthKeyOK %s", 200, payload)
 }
 
 func (o *HeadscaleServiceExpirePreAuthKeyOK) GetPayload() models.V1ExpirePreAuthKeyResponse {
@@ -120,11 +128,6 @@ type HeadscaleServiceExpirePreAuthKeyDefault struct {
 	Payload *models.RPCStatus
 }
 
-// Code gets the status code for the headscale service expire pre auth key default response
-func (o *HeadscaleServiceExpirePreAuthKeyDefault) Code() int {
-	return o._statusCode
-}
-
 // IsSuccess returns true when this headscale service expire pre auth key default response has a 2xx status code
 func (o *HeadscaleServiceExpirePreAuthKeyDefault) IsSuccess() bool {
 	return o._statusCode/100 == 2
@@ -150,12 +153,19 @@ func (o *HeadscaleServiceExpirePreAuthKeyDefault) IsCode(code int) bool {
 	return o._statusCode == code
 }
 
+// Code gets the status code for the headscale service expire pre auth key default response
+func (o *HeadscaleServiceExpirePreAuthKeyDefault) Code() int {
+	return o._statusCode
+}
+
 func (o *HeadscaleServiceExpirePreAuthKeyDefault) Error() string {
-	return fmt.Sprintf("[POST /api/v1/preauthkey/expire][%d] HeadscaleService_ExpirePreAuthKey default  %+v", o._statusCode, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /api/v1/preauthkey/expire][%d] HeadscaleService_ExpirePreAuthKey default %s", o._statusCode, payload)
 }
 
 func (o *HeadscaleServiceExpirePreAuthKeyDefault) String() string {
-	return fmt.Sprintf("[POST /api/v1/preauthkey/expire][%d] HeadscaleService_ExpirePreAuthKey default  %+v", o._statusCode, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /api/v1/preauthkey/expire][%d] HeadscaleService_ExpirePreAuthKey default %s", o._statusCode, payload)
 }
 
 func (o *HeadscaleServiceExpirePreAuthKeyDefault) GetPayload() *models.RPCStatus {

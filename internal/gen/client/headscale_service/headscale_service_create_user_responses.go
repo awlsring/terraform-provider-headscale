@@ -6,6 +6,7 @@ package headscale_service
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 
@@ -80,12 +81,19 @@ func (o *HeadscaleServiceCreateUserOK) IsCode(code int) bool {
 	return code == 200
 }
 
+// Code gets the status code for the headscale service create user o k response
+func (o *HeadscaleServiceCreateUserOK) Code() int {
+	return 200
+}
+
 func (o *HeadscaleServiceCreateUserOK) Error() string {
-	return fmt.Sprintf("[POST /api/v1/user][%d] headscaleServiceCreateUserOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /api/v1/user][%d] headscaleServiceCreateUserOK %s", 200, payload)
 }
 
 func (o *HeadscaleServiceCreateUserOK) String() string {
-	return fmt.Sprintf("[POST /api/v1/user][%d] headscaleServiceCreateUserOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /api/v1/user][%d] headscaleServiceCreateUserOK %s", 200, payload)
 }
 
 func (o *HeadscaleServiceCreateUserOK) GetPayload() *models.V1CreateUserResponse {
@@ -122,11 +130,6 @@ type HeadscaleServiceCreateUserDefault struct {
 	Payload *models.RPCStatus
 }
 
-// Code gets the status code for the headscale service create user default response
-func (o *HeadscaleServiceCreateUserDefault) Code() int {
-	return o._statusCode
-}
-
 // IsSuccess returns true when this headscale service create user default response has a 2xx status code
 func (o *HeadscaleServiceCreateUserDefault) IsSuccess() bool {
 	return o._statusCode/100 == 2
@@ -152,12 +155,19 @@ func (o *HeadscaleServiceCreateUserDefault) IsCode(code int) bool {
 	return o._statusCode == code
 }
 
+// Code gets the status code for the headscale service create user default response
+func (o *HeadscaleServiceCreateUserDefault) Code() int {
+	return o._statusCode
+}
+
 func (o *HeadscaleServiceCreateUserDefault) Error() string {
-	return fmt.Sprintf("[POST /api/v1/user][%d] HeadscaleService_CreateUser default  %+v", o._statusCode, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /api/v1/user][%d] HeadscaleService_CreateUser default %s", o._statusCode, payload)
 }
 
 func (o *HeadscaleServiceCreateUserDefault) String() string {
-	return fmt.Sprintf("[POST /api/v1/user][%d] HeadscaleService_CreateUser default  %+v", o._statusCode, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /api/v1/user][%d] HeadscaleService_CreateUser default %s", o._statusCode, payload)
 }
 
 func (o *HeadscaleServiceCreateUserDefault) GetPayload() *models.RPCStatus {

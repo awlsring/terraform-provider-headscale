@@ -82,6 +82,11 @@ func (m *V1ListPreAuthKeysResponse) contextValidatePreAuthKeys(ctx context.Conte
 	for i := 0; i < len(m.PreAuthKeys); i++ {
 
 		if m.PreAuthKeys[i] != nil {
+
+			if swag.IsZero(m.PreAuthKeys[i]) { // not required
+				return nil
+			}
+
 			if err := m.PreAuthKeys[i].ContextValidate(ctx, formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("preAuthKeys" + "." + strconv.Itoa(i))
