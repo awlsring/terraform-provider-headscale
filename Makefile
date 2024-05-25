@@ -3,9 +3,8 @@ HOSTNAME=github.com
 NAMESPACE=awlsring
 NAME=headscale
 BINARY=terraform-provider-${NAME}
-OS_ARCH=darwin_arm64
 
-default: install terradocs
+default: gen install terradocs
 
 clean:
 	rm ${BINARY}
@@ -14,14 +13,11 @@ terradocs:
 	go generate
 
 gen:
-	swagger generate client -f ${SWAGGER_DOC} -A headscale -t ./internal/gen
+	swagger generate client -f models/headscale.22.3.json -A headscale -t ./internal/gen
 	go mod tidy
 
-install: install-tools
+install:
 	go install .
-
-install-tools:
-	go install github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs@latest
 
 test: 
 	go test -i $(TEST) || exit 1                                                   
