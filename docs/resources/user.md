@@ -26,6 +26,10 @@ resource "headscale_user" "terraform_user" {
 
 - `name` (String) The name of the user.
 
+### Optional
+
+- `force_delete` (Boolean) If the user should be deleted even if it has nodes attached to it. Defaults to `false`.
+
 ### Read-Only
 
 - `created_at` (String) The time the user was created.

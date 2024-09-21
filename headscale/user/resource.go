@@ -3,6 +3,7 @@ package user
 import (
 	"context"
 
+	"github.com/awlsring/terraform-provider-headscale/internal/gen/models"
 	"github.com/awlsring/terraform-provider-headscale/internal/service"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -43,6 +44,10 @@ func (d *userResource) Schema(_ context.Context, _ resource.SchemaRequest, resp 
 			"name": schema.StringAttribute{
 				Required:    true,
 				Description: "The name of the user.",
+			},
+			"force_delete": schema.BoolAttribute{
+				Optional:            true,
+				MarkdownDescription: "If the user should be deleted even if it has nodes attached to it. Defaults to `false`.",
 			},
 			"id": schema.StringAttribute{
 				Computed:    true,
@@ -106,19 +111,34 @@ func (r *userResource) Update(ctx context.Context, req resource.UpdateRequest, r
 	oldName := state.Name.ValueString()
 	newName := plan.Name.ValueString()
 
-	user, err := r.client.RenameUser(ctx, oldName, newName)
-	if err != nil {
-		resp.Diagnostics.AddError(
-			"Error updating user",
-			"Could not update user, unexpected error: "+err.Error(),
-		)
-		return
+	var user *models.V1User
+	var err error
+	if oldName != newName {
+		user, err = r.client.RenameUser(ctx, oldName, newName)
+		if err != nil {
+			resp.Diagnostics.AddError(
+				"Error updating user",
+				"Could not update user, unexpected error: "+err.Error(),
+			)
+			return
+		}
+	} else {
+		user, err = r.client.GetUser(ctx, oldName)
+		if err != nil {
+			resp.Diagnostics.AddError(
+				"Unable to get user.",
+				"An error was encountered retrieving the user.\n"+
+					err.Error(),
+			)
+			return
+		}
 	}
 
 	m := userModel{
-		Id:        types.StringValue(user.ID),
-		Name:      types.StringValue(user.Name),
-		CreatedAt: types.StringValue(user.CreatedAt.DeepCopy().String()),
+		Id:          types.StringValue(user.ID),
+		Name:        types.StringValue(user.Name),
+		ForceDelete: types.BoolValue(plan.ForceDelete.ValueBool()),
+		CreatedAt:   types.StringValue(user.CreatedAt.DeepCopy().String()),
 	}
 
 	diags = resp.State.Set(ctx, &m)
@@ -136,7 +156,36 @@ func (r *userResource) Delete(ctx context.Context, req resource.DeleteRequest, r
 		return
 	}
 
-	err := r.client.DeleteUser(ctx, state.Name.ValueString())
+	user := state.Name.ValueString()
+	devices, err := r.client.ListDevices(ctx, &user)
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Error deleting user",
+			"Could not list devices, unexpected error: "+err.Error(),
+		)
+		return
+	}
+
+	if len(devices) > 0 && !state.ForceDelete.ValueBool() {
+		resp.Diagnostics.AddError(
+			"Error deleting user",
+			"User has devices attached to it. Set `force_delete` to `true` to delete the user anyway.",
+		)
+		return
+	}
+
+	for _, device := range devices {
+		err = r.client.DeleteDevice(ctx, device.ID)
+		if err != nil {
+			resp.Diagnostics.AddError(
+				"Error deleting user",
+				"Could not remove device, unexpected error: "+err.Error(),
+			)
+			return
+		}
+	}
+
+	err = r.client.DeleteUser(ctx, state.Name.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error deleting user",
