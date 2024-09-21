@@ -25,7 +25,7 @@
       devShells = forAllSystems ({ pkgs }: {
         default = pkgs.mkShell {
           packages = with pkgs; [
-            go
+            go_1_23
             gotools
             terraform
             terraform-plugin-docs

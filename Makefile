@@ -10,6 +10,7 @@ clean:
 	rm ${BINARY}
 
 terradocs:
+	go get github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs
 	go generate
 
 gen:
