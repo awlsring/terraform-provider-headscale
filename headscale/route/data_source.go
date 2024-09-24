@@ -128,7 +128,7 @@ func (d *routeDataSource) Read(ctx context.Context, req datasource.ReadRequest, 
 
 	for _, route := range routes {
 		if device != nil {
-			if route.Machine.ID != *device {
+			if route.Node.ID != *device {
 				continue
 			}
 		}
@@ -148,8 +148,8 @@ func (d *routeDataSource) Read(ctx context.Context, req datasource.ReadRequest, 
 			Id:        types.StringValue(route.ID),
 			Route:     types.StringValue(route.Prefix),
 			Status:    types.StringValue(stat),
-			DeviceId:  types.StringValue(route.Machine.ID),
-			UserId:    types.StringValue(route.Machine.User.ID),
+			DeviceId:  types.StringValue(route.Node.ID),
+			UserId:    types.StringValue(route.Node.User.ID),
 			CreatedAt: types.StringValue(route.CreatedAt.DeepCopy().String()),
 		}
 

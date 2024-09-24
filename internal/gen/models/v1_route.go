@@ -39,8 +39,8 @@ type V1Route struct {
 	// is primary
 	IsPrimary bool `json:"isPrimary,omitempty"`
 
-	// machine
-	Machine *V1Machine `json:"machine,omitempty"`
+	// node
+	Node *V1Node `json:"node,omitempty"`
 
 	// prefix
 	Prefix string `json:"prefix,omitempty"`
@@ -62,7 +62,7 @@ func (m *V1Route) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
-	if err := m.validateMachine(formats); err != nil {
+	if err := m.validateNode(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -100,17 +100,17 @@ func (m *V1Route) validateDeletedAt(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *V1Route) validateMachine(formats strfmt.Registry) error {
-	if swag.IsZero(m.Machine) { // not required
+func (m *V1Route) validateNode(formats strfmt.Registry) error {
+	if swag.IsZero(m.Node) { // not required
 		return nil
 	}
 
-	if m.Machine != nil {
-		if err := m.Machine.Validate(formats); err != nil {
+	if m.Node != nil {
+		if err := m.Node.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("machine")
+				return ve.ValidateName("node")
 			} else if ce, ok := err.(*errors.CompositeError); ok {
-				return ce.ValidateName("machine")
+				return ce.ValidateName("node")
 			}
 			return err
 		}
@@ -135,7 +135,7 @@ func (m *V1Route) validateUpdatedAt(formats strfmt.Registry) error {
 func (m *V1Route) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	var res []error
 
-	if err := m.contextValidateMachine(ctx, formats); err != nil {
+	if err := m.contextValidateNode(ctx, formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -145,19 +145,19 @@ func (m *V1Route) ContextValidate(ctx context.Context, formats strfmt.Registry) 
 	return nil
 }
 
-func (m *V1Route) contextValidateMachine(ctx context.Context, formats strfmt.Registry) error {
+func (m *V1Route) contextValidateNode(ctx context.Context, formats strfmt.Registry) error {
 
-	if m.Machine != nil {
+	if m.Node != nil {
 
-		if swag.IsZero(m.Machine) { // not required
+		if swag.IsZero(m.Node) { // not required
 			return nil
 		}
 
-		if err := m.Machine.ContextValidate(ctx, formats); err != nil {
+		if err := m.Node.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("machine")
+				return ve.ValidateName("node")
 			} else if ce, ok := err.(*errors.CompositeError); ok {
-				return ce.ValidateName("machine")
+				return ce.ValidateName("node")
 			}
 			return err
 		}
