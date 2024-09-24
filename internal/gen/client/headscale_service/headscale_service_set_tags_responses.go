@@ -6,14 +6,12 @@ package headscale_service
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"io"
 
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/strfmt"
-	"github.com/go-openapi/swag"
 
 	"github.com/awlsring/terraform-provider-headscale/internal/gen/models"
 )
@@ -90,12 +88,12 @@ func (o *HeadscaleServiceSetTagsOK) Code() int {
 
 func (o *HeadscaleServiceSetTagsOK) Error() string {
 	payload, _ := json.Marshal(o.Payload)
-	return fmt.Sprintf("[POST /api/v1/machine/{machineId}/tags][%d] headscaleServiceSetTagsOK %s", 200, payload)
+	return fmt.Sprintf("[POST /api/v1/node/{nodeId}/tags][%d] headscaleServiceSetTagsOK %s", 200, payload)
 }
 
 func (o *HeadscaleServiceSetTagsOK) String() string {
 	payload, _ := json.Marshal(o.Payload)
-	return fmt.Sprintf("[POST /api/v1/machine/{machineId}/tags][%d] headscaleServiceSetTagsOK %s", 200, payload)
+	return fmt.Sprintf("[POST /api/v1/node/{nodeId}/tags][%d] headscaleServiceSetTagsOK %s", 200, payload)
 }
 
 func (o *HeadscaleServiceSetTagsOK) GetPayload() *models.V1SetTagsResponse {
@@ -164,12 +162,12 @@ func (o *HeadscaleServiceSetTagsDefault) Code() int {
 
 func (o *HeadscaleServiceSetTagsDefault) Error() string {
 	payload, _ := json.Marshal(o.Payload)
-	return fmt.Sprintf("[POST /api/v1/machine/{machineId}/tags][%d] HeadscaleService_SetTags default %s", o._statusCode, payload)
+	return fmt.Sprintf("[POST /api/v1/node/{nodeId}/tags][%d] HeadscaleService_SetTags default %s", o._statusCode, payload)
 }
 
 func (o *HeadscaleServiceSetTagsDefault) String() string {
 	payload, _ := json.Marshal(o.Payload)
-	return fmt.Sprintf("[POST /api/v1/machine/{machineId}/tags][%d] HeadscaleService_SetTags default %s", o._statusCode, payload)
+	return fmt.Sprintf("[POST /api/v1/node/{nodeId}/tags][%d] HeadscaleService_SetTags default %s", o._statusCode, payload)
 }
 
 func (o *HeadscaleServiceSetTagsDefault) GetPayload() *models.RPCStatus {
@@ -185,43 +183,5 @@ func (o *HeadscaleServiceSetTagsDefault) readResponse(response runtime.ClientRes
 		return err
 	}
 
-	return nil
-}
-
-/*
-HeadscaleServiceSetTagsBody headscale service set tags body
-swagger:model HeadscaleServiceSetTagsBody
-*/
-type HeadscaleServiceSetTagsBody struct {
-
-	// tags
-	Tags []string `json:"tags"`
-}
-
-// Validate validates this headscale service set tags body
-func (o *HeadscaleServiceSetTagsBody) Validate(formats strfmt.Registry) error {
-	return nil
-}
-
-// ContextValidate validates this headscale service set tags body based on context it is used
-func (o *HeadscaleServiceSetTagsBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
-	return nil
-}
-
-// MarshalBinary interface implementation
-func (o *HeadscaleServiceSetTagsBody) MarshalBinary() ([]byte, error) {
-	if o == nil {
-		return nil, nil
-	}
-	return swag.WriteJSON(o)
-}
-
-// UnmarshalBinary interface implementation
-func (o *HeadscaleServiceSetTagsBody) UnmarshalBinary(b []byte) error {
-	var res HeadscaleServiceSetTagsBody
-	if err := swag.ReadJSON(b, &res); err != nil {
-		return err
-	}
-	*o = res
 	return nil
 }

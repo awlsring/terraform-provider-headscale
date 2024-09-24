@@ -28,6 +28,7 @@
             go_1_23
             gotools
             terraform
+            headscale
             terraform-plugin-docs
             go-swagger
             direnv

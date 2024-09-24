@@ -13,17 +13,17 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// V1SetTagsResponse v1 set tags response
+// V1ExpireNodeResponse v1 expire node response
 //
-// swagger:model v1SetTagsResponse
-type V1SetTagsResponse struct {
+// swagger:model v1ExpireNodeResponse
+type V1ExpireNodeResponse struct {
 
 	// node
 	Node *V1Node `json:"node,omitempty"`
 }
 
-// Validate validates this v1 set tags response
-func (m *V1SetTagsResponse) Validate(formats strfmt.Registry) error {
+// Validate validates this v1 expire node response
+func (m *V1ExpireNodeResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateNode(formats); err != nil {
@@ -36,7 +36,7 @@ func (m *V1SetTagsResponse) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *V1SetTagsResponse) validateNode(formats strfmt.Registry) error {
+func (m *V1ExpireNodeResponse) validateNode(formats strfmt.Registry) error {
 	if swag.IsZero(m.Node) { // not required
 		return nil
 	}
@@ -55,8 +55,8 @@ func (m *V1SetTagsResponse) validateNode(formats strfmt.Registry) error {
 	return nil
 }
 
-// ContextValidate validate this v1 set tags response based on the context it is used
-func (m *V1SetTagsResponse) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+// ContextValidate validate this v1 expire node response based on the context it is used
+func (m *V1ExpireNodeResponse) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.contextValidateNode(ctx, formats); err != nil {
@@ -69,7 +69,7 @@ func (m *V1SetTagsResponse) ContextValidate(ctx context.Context, formats strfmt.
 	return nil
 }
 
-func (m *V1SetTagsResponse) contextValidateNode(ctx context.Context, formats strfmt.Registry) error {
+func (m *V1ExpireNodeResponse) contextValidateNode(ctx context.Context, formats strfmt.Registry) error {
 
 	if m.Node != nil {
 
@@ -91,7 +91,7 @@ func (m *V1SetTagsResponse) contextValidateNode(ctx context.Context, formats str
 }
 
 // MarshalBinary interface implementation
-func (m *V1SetTagsResponse) MarshalBinary() ([]byte, error) {
+func (m *V1ExpireNodeResponse) MarshalBinary() ([]byte, error) {
 	if m == nil {
 		return nil, nil
 	}
@@ -99,8 +99,8 @@ func (m *V1SetTagsResponse) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (m *V1SetTagsResponse) UnmarshalBinary(b []byte) error {
-	var res V1SetTagsResponse
+func (m *V1ExpireNodeResponse) UnmarshalBinary(b []byte) error {
+	var res V1ExpireNodeResponse
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

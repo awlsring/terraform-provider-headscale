@@ -16,15 +16,15 @@ type Headscale interface {
 	ListAPIKeys(ctx context.Context) ([]*models.V1APIKey, error)
 	CreateAPIKey(ctx context.Context, expiration *strfmt.DateTime) (string, error)
 	ExpireAPIKey(ctx context.Context, key string) error
-	ListDevices(ctx context.Context, user *string) ([]*models.V1Machine, error)
-	GetDevice(ctx context.Context, deviceId string) (*models.V1Machine, error)
-	CreateDevice(ctx context.Context, user string, key string) (*models.V1Machine, error)
-	ExpireDevice(ctx context.Context, deviceId string) (*models.V1Machine, error)
+	ListDevices(ctx context.Context, user *string) ([]*models.V1Node, error)
+	GetDevice(ctx context.Context, deviceId string) (*models.V1Node, error)
+	CreateDevice(ctx context.Context, user string, key string) (*models.V1Node, error)
+	ExpireDevice(ctx context.Context, deviceId string) (*models.V1Node, error)
 	DeleteDevice(ctx context.Context, deviceId string) error
-	RenameDevice(ctx context.Context, deviceId string, newName string) (*models.V1Machine, error)
+	RenameDevice(ctx context.Context, deviceId string, newName string) (*models.V1Node, error)
 	GetDeviceRoutes(ctx context.Context, deviceId string) ([]*models.V1Route, error)
-	TagDevice(ctx context.Context, deviceId string, tags []string) (*models.V1Machine, error)
-	MoveDevice(ctx context.Context, deviceId string, newOwner string) (*models.V1Machine, error)
+	TagDevice(ctx context.Context, deviceId string, tags []string) (*models.V1Node, error)
+	MoveDevice(ctx context.Context, deviceId string, newOwner string) (*models.V1Node, error)
 	ListPreAuthKeys(ctx context.Context, user string) ([]*models.V1PreAuthKey, error)
 	CreatePreAuthKey(ctx context.Context, input CreatePreAuthKeyInput) (*models.V1PreAuthKey, error)
 	ExpirePreAuthKey(ctx context.Context, user string, key string) error
@@ -115,12 +115,12 @@ func (h *HeadscaleService) ExpireAPIKey(ctx context.Context, key string) error {
 	return nil
 }
 
-func (h *HeadscaleService) ListDevices(ctx context.Context, user *string) ([]*models.V1Machine, error) {
-	request := headscale_service.NewHeadscaleServiceListMachinesParams()
+func (h *HeadscaleService) ListDevices(ctx context.Context, user *string) ([]*models.V1Node, error) {
+	request := headscale_service.NewHeadscaleServiceListNodesParams()
 	request.SetContext(ctx)
 	request.SetUser(user)
 
-	resp, err := h.client.HeadscaleService.HeadscaleServiceListMachines(request)
+	resp, err := h.client.HeadscaleService.HeadscaleServiceListNodes(request)
 	if err != nil {
 		return nil, handleRequestError(err)
 	}
@@ -130,15 +130,15 @@ func (h *HeadscaleService) ListDevices(ctx context.Context, user *string) ([]*mo
 		return nil, err
 	}
 
-	return resp.Payload.Machines, nil
+	return resp.Payload.Nodes, nil
 }
 
-func (h *HeadscaleService) GetDevice(ctx context.Context, deviceId string) (*models.V1Machine, error) {
-	request := headscale_service.NewHeadscaleServiceGetMachineParams()
+func (h *HeadscaleService) GetDevice(ctx context.Context, deviceId string) (*models.V1Node, error) {
+	request := headscale_service.NewHeadscaleServiceGetNodeParams()
 	request.SetContext(ctx)
-	request.SetMachineID(deviceId)
+	request.SetNodeID(deviceId)
 
-	resp, err := h.client.HeadscaleService.HeadscaleServiceGetMachine(request)
+	resp, err := h.client.HeadscaleService.HeadscaleServiceGetNode(request)
 	if err != nil {
 		return nil, handleRequestError(err)
 	}
@@ -148,7 +148,7 @@ func (h *HeadscaleService) GetDevice(ctx context.Context, deviceId string) (*mod
 		return nil, err
 	}
 
-	return resp.Payload.Machine, nil
+	return resp.Payload.Node, nil
 }
 
 type CreateDeviceInput struct {
@@ -156,13 +156,13 @@ type CreateDeviceInput struct {
 	Key  *string
 }
 
-func (h *HeadscaleService) CreateDevice(ctx context.Context, user string, key string) (*models.V1Machine, error) {
-	request := headscale_service.NewHeadscaleServiceRegisterMachineParams()
+func (h *HeadscaleService) CreateDevice(ctx context.Context, user string, key string) (*models.V1Node, error) {
+	request := headscale_service.NewHeadscaleServiceRegisterNodeParams()
 	request.SetContext(ctx)
 	request.SetKey(&key)
 	request.SetUser(&user)
 
-	resp, err := h.client.HeadscaleService.HeadscaleServiceRegisterMachine(request)
+	resp, err := h.client.HeadscaleService.HeadscaleServiceRegisterNode(request)
 	if err != nil {
 		return nil, handleRequestError(err)
 	}
@@ -172,15 +172,15 @@ func (h *HeadscaleService) CreateDevice(ctx context.Context, user string, key st
 		return nil, err
 	}
 
-	return resp.Payload.Machine, nil
+	return resp.Payload.Node, nil
 }
 
-func (h *HeadscaleService) ExpireDevice(ctx context.Context, deviceId string) (*models.V1Machine, error) {
-	request := headscale_service.NewHeadscaleServiceExpireMachineParams()
+func (h *HeadscaleService) ExpireDevice(ctx context.Context, deviceId string) (*models.V1Node, error) {
+	request := headscale_service.NewHeadscaleServiceExpireNodeParams()
 	request.SetContext(ctx)
-	request.SetMachineID(deviceId)
+	request.SetNodeID(deviceId)
 
-	resp, err := h.client.HeadscaleService.HeadscaleServiceExpireMachine(request)
+	resp, err := h.client.HeadscaleService.HeadscaleServiceExpireNode(request)
 	if err != nil {
 		return nil, handleRequestError(err)
 	}
@@ -190,28 +190,28 @@ func (h *HeadscaleService) ExpireDevice(ctx context.Context, deviceId string) (*
 		return nil, err
 	}
 
-	return resp.Payload.Machine, nil
+	return resp.Payload.Node, nil
 }
 
 func (h *HeadscaleService) DeleteDevice(ctx context.Context, deviceId string) error {
-	request := headscale_service.NewHeadscaleServiceDeleteMachineParams()
+	request := headscale_service.NewHeadscaleServiceDeleteNodeParams()
 	request.SetContext(ctx)
-	request.SetMachineID(deviceId)
+	request.SetNodeID(deviceId)
 
-	_, err := h.client.HeadscaleService.HeadscaleServiceDeleteMachine(request)
+	_, err := h.client.HeadscaleService.HeadscaleServiceDeleteNode(request)
 	if err != nil {
 		return handleRequestError(err)
 	}
 	return nil
 }
 
-func (h *HeadscaleService) RenameDevice(ctx context.Context, deviceId string, name string) (*models.V1Machine, error) {
-	request := headscale_service.NewHeadscaleServiceRenameMachineParams()
+func (h *HeadscaleService) RenameDevice(ctx context.Context, deviceId string, name string) (*models.V1Node, error) {
+	request := headscale_service.NewHeadscaleServiceRenameNodeParams()
 	request.SetContext(ctx)
-	request.SetMachineID(deviceId)
+	request.SetNodeID(deviceId)
 	request.SetNewName(name)
 
-	resp, err := h.client.HeadscaleService.HeadscaleServiceRenameMachine(request)
+	resp, err := h.client.HeadscaleService.HeadscaleServiceRenameNode(request)
 	if err != nil {
 		return nil, handleRequestError(err)
 	}
@@ -221,15 +221,15 @@ func (h *HeadscaleService) RenameDevice(ctx context.Context, deviceId string, na
 		return nil, err
 	}
 
-	return resp.Payload.Machine, nil
+	return resp.Payload.Node, nil
 }
 
 func (h *HeadscaleService) GetDeviceRoutes(ctx context.Context, deviceId string) ([]*models.V1Route, error) {
-	request := headscale_service.NewHeadscaleServiceGetMachineRoutesParams()
+	request := headscale_service.NewHeadscaleServiceGetNodeRoutesParams()
 	request.SetContext(ctx)
-	request.SetMachineID(deviceId)
+	request.SetNodeID(deviceId)
 
-	resp, err := h.client.HeadscaleService.HeadscaleServiceGetMachineRoutes(request)
+	resp, err := h.client.HeadscaleService.HeadscaleServiceGetNodeRoutes(request)
 	if err != nil {
 		return nil, handleRequestError(err)
 	}
@@ -242,12 +242,12 @@ func (h *HeadscaleService) GetDeviceRoutes(ctx context.Context, deviceId string)
 	return resp.Payload.Routes, nil
 }
 
-func (h *HeadscaleService) TagDevice(ctx context.Context, deviceId string, tags []string) (*models.V1Machine, error) {
+func (h *HeadscaleService) TagDevice(ctx context.Context, deviceId string, tags []string) (*models.V1Node, error) {
 	request := headscale_service.NewHeadscaleServiceSetTagsParams()
 	request.SetContext(ctx)
-	request.SetMachineID(deviceId)
+	request.SetNodeID(deviceId)
 
-	request.SetBody(headscale_service.HeadscaleServiceSetTagsBody{
+	request.SetBody(&models.HeadscaleServiceSetTagsBody{
 		Tags: tags,
 	})
 
@@ -261,16 +261,16 @@ func (h *HeadscaleService) TagDevice(ctx context.Context, deviceId string, tags 
 		return nil, err
 	}
 
-	return resp.Payload.Machine, nil
+	return resp.Payload.Node, nil
 }
 
-func (h *HeadscaleService) MoveDevice(ctx context.Context, deviceId string, user string) (*models.V1Machine, error) {
-	request := headscale_service.NewHeadscaleServiceMoveMachineParams()
+func (h *HeadscaleService) MoveDevice(ctx context.Context, deviceId string, user string) (*models.V1Node, error) {
+	request := headscale_service.NewHeadscaleServiceMoveNodeParams()
 	request.SetContext(ctx)
-	request.SetMachineID(deviceId)
+	request.SetNodeID(deviceId)
 	request.SetUser(&user)
 
-	resp, err := h.client.HeadscaleService.HeadscaleServiceMoveMachine(request)
+	resp, err := h.client.HeadscaleService.HeadscaleServiceMoveNode(request)
 	if err != nil {
 		return nil, handleRequestError(err)
 	}
@@ -280,7 +280,7 @@ func (h *HeadscaleService) MoveDevice(ctx context.Context, deviceId string, user
 		return nil, err
 	}
 
-	return resp.Payload.Machine, nil
+	return resp.Payload.Node, nil
 }
 
 func (h *HeadscaleService) ListPreAuthKeys(ctx context.Context, user string) ([]*models.V1PreAuthKey, error) {
