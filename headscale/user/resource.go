@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
@@ -47,6 +48,8 @@ func (d *userResource) Schema(_ context.Context, _ resource.SchemaRequest, resp 
 			},
 			"force_delete": schema.BoolAttribute{
 				Optional:            true,
+				Computed:            true,
+				Default:             booldefault.StaticBool(false),
 				MarkdownDescription: "If the user should be deleted even if it has nodes attached to it. Defaults to `false`.",
 			},
 			"id": schema.StringAttribute{
@@ -81,9 +84,10 @@ func (r *userResource) Create(ctx context.Context, req resource.CreateRequest, r
 	}
 
 	m := userModel{
-		Id:        types.StringValue(user.ID),
-		Name:      types.StringValue(user.Name),
-		CreatedAt: types.StringValue(user.CreatedAt.DeepCopy().String()),
+		Id:          types.StringValue(user.ID),
+		Name:        types.StringValue(user.Name),
+		ForceDelete: types.BoolValue(plan.ForceDelete.ValueBool()),
+		CreatedAt:   types.StringValue(user.CreatedAt.DeepCopy().String()),
 	}
 
 	diags = resp.State.Set(ctx, &m)
@@ -215,9 +219,10 @@ func (r *userResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 	}
 
 	m := userModel{
-		Id:        types.StringValue(user.ID),
-		Name:      types.StringValue(user.Name),
-		CreatedAt: types.StringValue(user.CreatedAt.DeepCopy().String()),
+		Id:          types.StringValue(user.ID),
+		Name:        types.StringValue(user.Name),
+		ForceDelete: types.BoolValue(state.ForceDelete.ValueBool()),
+		CreatedAt:   types.StringValue(user.CreatedAt.DeepCopy().String()),
 	}
 
 	diags = resp.State.Set(ctx, &m)
@@ -241,9 +246,10 @@ func (r *userResource) ImportState(ctx context.Context, req resource.ImportState
 	}
 
 	m := userModel{
-		Id:        types.StringValue(user.ID),
-		Name:      types.StringValue(user.Name),
-		CreatedAt: types.StringValue(user.CreatedAt.DeepCopy().String()),
+		Id:          types.StringValue(user.ID),
+		Name:        types.StringValue(user.Name),
+		ForceDelete: types.BoolValue(false),
+		CreatedAt:   types.StringValue(user.CreatedAt.DeepCopy().String()),
 	}
 
 	diags := resp.State.Set(ctx, &m)
