@@ -46,6 +46,11 @@ func (d *userDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, r
 				Computed:    true,
 				Description: "The user's id.",
 			},
+			"force_delete": schema.BoolAttribute{
+				Optional:            true,
+				Computed:            true,
+				MarkdownDescription: "If the user should be deleted even if it has nodes attached to it. Defaults to `false`.",
+			},
 			"created_at": schema.StringAttribute{
 				Computed:    true,
 				Description: "The time the user was created.",

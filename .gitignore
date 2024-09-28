@@ -4,3 +4,4 @@ bin
 *.terraform
 tmp
 examples/test
+resources/data

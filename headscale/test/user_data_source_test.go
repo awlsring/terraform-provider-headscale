@@ -17,6 +17,7 @@ func Test_UserDataSource(t *testing.T) {
 				
 				  data "headscale_user" "test" {
 					name = headscale_user.test.name
+					force_delete = false
 				  }
 				  `,
 				Check: resource.ComposeAggregateTestCheckFunc(
