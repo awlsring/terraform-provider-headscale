@@ -4,6 +4,10 @@ This is a Terraform provider for [Headscale](https://github.com/juanfont/headsca
 
 You can find this provider on the [Terraform Registry](https://registry.terraform.io/providers/awlsring/headscale/latest).
 
+## Versions
+
+As of release 0.2.0, this provider supports Headscale v0.23.0. This release changed the API with backwards incompatible changes. For compatibility with the previous API, use releases like 0.1.x.
+
 ## Differences between the Tailscale and Headscale Providers
 
 As Headscale has a different API than Tailscale, the functionality of this provider differs from what the [Tailscale provider](https://registry.terraform.io/providers/tailscale/tailscale) offers.
