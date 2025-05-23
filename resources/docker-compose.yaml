@@ -2,7 +2,7 @@ version: "3"
 services:
   headscale:
     container_name: headscale
-    image: "headscale/headscale:0.23.0"
+    image: "headscale/headscale:0.25.1"
     command: serve
     volumes:
       - ./config.yaml:/etc/headscale/config.yaml

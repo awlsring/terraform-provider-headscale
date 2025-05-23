@@ -14,15 +14,15 @@ terradocs:
 	go generate
 
 gen:
-	swagger generate client -f models/headscale.23.0.json -A headscale -t ./internal/gen
+	swagger generate client -f models/headscale.25.0.json -A headscale -t ./internal/gen
 	go mod tidy
 
 install:
 	go install .
 
-test: 
-	go test -i $(TEST) || exit 1                                                   
-	echo $(TEST) | xargs -t -n4 go test $(TESTARGS) -timeout=30s -parallel=4                    
+test:
+	go test -i $(TEST) || exit 1
+	echo $(TEST) | xargs -t -n4 go test $(TESTARGS) -timeout=30s -parallel=4
 
-testacc: 
+testacc:
 	scripts/run_tests.sh

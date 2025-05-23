@@ -23,11 +23,26 @@ type V1User struct {
 	// Format: date-time
 	CreatedAt strfmt.DateTime `json:"createdAt,omitempty"`
 
+	// display name
+	DisplayName string `json:"displayName,omitempty"`
+
+	// email
+	Email string `json:"email,omitempty"`
+
 	// id
 	ID string `json:"id,omitempty"`
 
 	// name
 	Name string `json:"name,omitempty"`
+
+	// profile pic Url
+	ProfilePicURL string `json:"profilePicUrl,omitempty"`
+
+	// provider
+	Provider string `json:"provider,omitempty"`
+
+	// provider Id
+	ProviderID string `json:"providerId,omitempty"`
 }
 
 // Validate validates this v1 user

@@ -88,12 +88,12 @@ func (o *HeadscaleServiceDeleteUserOK) Code() int {
 
 func (o *HeadscaleServiceDeleteUserOK) Error() string {
 	payload, _ := json.Marshal(o.Payload)
-	return fmt.Sprintf("[DELETE /api/v1/user/{name}][%d] headscaleServiceDeleteUserOK %s", 200, payload)
+	return fmt.Sprintf("[DELETE /api/v1/user/{id}][%d] headscaleServiceDeleteUserOK %s", 200, payload)
 }
 
 func (o *HeadscaleServiceDeleteUserOK) String() string {
 	payload, _ := json.Marshal(o.Payload)
-	return fmt.Sprintf("[DELETE /api/v1/user/{name}][%d] headscaleServiceDeleteUserOK %s", 200, payload)
+	return fmt.Sprintf("[DELETE /api/v1/user/{id}][%d] headscaleServiceDeleteUserOK %s", 200, payload)
 }
 
 func (o *HeadscaleServiceDeleteUserOK) GetPayload() models.V1DeleteUserResponse {
@@ -160,12 +160,12 @@ func (o *HeadscaleServiceDeleteUserDefault) Code() int {
 
 func (o *HeadscaleServiceDeleteUserDefault) Error() string {
 	payload, _ := json.Marshal(o.Payload)
-	return fmt.Sprintf("[DELETE /api/v1/user/{name}][%d] HeadscaleService_DeleteUser default %s", o._statusCode, payload)
+	return fmt.Sprintf("[DELETE /api/v1/user/{id}][%d] HeadscaleService_DeleteUser default %s", o._statusCode, payload)
 }
 
 func (o *HeadscaleServiceDeleteUserDefault) String() string {
 	payload, _ := json.Marshal(o.Payload)
-	return fmt.Sprintf("[DELETE /api/v1/user/{name}][%d] HeadscaleService_DeleteUser default %s", o._statusCode, payload)
+	return fmt.Sprintf("[DELETE /api/v1/user/{id}][%d] HeadscaleService_DeleteUser default %s", o._statusCode, payload)
 }
 
 func (o *HeadscaleServiceDeleteUserDefault) GetPayload() *models.RPCStatus {

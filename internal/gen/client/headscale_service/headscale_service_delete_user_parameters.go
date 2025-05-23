@@ -61,8 +61,10 @@ HeadscaleServiceDeleteUserParams contains all the parameters to send to the API 
 */
 type HeadscaleServiceDeleteUserParams struct {
 
-	// Name.
-	Name string
+	// ID.
+	//
+	// Format: uint64
+	ID string
 
 	timeout    time.Duration
 	Context    context.Context
@@ -117,15 +119,15 @@ func (o *HeadscaleServiceDeleteUserParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
-// WithName adds the name to the headscale service delete user params
-func (o *HeadscaleServiceDeleteUserParams) WithName(name string) *HeadscaleServiceDeleteUserParams {
-	o.SetName(name)
+// WithID adds the id to the headscale service delete user params
+func (o *HeadscaleServiceDeleteUserParams) WithID(id string) *HeadscaleServiceDeleteUserParams {
+	o.SetID(id)
 	return o
 }
 
-// SetName adds the name to the headscale service delete user params
-func (o *HeadscaleServiceDeleteUserParams) SetName(name string) {
-	o.Name = name
+// SetID adds the id to the headscale service delete user params
+func (o *HeadscaleServiceDeleteUserParams) SetID(id string) {
+	o.ID = id
 }
 
 // WriteToRequest writes these params to a swagger request
@@ -136,8 +138,8 @@ func (o *HeadscaleServiceDeleteUserParams) WriteToRequest(r runtime.ClientReques
 	}
 	var res []error
 
-	// path param name
-	if err := r.SetPathParam("name", o.Name); err != nil {
+	// path param id
+	if err := r.SetPathParam("id", o.ID); err != nil {
 		return err
 	}
 

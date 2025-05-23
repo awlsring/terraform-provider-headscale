@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"net/url"
 	"strings"
 
@@ -268,7 +269,10 @@ func (h *HeadscaleService) MoveDevice(ctx context.Context, deviceId string, user
 	request := headscale_service.NewHeadscaleServiceMoveNodeParams()
 	request.SetContext(ctx)
 	request.SetNodeID(deviceId)
-	request.SetUser(&user)
+	body := models.HeadscaleServiceMoveNodeBody{
+		User: user,
+	}
+	request.SetBody(&body)
 
 	resp, err := h.client.HeadscaleService.HeadscaleServiceMoveNode(request)
 	if err != nil {
@@ -435,11 +439,11 @@ func (h *HeadscaleService) ListUsers(ctx context.Context) ([]*models.V1User, err
 }
 
 func (h *HeadscaleService) GetUser(ctx context.Context, name string) (*models.V1User, error) {
-	request := headscale_service.NewHeadscaleServiceGetUserParams()
+	request := headscale_service.NewHeadscaleServiceListUsersParams()
 	request.SetContext(ctx)
-	request.SetName(name)
+	request.SetName(&name)
 
-	resp, err := h.client.HeadscaleService.HeadscaleServiceGetUser(request)
+	resp, err := h.client.HeadscaleService.HeadscaleServiceListUsers(request)
 	if err != nil {
 		return nil, handleRequestError(err)
 	}
@@ -449,7 +453,13 @@ func (h *HeadscaleService) GetUser(ctx context.Context, name string) (*models.V1
 		return nil, err
 	}
 
-	return resp.Payload.User, nil
+	// Check if any users were returned
+	if len(resp.Payload.Users) == 0 {
+		return nil, fmt.Errorf("user %q not found", name)
+	}
+
+	// Return the first (and presumably only) user
+	return resp.Payload.Users[0], nil
 }
 
 func (h *HeadscaleService) CreateUser(ctx context.Context, name string) (*models.V1User, error) {
@@ -475,7 +485,7 @@ func (h *HeadscaleService) CreateUser(ctx context.Context, name string) (*models
 func (h *HeadscaleService) DeleteUser(ctx context.Context, name string) error {
 	request := headscale_service.NewHeadscaleServiceDeleteUserParams()
 	request.SetContext(ctx)
-	request.SetName(name)
+	request.SetID(name)
 
 	_, err := h.client.HeadscaleService.HeadscaleServiceDeleteUser(request)
 	if err != nil {
@@ -488,7 +498,7 @@ func (h *HeadscaleService) RenameUser(ctx context.Context, oldName string, newNa
 	request := headscale_service.NewHeadscaleServiceRenameUserParams()
 	request.SetContext(ctx)
 	request.SetNewName(newName)
-	request.SetOldName(oldName)
+	request.SetOldID(oldName)
 
 	resp, err := h.client.HeadscaleService.HeadscaleServiceRenameUser(request)
 	if err != nil {

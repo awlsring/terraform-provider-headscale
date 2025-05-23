@@ -17,8 +17,17 @@ import (
 // swagger:model v1CreateUserRequest
 type V1CreateUserRequest struct {
 
+	// display name
+	DisplayName string `json:"displayName,omitempty"`
+
+	// email
+	Email string `json:"email,omitempty"`
+
 	// name
 	Name string `json:"name,omitempty"`
+
+	// picture Url
+	PictureURL string `json:"pictureUrl,omitempty"`
 }
 
 // Validate validates this v1 create user request
