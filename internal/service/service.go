@@ -33,7 +33,8 @@ type Headscale interface {
 	DeleteRoute(ctx context.Context, routeId string) error
 	DisableRoute(ctx context.Context, routeId string) error
 	EnableRoute(ctx context.Context, routeId string) error
-	GetUser(ctx context.Context, userId string) (*models.V1User, error)
+	GetUserById(ctx context.Context, userId string) (*models.V1User, error)
+	GetUserByName(ctx context.Context, userId string) (*models.V1User, error)
 	ListUsers(ctx context.Context) ([]*models.V1User, error)
 	CreateUser(ctx context.Context, name string) (*models.V1User, error)
 	DeleteUser(ctx context.Context, userId string) error
@@ -437,8 +438,31 @@ func (h *HeadscaleService) ListUsers(ctx context.Context) ([]*models.V1User, err
 
 	return resp.Payload.Users, nil
 }
+func (h *HeadscaleService) GetUserById(ctx context.Context, userId string) (*models.V1User, error) {
+	request := headscale_service.NewHeadscaleServiceListUsersParams()
+	request.SetContext(ctx)
+	request.SetID(&userId)
 
-func (h *HeadscaleService) GetUser(ctx context.Context, name string) (*models.V1User, error) {
+	resp, err := h.client.HeadscaleService.HeadscaleServiceListUsers(request)
+	if err != nil {
+		return nil, handleRequestError(err)
+	}
+
+	err = resp.Payload.Validate(strfmt.Default)
+	if err != nil {
+		return nil, err
+	}
+
+	// Check if any users were returned
+	if len(resp.Payload.Users) == 0 {
+		return nil, fmt.Errorf("user %q not found", userId)
+	}
+
+	// Return the first (and presumably only) user
+	return resp.Payload.Users[0], nil
+}
+
+func (h *HeadscaleService) GetUserByName(ctx context.Context, name string) (*models.V1User, error) {
 	request := headscale_service.NewHeadscaleServiceListUsersParams()
 	request.SetContext(ctx)
 	request.SetName(&name)
@@ -482,10 +506,10 @@ func (h *HeadscaleService) CreateUser(ctx context.Context, name string) (*models
 	return resp.Payload.User, nil
 }
 
-func (h *HeadscaleService) DeleteUser(ctx context.Context, name string) error {
+func (h *HeadscaleService) DeleteUser(ctx context.Context, userId string) error {
 	request := headscale_service.NewHeadscaleServiceDeleteUserParams()
 	request.SetContext(ctx)
-	request.SetID(name)
+	request.SetID(userId)
 
 	_, err := h.client.HeadscaleService.HeadscaleServiceDeleteUser(request)
 	if err != nil {
@@ -494,11 +518,11 @@ func (h *HeadscaleService) DeleteUser(ctx context.Context, name string) error {
 	return nil
 }
 
-func (h *HeadscaleService) RenameUser(ctx context.Context, oldName string, newName string) (*models.V1User, error) {
+func (h *HeadscaleService) RenameUser(ctx context.Context, oldId string, newName string) (*models.V1User, error) {
 	request := headscale_service.NewHeadscaleServiceRenameUserParams()
 	request.SetContext(ctx)
 	request.SetNewName(newName)
-	request.SetOldID(oldName)
+	request.SetOldID(oldId)
 
 	resp, err := h.client.HeadscaleService.HeadscaleServiceRenameUser(request)
 	if err != nil {

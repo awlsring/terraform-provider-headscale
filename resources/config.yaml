@@ -314,7 +314,7 @@ dns:
   # node1.example.com
   # This is a legacy option as Headscale has have this wrongly implemented
   # while in upstream Tailscale, the username is not included.
-  use_username_in_magic_dns: false
+  # use_username_in_magic_dns: false
 
 # Unix socket used for the CLI to connect without authentication
 # Note: for production you will want to set this to something like:

@@ -67,7 +67,7 @@ func (d *userDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 	}
 
 	name := state.Name.ValueString()
-	user, err := d.client.GetUser(ctx, name)
+	user, err := d.client.GetUserByName(ctx, name)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to get user.",

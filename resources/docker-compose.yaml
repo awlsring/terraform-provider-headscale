@@ -10,3 +10,7 @@ services:
     ports:
       - 0.0.0.0:8080:8080
       - 0.0.0.0:9090:9090
+networks:
+  headscale-network:
+    driver: bridge
+    name: headscale-test-network

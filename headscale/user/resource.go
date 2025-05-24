@@ -113,12 +113,13 @@ func (r *userResource) Update(ctx context.Context, req resource.UpdateRequest, r
 	}
 
 	oldName := state.Name.ValueString()
+	oldId := state.Id.ValueString()
 	newName := plan.Name.ValueString()
 
 	var user *models.V1User
 	var err error
 	if oldName != newName {
-		user, err = r.client.RenameUser(ctx, oldName, newName)
+		user, err = r.client.RenameUser(ctx, oldId, newName)
 		if err != nil {
 			resp.Diagnostics.AddError(
 				"Error updating user",
@@ -127,7 +128,7 @@ func (r *userResource) Update(ctx context.Context, req resource.UpdateRequest, r
 			return
 		}
 	} else {
-		user, err = r.client.GetUser(ctx, oldName)
+		user, err = r.client.GetUserByName(ctx, oldName)
 		if err != nil {
 			resp.Diagnostics.AddError(
 				"Unable to get user.",
@@ -189,7 +190,7 @@ func (r *userResource) Delete(ctx context.Context, req resource.DeleteRequest, r
 		}
 	}
 
-	err = r.client.DeleteUser(ctx, state.Name.ValueString())
+	err = r.client.DeleteUser(ctx, state.Id.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error deleting user",
@@ -208,7 +209,7 @@ func (r *userResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 	}
 
 	name := state.Name.ValueString()
-	user, err := r.client.GetUser(ctx, name)
+	user, err := r.client.GetUserByName(ctx, name)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to get user.",
@@ -235,7 +236,7 @@ func (r *userResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 func (r *userResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 
-	user, err := r.client.GetUser(ctx, req.ID)
+	user, err := r.client.GetUserById(ctx, req.ID)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to get user.",
