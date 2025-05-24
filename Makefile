@@ -14,7 +14,7 @@ terradocs:
 	go generate
 
 gen:
-	swagger generate client -f models/headscale.25.0.json -A headscale -t ./internal/gen
+	swagger generate client -f models/headscale.25.1.json -A headscale -t ./internal/gen
 	go mod tidy
 
 install:
