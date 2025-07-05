@@ -11,11 +11,19 @@ func Test_PreAuthKeyDataSource(t *testing.T) {
 		ProtoV6ProviderFactories: TestAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: ProviderConfig + `data "headscale_pre_auth_keys" "test" {
-					user = "terraform"
-				  }`,
+				Config: ProviderConfig + `data "headscale_user" "test_user" {
+			  name = "terraform"
+			}
+
+			data "headscale_pre_auth_keys" "test" {
+			  user = data.headscale_user.test_user.id
+			}
+			`,
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("data.headscale_pre_auth_keys.test", "user", "terraform"),
+					resource.TestCheckResourceAttrPair(
+						"data.headscale_pre_auth_keys.test", "user",
+						"data.headscale_user.test_user", "id",
+					),
 				),
 			},
 		},

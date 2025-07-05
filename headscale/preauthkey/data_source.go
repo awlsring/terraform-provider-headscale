@@ -142,7 +142,7 @@ func (d *preAuthKeyDataSource) Read(ctx context.Context, req datasource.ReadRequ
 
 		m := preAuthKeyModel{
 			Id:         types.StringValue(key.ID),
-			User:       types.StringValue(key.User),
+			User:       types.StringValue(key.User.ID),
 			Key:        types.StringValue(key.Key),
 			Reusable:   types.BoolValue(key.Reusable),
 			Ephemeral:  types.BoolValue(key.Ephemeral),

@@ -62,6 +62,8 @@ HeadscaleServiceListPreAuthKeysParams contains all the parameters to send to the
 type HeadscaleServiceListPreAuthKeysParams struct {
 
 	// User.
+	//
+	// Format: uint64
 	User *string
 
 	timeout    time.Duration

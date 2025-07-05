@@ -46,7 +46,7 @@ type V1PreAuthKey struct {
 	Used bool `json:"used,omitempty"`
 
 	// user
-	User string `json:"user,omitempty"`
+	User *V1User `json:"user,omitempty"`
 }
 
 // Validate validates this v1 pre auth key
@@ -58,6 +58,10 @@ func (m *V1PreAuthKey) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateExpiration(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateUser(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -91,8 +95,57 @@ func (m *V1PreAuthKey) validateExpiration(formats strfmt.Registry) error {
 	return nil
 }
 
-// ContextValidate validates this v1 pre auth key based on context it is used
+func (m *V1PreAuthKey) validateUser(formats strfmt.Registry) error {
+	if swag.IsZero(m.User) { // not required
+		return nil
+	}
+
+	if m.User != nil {
+		if err := m.User.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("user")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("user")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+// ContextValidate validate this v1 pre auth key based on the context it is used
 func (m *V1PreAuthKey) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.contextValidateUser(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (m *V1PreAuthKey) contextValidateUser(ctx context.Context, formats strfmt.Registry) error {
+
+	if m.User != nil {
+
+		if swag.IsZero(m.User) { // not required
+			return nil
+		}
+
+		if err := m.User.ContextValidate(ctx, formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("user")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("user")
+			}
+			return err
+		}
+	}
+
 	return nil
 }
 

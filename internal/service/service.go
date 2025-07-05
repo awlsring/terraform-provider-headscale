@@ -23,13 +23,13 @@ type Headscale interface {
 	ExpireDevice(ctx context.Context, deviceId string) (*models.V1Node, error)
 	DeleteDevice(ctx context.Context, deviceId string) error
 	RenameDevice(ctx context.Context, deviceId string, newName string) (*models.V1Node, error)
-	GetDeviceRoutes(ctx context.Context, deviceId string) ([]*models.V1Route, error)
+	GetDeviceRoutes(ctx context.Context, deviceId string) ([]*Route, error)
 	TagDevice(ctx context.Context, deviceId string, tags []string) (*models.V1Node, error)
 	MoveDevice(ctx context.Context, deviceId string, newOwner string) (*models.V1Node, error)
 	ListPreAuthKeys(ctx context.Context, user string) ([]*models.V1PreAuthKey, error)
 	CreatePreAuthKey(ctx context.Context, input CreatePreAuthKeyInput) (*models.V1PreAuthKey, error)
 	ExpirePreAuthKey(ctx context.Context, user string, key string) error
-	ListRoutes(ctx context.Context) ([]*models.V1Route, error)
+	ListRoutes(ctx context.Context) ([]*Route, error)
 	DeleteRoute(ctx context.Context, routeId string) error
 	DisableRoute(ctx context.Context, routeId string) error
 	EnableRoute(ctx context.Context, routeId string) error
@@ -48,6 +48,25 @@ type HeadscaleService struct {
 type ClientConfig struct {
 	Endpoint string
 	Token    string
+}
+
+// Route represents a subnet route advertised by a node.
+type Route struct {
+	ID        string
+	Prefix    string
+	Enabled   bool
+	Node      *models.V1Node
+	CreatedAt strfmt.DateTime
+}
+
+// contains returns true if the provided slice contains the given value.
+func contains(s []string, val string) bool {
+	for _, item := range s {
+		if item == val {
+			return true
+		}
+	}
+	return false
 }
 
 func New(c ClientConfig) (Headscale, error) {
@@ -226,22 +245,22 @@ func (h *HeadscaleService) RenameDevice(ctx context.Context, deviceId string, na
 	return resp.Payload.Node, nil
 }
 
-func (h *HeadscaleService) GetDeviceRoutes(ctx context.Context, deviceId string) ([]*models.V1Route, error) {
-	request := headscale_service.NewHeadscaleServiceGetNodeRoutesParams()
-	request.SetContext(ctx)
-	request.SetNodeID(deviceId)
-
-	resp, err := h.client.HeadscaleService.HeadscaleServiceGetNodeRoutes(request)
-	if err != nil {
-		return nil, handleRequestError(err)
-	}
-
-	err = resp.Payload.Validate(strfmt.Default)
+func (h *HeadscaleService) GetDeviceRoutes(ctx context.Context, deviceId string) ([]*Route, error) {
+	node, err := h.GetDevice(ctx, deviceId)
 	if err != nil {
 		return nil, err
 	}
-
-	return resp.Payload.Routes, nil
+	var routes []*Route
+	for _, prefix := range node.SubnetRoutes {
+		routes = append(routes, &Route{
+			ID:        prefix,
+			Prefix:    prefix,
+			Enabled:   contains(node.ApprovedRoutes, prefix),
+			Node:      node,
+			CreatedAt: node.CreatedAt,
+		})
+	}
+	return routes, nil
 }
 
 func (h *HeadscaleService) TagDevice(ctx context.Context, deviceId string, tags []string) (*models.V1Node, error) {
@@ -367,59 +386,36 @@ func (h *HeadscaleService) ExpirePreAuthKey(ctx context.Context, user string, ke
 	return nil
 }
 
-func (h *HeadscaleService) ListRoutes(ctx context.Context) ([]*models.V1Route, error) {
-	request := headscale_service.NewHeadscaleServiceGetRoutesParams()
-	request.SetContext(ctx)
-
-	resp, err := h.client.HeadscaleService.HeadscaleServiceGetRoutes(request)
-	if err != nil {
-		return nil, handleRequestError(err)
-	}
-
-	err = resp.Payload.Validate(strfmt.Default)
+func (h *HeadscaleService) ListRoutes(ctx context.Context) ([]*Route, error) {
+	nodes, err := h.ListDevices(ctx, nil)
 	if err != nil {
 		return nil, err
 	}
-
-	return resp.Payload.Routes, nil
+	var routes []*Route
+	for _, node := range nodes {
+		for _, prefix := range node.SubnetRoutes {
+			routes = append(routes, &Route{
+				ID:        prefix,
+				Prefix:    prefix,
+				Enabled:   contains(node.ApprovedRoutes, prefix),
+				Node:      node,
+				CreatedAt: node.CreatedAt,
+			})
+		}
+	}
+	return routes, nil
 }
 
 func (h *HeadscaleService) DeleteRoute(ctx context.Context, route string) error {
-	request := headscale_service.NewHeadscaleServiceDeleteRouteParams()
-	request.SetContext(ctx)
-	request.SetRouteID(route)
-
-	_, err := h.client.HeadscaleService.HeadscaleServiceDeleteRoute(request)
-	if err != nil {
-		return handleRequestError(err)
-	}
-	return nil
+	return fmt.Errorf("DeleteRoute is not implemented in this provider version")
 }
 
 func (h *HeadscaleService) DisableRoute(ctx context.Context, route string) error {
-	request := headscale_service.NewHeadscaleServiceDisableRouteParams()
-	request.SetContext(ctx)
-	request.SetRouteID(route)
-
-	_, err := h.client.HeadscaleService.HeadscaleServiceDisableRoute(request)
-	if err != nil {
-		return handleRequestError(err)
-	}
-
-	return nil
+	return fmt.Errorf("DisableRoute is not implemented in this provider version")
 }
 
 func (h *HeadscaleService) EnableRoute(ctx context.Context, route string) error {
-	request := headscale_service.NewHeadscaleServiceEnableRouteParams()
-	request.SetContext(ctx)
-	request.SetRouteID(route)
-
-	_, err := h.client.HeadscaleService.HeadscaleServiceEnableRoute(request)
-	if err != nil {
-		return handleRequestError(err)
-	}
-
-	return nil
+	return fmt.Errorf("EnableRoute is not implemented in this provider version")
 }
 
 func (h *HeadscaleService) ListUsers(ctx context.Context) ([]*models.V1User, error) {

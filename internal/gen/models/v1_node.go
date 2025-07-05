@@ -19,6 +19,12 @@ import (
 // swagger:model v1Node
 type V1Node struct {
 
+	// approved routes
+	ApprovedRoutes []string `json:"approvedRoutes"`
+
+	// available routes
+	AvailableRoutes []string `json:"availableRoutes"`
+
 	// created at
 	// Format: date-time
 	CreatedAt strfmt.DateTime `json:"createdAt,omitempty"`
@@ -66,6 +72,9 @@ type V1Node struct {
 
 	// register method
 	RegisterMethod *V1RegisterMethod `json:"registerMethod,omitempty"`
+
+	// subnet routes
+	SubnetRoutes []string `json:"subnetRoutes"`
 
 	// user
 	User *V1User `json:"user,omitempty"`

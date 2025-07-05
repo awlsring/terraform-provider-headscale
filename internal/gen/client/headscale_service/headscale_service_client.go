@@ -68,13 +68,7 @@ type ClientService interface {
 
 	HeadscaleServiceDeleteNode(params *HeadscaleServiceDeleteNodeParams, opts ...ClientOption) (*HeadscaleServiceDeleteNodeOK, error)
 
-	HeadscaleServiceDeleteRoute(params *HeadscaleServiceDeleteRouteParams, opts ...ClientOption) (*HeadscaleServiceDeleteRouteOK, error)
-
 	HeadscaleServiceDeleteUser(params *HeadscaleServiceDeleteUserParams, opts ...ClientOption) (*HeadscaleServiceDeleteUserOK, error)
-
-	HeadscaleServiceDisableRoute(params *HeadscaleServiceDisableRouteParams, opts ...ClientOption) (*HeadscaleServiceDisableRouteOK, error)
-
-	HeadscaleServiceEnableRoute(params *HeadscaleServiceEnableRouteParams, opts ...ClientOption) (*HeadscaleServiceEnableRouteOK, error)
 
 	HeadscaleServiceExpireAPIKey(params *HeadscaleServiceExpireAPIKeyParams, opts ...ClientOption) (*HeadscaleServiceExpireAPIKeyOK, error)
 
@@ -84,11 +78,7 @@ type ClientService interface {
 
 	HeadscaleServiceGetNode(params *HeadscaleServiceGetNodeParams, opts ...ClientOption) (*HeadscaleServiceGetNodeOK, error)
 
-	HeadscaleServiceGetNodeRoutes(params *HeadscaleServiceGetNodeRoutesParams, opts ...ClientOption) (*HeadscaleServiceGetNodeRoutesOK, error)
-
 	HeadscaleServiceGetPolicy(params *HeadscaleServiceGetPolicyParams, opts ...ClientOption) (*HeadscaleServiceGetPolicyOK, error)
-
-	HeadscaleServiceGetRoutes(params *HeadscaleServiceGetRoutesParams, opts ...ClientOption) (*HeadscaleServiceGetRoutesOK, error)
 
 	HeadscaleServiceListAPIKeys(params *HeadscaleServiceListAPIKeysParams, opts ...ClientOption) (*HeadscaleServiceListAPIKeysOK, error)
 
@@ -105,6 +95,8 @@ type ClientService interface {
 	HeadscaleServiceRenameNode(params *HeadscaleServiceRenameNodeParams, opts ...ClientOption) (*HeadscaleServiceRenameNodeOK, error)
 
 	HeadscaleServiceRenameUser(params *HeadscaleServiceRenameUserParams, opts ...ClientOption) (*HeadscaleServiceRenameUserOK, error)
+
+	HeadscaleServiceSetApprovedRoutes(params *HeadscaleServiceSetApprovedRoutesParams, opts ...ClientOption) (*HeadscaleServiceSetApprovedRoutesOK, error)
 
 	HeadscaleServiceSetPolicy(params *HeadscaleServiceSetPolicyParams, opts ...ClientOption) (*HeadscaleServiceSetPolicyOK, error)
 
@@ -373,43 +365,6 @@ func (a *Client) HeadscaleServiceDeleteNode(params *HeadscaleServiceDeleteNodePa
 }
 
 /*
-HeadscaleServiceDeleteRoute headscale service delete route API
-*/
-func (a *Client) HeadscaleServiceDeleteRoute(params *HeadscaleServiceDeleteRouteParams, opts ...ClientOption) (*HeadscaleServiceDeleteRouteOK, error) {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewHeadscaleServiceDeleteRouteParams()
-	}
-	op := &runtime.ClientOperation{
-		ID:                 "HeadscaleService_DeleteRoute",
-		Method:             "DELETE",
-		PathPattern:        "/api/v1/routes/{routeId}",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http"},
-		Params:             params,
-		Reader:             &HeadscaleServiceDeleteRouteReader{formats: a.formats},
-		Context:            params.Context,
-		Client:             params.HTTPClient,
-	}
-	for _, opt := range opts {
-		opt(op)
-	}
-
-	result, err := a.transport.Submit(op)
-	if err != nil {
-		return nil, err
-	}
-	success, ok := result.(*HeadscaleServiceDeleteRouteOK)
-	if ok {
-		return success, nil
-	}
-	// unexpected success response
-	unexpectedSuccess := result.(*HeadscaleServiceDeleteRouteDefault)
-	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
-}
-
-/*
 HeadscaleServiceDeleteUser headscale service delete user API
 */
 func (a *Client) HeadscaleServiceDeleteUser(params *HeadscaleServiceDeleteUserParams, opts ...ClientOption) (*HeadscaleServiceDeleteUserOK, error) {
@@ -443,80 +398,6 @@ func (a *Client) HeadscaleServiceDeleteUser(params *HeadscaleServiceDeleteUserPa
 	}
 	// unexpected success response
 	unexpectedSuccess := result.(*HeadscaleServiceDeleteUserDefault)
-	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
-}
-
-/*
-HeadscaleServiceDisableRoute headscale service disable route API
-*/
-func (a *Client) HeadscaleServiceDisableRoute(params *HeadscaleServiceDisableRouteParams, opts ...ClientOption) (*HeadscaleServiceDisableRouteOK, error) {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewHeadscaleServiceDisableRouteParams()
-	}
-	op := &runtime.ClientOperation{
-		ID:                 "HeadscaleService_DisableRoute",
-		Method:             "POST",
-		PathPattern:        "/api/v1/routes/{routeId}/disable",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http"},
-		Params:             params,
-		Reader:             &HeadscaleServiceDisableRouteReader{formats: a.formats},
-		Context:            params.Context,
-		Client:             params.HTTPClient,
-	}
-	for _, opt := range opts {
-		opt(op)
-	}
-
-	result, err := a.transport.Submit(op)
-	if err != nil {
-		return nil, err
-	}
-	success, ok := result.(*HeadscaleServiceDisableRouteOK)
-	if ok {
-		return success, nil
-	}
-	// unexpected success response
-	unexpectedSuccess := result.(*HeadscaleServiceDisableRouteDefault)
-	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
-}
-
-/*
-HeadscaleServiceEnableRoute headscale service enable route API
-*/
-func (a *Client) HeadscaleServiceEnableRoute(params *HeadscaleServiceEnableRouteParams, opts ...ClientOption) (*HeadscaleServiceEnableRouteOK, error) {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewHeadscaleServiceEnableRouteParams()
-	}
-	op := &runtime.ClientOperation{
-		ID:                 "HeadscaleService_EnableRoute",
-		Method:             "POST",
-		PathPattern:        "/api/v1/routes/{routeId}/enable",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http"},
-		Params:             params,
-		Reader:             &HeadscaleServiceEnableRouteReader{formats: a.formats},
-		Context:            params.Context,
-		Client:             params.HTTPClient,
-	}
-	for _, opt := range opts {
-		opt(op)
-	}
-
-	result, err := a.transport.Submit(op)
-	if err != nil {
-		return nil, err
-	}
-	success, ok := result.(*HeadscaleServiceEnableRouteOK)
-	if ok {
-		return success, nil
-	}
-	// unexpected success response
-	unexpectedSuccess := result.(*HeadscaleServiceEnableRouteDefault)
 	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
 }
 
@@ -669,43 +550,6 @@ func (a *Client) HeadscaleServiceGetNode(params *HeadscaleServiceGetNodeParams, 
 }
 
 /*
-HeadscaleServiceGetNodeRoutes headscale service get node routes API
-*/
-func (a *Client) HeadscaleServiceGetNodeRoutes(params *HeadscaleServiceGetNodeRoutesParams, opts ...ClientOption) (*HeadscaleServiceGetNodeRoutesOK, error) {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewHeadscaleServiceGetNodeRoutesParams()
-	}
-	op := &runtime.ClientOperation{
-		ID:                 "HeadscaleService_GetNodeRoutes",
-		Method:             "GET",
-		PathPattern:        "/api/v1/node/{nodeId}/routes",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http"},
-		Params:             params,
-		Reader:             &HeadscaleServiceGetNodeRoutesReader{formats: a.formats},
-		Context:            params.Context,
-		Client:             params.HTTPClient,
-	}
-	for _, opt := range opts {
-		opt(op)
-	}
-
-	result, err := a.transport.Submit(op)
-	if err != nil {
-		return nil, err
-	}
-	success, ok := result.(*HeadscaleServiceGetNodeRoutesOK)
-	if ok {
-		return success, nil
-	}
-	// unexpected success response
-	unexpectedSuccess := result.(*HeadscaleServiceGetNodeRoutesDefault)
-	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
-}
-
-/*
 HeadscaleServiceGetPolicy policies start
 */
 func (a *Client) HeadscaleServiceGetPolicy(params *HeadscaleServiceGetPolicyParams, opts ...ClientOption) (*HeadscaleServiceGetPolicyOK, error) {
@@ -739,43 +583,6 @@ func (a *Client) HeadscaleServiceGetPolicy(params *HeadscaleServiceGetPolicyPara
 	}
 	// unexpected success response
 	unexpectedSuccess := result.(*HeadscaleServiceGetPolicyDefault)
-	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
-}
-
-/*
-HeadscaleServiceGetRoutes routes start
-*/
-func (a *Client) HeadscaleServiceGetRoutes(params *HeadscaleServiceGetRoutesParams, opts ...ClientOption) (*HeadscaleServiceGetRoutesOK, error) {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewHeadscaleServiceGetRoutesParams()
-	}
-	op := &runtime.ClientOperation{
-		ID:                 "HeadscaleService_GetRoutes",
-		Method:             "GET",
-		PathPattern:        "/api/v1/routes",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http"},
-		Params:             params,
-		Reader:             &HeadscaleServiceGetRoutesReader{formats: a.formats},
-		Context:            params.Context,
-		Client:             params.HTTPClient,
-	}
-	for _, opt := range opts {
-		opt(op)
-	}
-
-	result, err := a.transport.Submit(op)
-	if err != nil {
-		return nil, err
-	}
-	success, ok := result.(*HeadscaleServiceGetRoutesOK)
-	if ok {
-		return success, nil
-	}
-	// unexpected success response
-	unexpectedSuccess := result.(*HeadscaleServiceGetRoutesDefault)
 	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
 }
 
@@ -1072,6 +879,43 @@ func (a *Client) HeadscaleServiceRenameUser(params *HeadscaleServiceRenameUserPa
 	}
 	// unexpected success response
 	unexpectedSuccess := result.(*HeadscaleServiceRenameUserDefault)
+	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
+}
+
+/*
+HeadscaleServiceSetApprovedRoutes headscale service set approved routes API
+*/
+func (a *Client) HeadscaleServiceSetApprovedRoutes(params *HeadscaleServiceSetApprovedRoutesParams, opts ...ClientOption) (*HeadscaleServiceSetApprovedRoutesOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewHeadscaleServiceSetApprovedRoutesParams()
+	}
+	op := &runtime.ClientOperation{
+		ID:                 "HeadscaleService_SetApprovedRoutes",
+		Method:             "POST",
+		PathPattern:        "/api/v1/node/{nodeId}/approve_routes",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http"},
+		Params:             params,
+		Reader:             &HeadscaleServiceSetApprovedRoutesReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*HeadscaleServiceSetApprovedRoutesOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	unexpectedSuccess := result.(*HeadscaleServiceSetApprovedRoutesDefault)
 	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
 }
 

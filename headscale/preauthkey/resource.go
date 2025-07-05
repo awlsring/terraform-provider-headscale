@@ -201,7 +201,7 @@ func (r *preAuthKeyResource) Create(ctx context.Context, req resource.CreateRequ
 	m := preAuthKeyResourceModel{
 		TimeToExpire: plan.TimeToExpire,
 		Id:           types.StringValue(key.ID),
-		User:         types.StringValue(key.User),
+		User:         types.StringValue(key.User.ID),
 		Key:          types.StringValue(key.Key),
 		Reusable:     types.BoolValue(key.Reusable),
 		Ephemeral:    types.BoolValue(key.Ephemeral),
@@ -291,7 +291,7 @@ func (r *preAuthKeyResource) Read(ctx context.Context, req resource.ReadRequest,
 			m = preAuthKeyResourceModel{
 				TimeToExpire: state.TimeToExpire,
 				Id:           types.StringValue(key.ID),
-				User:         types.StringValue(key.User),
+				User:         types.StringValue(key.User.ID),
 				Key:          types.StringValue(key.Key),
 				Reusable:     types.BoolValue(key.Reusable),
 				Ephemeral:    types.BoolValue(key.Ephemeral),
