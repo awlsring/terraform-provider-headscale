@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/awlsring/terraform-provider-headscale/internal/service"
+	"github.com/awlsring/terraform-provider-headscale/internal/utils"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -39,12 +40,29 @@ func (d *userDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, r
 		Description: "The user data source allows you to get information about a user registered on the Headscale instance.",
 		Attributes: map[string]schema.Attribute{
 			"name": schema.StringAttribute{
-				Required:    true,
+				Optional:    true,
+				Computed:    true,
 				Description: "The name of the user.",
 			},
+			"display_name": schema.StringAttribute{
+				Optional:    true,
+				Computed:    true,
+				Description: "The display name of the user.",
+			},
 			"id": schema.StringAttribute{
+				Optional:    true,
 				Computed:    true,
 				Description: "The user's id.",
+			},
+			"email": schema.StringAttribute{
+				Optional:    true,
+				Computed:    true,
+				Description: "The user's email address.",
+			},
+			"profile_picture_url": schema.StringAttribute{
+				Optional:    true,
+				Computed:    true,
+				Description: "The URL of the user's profile picture.",
 			},
 			"force_delete": schema.BoolAttribute{
 				Optional:            true,
@@ -66,8 +84,11 @@ func (d *userDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 		return
 	}
 
-	name := state.Name.ValueString()
-	user, err := d.client.GetUser(ctx, name)
+	user, err := d.client.GetUser(ctx, service.GetUserInput{
+		Name:  utils.StrToPtr(state.Name.ValueString()),
+		ID:    utils.StrToPtr(state.ID.ValueString()),
+		Email: utils.StrToPtr(state.Email.ValueString()),
+	})
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to get user.",
@@ -78,9 +99,25 @@ func (d *userDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 	}
 
 	m := userModel{
-		Id:        types.StringValue(user.ID),
+		ID:        types.StringValue(user.ID),
 		Name:      types.StringValue(user.Name),
 		CreatedAt: types.StringValue(user.CreatedAt.DeepCopy().String()),
+	}
+
+	if user.DisplayName != "" {
+		m.DisplayName = types.StringValue(user.DisplayName)
+	} else {
+		m.DisplayName = types.StringNull()
+	}
+	if user.Email != "" {
+		m.Email = types.StringValue(user.Email)
+	} else {
+		m.Email = types.StringNull()
+	}
+	if user.ProfilePicURL != "" {
+		m.ProfilePictureURL = types.StringValue(user.ProfilePicURL)
+	} else {
+		m.ProfilePictureURL = types.StringNull()
 	}
 
 	diags := resp.State.Set(ctx, &m)

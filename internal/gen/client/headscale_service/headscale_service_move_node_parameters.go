@@ -14,6 +14,8 @@ import (
 	"github.com/go-openapi/runtime"
 	cr "github.com/go-openapi/runtime/client"
 	"github.com/go-openapi/strfmt"
+
+	"github.com/awlsring/terraform-provider-headscale/internal/gen/models"
 )
 
 // NewHeadscaleServiceMoveNodeParams creates a new HeadscaleServiceMoveNodeParams object,
@@ -61,13 +63,13 @@ HeadscaleServiceMoveNodeParams contains all the parameters to send to the API en
 */
 type HeadscaleServiceMoveNodeParams struct {
 
+	// Body.
+	Body *models.HeadscaleServiceMoveNodeBody
+
 	// NodeID.
 	//
 	// Format: uint64
 	NodeID string
-
-	// User.
-	User *string
 
 	timeout    time.Duration
 	Context    context.Context
@@ -122,6 +124,17 @@ func (o *HeadscaleServiceMoveNodeParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
+// WithBody adds the body to the headscale service move node params
+func (o *HeadscaleServiceMoveNodeParams) WithBody(body *models.HeadscaleServiceMoveNodeBody) *HeadscaleServiceMoveNodeParams {
+	o.SetBody(body)
+	return o
+}
+
+// SetBody adds the body to the headscale service move node params
+func (o *HeadscaleServiceMoveNodeParams) SetBody(body *models.HeadscaleServiceMoveNodeBody) {
+	o.Body = body
+}
+
 // WithNodeID adds the nodeID to the headscale service move node params
 func (o *HeadscaleServiceMoveNodeParams) WithNodeID(nodeID string) *HeadscaleServiceMoveNodeParams {
 	o.SetNodeID(nodeID)
@@ -133,17 +146,6 @@ func (o *HeadscaleServiceMoveNodeParams) SetNodeID(nodeID string) {
 	o.NodeID = nodeID
 }
 
-// WithUser adds the user to the headscale service move node params
-func (o *HeadscaleServiceMoveNodeParams) WithUser(user *string) *HeadscaleServiceMoveNodeParams {
-	o.SetUser(user)
-	return o
-}
-
-// SetUser adds the user to the headscale service move node params
-func (o *HeadscaleServiceMoveNodeParams) SetUser(user *string) {
-	o.User = user
-}
-
 // WriteToRequest writes these params to a swagger request
 func (o *HeadscaleServiceMoveNodeParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Registry) error {
 
@@ -151,27 +153,15 @@ func (o *HeadscaleServiceMoveNodeParams) WriteToRequest(r runtime.ClientRequest,
 		return err
 	}
 	var res []error
+	if o.Body != nil {
+		if err := r.SetBodyParam(o.Body); err != nil {
+			return err
+		}
+	}
 
 	// path param nodeId
 	if err := r.SetPathParam("nodeId", o.NodeID); err != nil {
 		return err
-	}
-
-	if o.User != nil {
-
-		// query param user
-		var qrUser string
-
-		if o.User != nil {
-			qrUser = *o.User
-		}
-		qUser := qrUser
-		if qUser != "" {
-
-			if err := r.SetQueryParam("user", qUser); err != nil {
-				return err
-			}
-		}
 	}
 
 	if len(res) > 0 {

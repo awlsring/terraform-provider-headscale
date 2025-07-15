@@ -60,6 +60,18 @@ HeadscaleServiceListUsersParams contains all the parameters to send to the API e
 	Typically these are written to a http.Request.
 */
 type HeadscaleServiceListUsersParams struct {
+
+	// Email.
+	Email *string
+
+	// ID.
+	//
+	// Format: uint64
+	ID *string
+
+	// Name.
+	Name *string
+
 	timeout    time.Duration
 	Context    context.Context
 	HTTPClient *http.Client
@@ -113,6 +125,39 @@ func (o *HeadscaleServiceListUsersParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
+// WithEmail adds the email to the headscale service list users params
+func (o *HeadscaleServiceListUsersParams) WithEmail(email *string) *HeadscaleServiceListUsersParams {
+	o.SetEmail(email)
+	return o
+}
+
+// SetEmail adds the email to the headscale service list users params
+func (o *HeadscaleServiceListUsersParams) SetEmail(email *string) {
+	o.Email = email
+}
+
+// WithID adds the id to the headscale service list users params
+func (o *HeadscaleServiceListUsersParams) WithID(id *string) *HeadscaleServiceListUsersParams {
+	o.SetID(id)
+	return o
+}
+
+// SetID adds the id to the headscale service list users params
+func (o *HeadscaleServiceListUsersParams) SetID(id *string) {
+	o.ID = id
+}
+
+// WithName adds the name to the headscale service list users params
+func (o *HeadscaleServiceListUsersParams) WithName(name *string) *HeadscaleServiceListUsersParams {
+	o.SetName(name)
+	return o
+}
+
+// SetName adds the name to the headscale service list users params
+func (o *HeadscaleServiceListUsersParams) SetName(name *string) {
+	o.Name = name
+}
+
 // WriteToRequest writes these params to a swagger request
 func (o *HeadscaleServiceListUsersParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Registry) error {
 
@@ -120,6 +165,57 @@ func (o *HeadscaleServiceListUsersParams) WriteToRequest(r runtime.ClientRequest
 		return err
 	}
 	var res []error
+
+	if o.Email != nil {
+
+		// query param email
+		var qrEmail string
+
+		if o.Email != nil {
+			qrEmail = *o.Email
+		}
+		qEmail := qrEmail
+		if qEmail != "" {
+
+			if err := r.SetQueryParam("email", qEmail); err != nil {
+				return err
+			}
+		}
+	}
+
+	if o.ID != nil {
+
+		// query param id
+		var qrID string
+
+		if o.ID != nil {
+			qrID = *o.ID
+		}
+		qID := qrID
+		if qID != "" {
+
+			if err := r.SetQueryParam("id", qID); err != nil {
+				return err
+			}
+		}
+	}
+
+	if o.Name != nil {
+
+		// query param name
+		var qrName string
+
+		if o.Name != nil {
+			qrName = *o.Name
+		}
+		qName := qrName
+		if qName != "" {
+
+			if err := r.SetQueryParam("name", qName); err != nil {
+				return err
+			}
+		}
+	}
 
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)

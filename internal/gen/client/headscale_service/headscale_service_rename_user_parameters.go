@@ -64,8 +64,10 @@ type HeadscaleServiceRenameUserParams struct {
 	// NewName.
 	NewName string
 
-	// OldName.
-	OldName string
+	// OldID.
+	//
+	// Format: uint64
+	OldID string
 
 	timeout    time.Duration
 	Context    context.Context
@@ -131,15 +133,15 @@ func (o *HeadscaleServiceRenameUserParams) SetNewName(newName string) {
 	o.NewName = newName
 }
 
-// WithOldName adds the oldName to the headscale service rename user params
-func (o *HeadscaleServiceRenameUserParams) WithOldName(oldName string) *HeadscaleServiceRenameUserParams {
-	o.SetOldName(oldName)
+// WithOldID adds the oldID to the headscale service rename user params
+func (o *HeadscaleServiceRenameUserParams) WithOldID(oldID string) *HeadscaleServiceRenameUserParams {
+	o.SetOldID(oldID)
 	return o
 }
 
-// SetOldName adds the oldName to the headscale service rename user params
-func (o *HeadscaleServiceRenameUserParams) SetOldName(oldName string) {
-	o.OldName = oldName
+// SetOldID adds the oldId to the headscale service rename user params
+func (o *HeadscaleServiceRenameUserParams) SetOldID(oldID string) {
+	o.OldID = oldID
 }
 
 // WriteToRequest writes these params to a swagger request
@@ -155,8 +157,8 @@ func (o *HeadscaleServiceRenameUserParams) WriteToRequest(r runtime.ClientReques
 		return err
 	}
 
-	// path param oldName
-	if err := r.SetPathParam("oldName", o.OldName); err != nil {
+	// path param oldId
+	if err := r.SetPathParam("oldId", o.OldID); err != nil {
 		return err
 	}
 

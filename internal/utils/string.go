@@ -18,3 +18,10 @@ func CreateUUID() string {
 	}
 	return val
 }
+
+func StrToPtr(s string) *string {
+	if s == "" {
+		return nil
+	}
+	return &s
+}

@@ -90,8 +90,6 @@ type ClientService interface {
 
 	HeadscaleServiceGetRoutes(params *HeadscaleServiceGetRoutesParams, opts ...ClientOption) (*HeadscaleServiceGetRoutesOK, error)
 
-	HeadscaleServiceGetUser(params *HeadscaleServiceGetUserParams, opts ...ClientOption) (*HeadscaleServiceGetUserOK, error)
-
 	HeadscaleServiceListAPIKeys(params *HeadscaleServiceListAPIKeysParams, opts ...ClientOption) (*HeadscaleServiceListAPIKeysOK, error)
 
 	HeadscaleServiceListNodes(params *HeadscaleServiceListNodesParams, opts ...ClientOption) (*HeadscaleServiceListNodesOK, error)
@@ -227,7 +225,7 @@ func (a *Client) HeadscaleServiceCreatePreAuthKey(params *HeadscaleServiceCreate
 }
 
 /*
-HeadscaleServiceCreateUser headscale service create user API
+HeadscaleServiceCreateUser users start
 */
 func (a *Client) HeadscaleServiceCreateUser(params *HeadscaleServiceCreateUserParams, opts ...ClientOption) (*HeadscaleServiceCreateUserOK, error) {
 	// TODO: Validate the params before sending
@@ -422,7 +420,7 @@ func (a *Client) HeadscaleServiceDeleteUser(params *HeadscaleServiceDeleteUserPa
 	op := &runtime.ClientOperation{
 		ID:                 "HeadscaleService_DeleteUser",
 		Method:             "DELETE",
-		PathPattern:        "/api/v1/user/{name}",
+		PathPattern:        "/api/v1/user/{id}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http"},
@@ -782,43 +780,6 @@ func (a *Client) HeadscaleServiceGetRoutes(params *HeadscaleServiceGetRoutesPara
 }
 
 /*
-HeadscaleServiceGetUser users start
-*/
-func (a *Client) HeadscaleServiceGetUser(params *HeadscaleServiceGetUserParams, opts ...ClientOption) (*HeadscaleServiceGetUserOK, error) {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewHeadscaleServiceGetUserParams()
-	}
-	op := &runtime.ClientOperation{
-		ID:                 "HeadscaleService_GetUser",
-		Method:             "GET",
-		PathPattern:        "/api/v1/user/{name}",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http"},
-		Params:             params,
-		Reader:             &HeadscaleServiceGetUserReader{formats: a.formats},
-		Context:            params.Context,
-		Client:             params.HTTPClient,
-	}
-	for _, opt := range opts {
-		opt(op)
-	}
-
-	result, err := a.transport.Submit(op)
-	if err != nil {
-		return nil, err
-	}
-	success, ok := result.(*HeadscaleServiceGetUserOK)
-	if ok {
-		return success, nil
-	}
-	// unexpected success response
-	unexpectedSuccess := result.(*HeadscaleServiceGetUserDefault)
-	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
-}
-
-/*
 HeadscaleServiceListAPIKeys headscale service list Api keys API
 */
 func (a *Client) HeadscaleServiceListAPIKeys(params *HeadscaleServiceListAPIKeysParams, opts ...ClientOption) (*HeadscaleServiceListAPIKeysOK, error) {
@@ -1088,7 +1049,7 @@ func (a *Client) HeadscaleServiceRenameUser(params *HeadscaleServiceRenameUserPa
 	op := &runtime.ClientOperation{
 		ID:                 "HeadscaleService_RenameUser",
 		Method:             "POST",
-		PathPattern:        "/api/v1/user/{oldName}/rename/{newName}",
+		PathPattern:        "/api/v1/user/{oldId}/rename/{newName}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http"},

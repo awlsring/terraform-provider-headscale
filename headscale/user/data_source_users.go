@@ -55,6 +55,18 @@ func (d *usersDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, 
 							Computed:    true,
 							Description: "The user's id.",
 						},
+						"display_name": schema.StringAttribute{
+							Computed:    true,
+							Description: "The display name of the user.",
+						},
+						"email": schema.StringAttribute{
+							Computed:    true,
+							Description: "The user's email address.",
+						},
+						"profile_picture_url": schema.StringAttribute{
+							Computed:    true,
+							Description: "The URL of the user's profile picture.",
+						},
 						"created_at": schema.StringAttribute{
 							Computed:    true,
 							Description: "The time the user entry was created.",
@@ -73,7 +85,7 @@ func (d *usersDataSource) Read(ctx context.Context, req datasource.ReadRequest, 
 		return
 	}
 
-	state.Id = types.StringValue(utils.CreateUUID())
+	state.ID = types.StringValue(utils.CreateUUID())
 
 	users, err := d.client.ListUsers(ctx)
 	if err != nil {
@@ -86,10 +98,26 @@ func (d *usersDataSource) Read(ctx context.Context, req datasource.ReadRequest, 
 	}
 
 	for _, user := range users {
-		m := userModel{
-			Id:        types.StringValue(user.ID),
+		m := userModelList{
+			ID:        types.StringValue(user.ID),
 			Name:      types.StringValue(user.Name),
 			CreatedAt: types.StringValue(user.CreatedAt.DeepCopy().String()),
+		}
+
+		if user.DisplayName != "" {
+			m.DisplayName = types.StringValue(user.DisplayName)
+		} else {
+			m.DisplayName = types.StringNull()
+		}
+		if user.Email != "" {
+			m.Email = types.StringValue(user.Email)
+		} else {
+			m.Email = types.StringNull()
+		}
+		if user.ProfilePicURL != "" {
+			m.ProfilePictureURL = types.StringValue(user.ProfilePicURL)
+		} else {
+			m.ProfilePictureURL = types.StringNull()
 		}
 
 		state.Users = append(state.Users, m)

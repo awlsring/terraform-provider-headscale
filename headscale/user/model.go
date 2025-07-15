@@ -1,15 +1,29 @@
 package user
 
-import "github.com/hashicorp/terraform-plugin-framework/types"
+import (
+	"github.com/hashicorp/terraform-plugin-framework/types"
+)
 
 type userModel struct {
-	Id          types.String `tfsdk:"id"`
-	ForceDelete types.Bool   `tfsdk:"force_delete"`
-	Name        types.String `tfsdk:"name"`
-	CreatedAt   types.String `tfsdk:"created_at"`
+	ID                types.String `tfsdk:"id"`
+	Name              types.String `tfsdk:"name"`
+	DisplayName       types.String `tfsdk:"display_name"`
+	Email             types.String `tfsdk:"email"`
+	ProfilePictureURL types.String `tfsdk:"profile_picture_url"`
+	CreatedAt         types.String `tfsdk:"created_at"`
+	ForceDelete       types.Bool   `tfsdk:"force_delete"`
+}
+
+type userModelList struct {
+	ID                types.String `tfsdk:"id"`
+	Name              types.String `tfsdk:"name"`
+	DisplayName       types.String `tfsdk:"display_name"`
+	Email             types.String `tfsdk:"email"`
+	ProfilePictureURL types.String `tfsdk:"profile_picture_url"`
+	CreatedAt         types.String `tfsdk:"created_at"`
 }
 
 type dataSourceUsersModel struct {
-	Id    types.String `tfsdk:"id"`
-	Users []userModel  `tfsdk:"users"`
+	ID    types.String    `tfsdk:"id"`
+	Users []userModelList `tfsdk:"users"`
 }

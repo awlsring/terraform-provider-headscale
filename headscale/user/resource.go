@@ -5,6 +5,7 @@ import (
 
 	"github.com/awlsring/terraform-provider-headscale/internal/gen/models"
 	"github.com/awlsring/terraform-provider-headscale/internal/service"
+	"github.com/awlsring/terraform-provider-headscale/internal/utils"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -46,6 +47,18 @@ func (d *userResource) Schema(_ context.Context, _ resource.SchemaRequest, resp 
 				Required:    true,
 				Description: "The name of the user.",
 			},
+			"display_name": schema.StringAttribute{
+				Optional:    true,
+				Description: "The display name of the user.",
+			},
+			"email": schema.StringAttribute{
+				Optional:    true,
+				Description: "The email address of the user.",
+			},
+			"profile_picture_url": schema.StringAttribute{
+				Optional:    true,
+				Description: "The URL of the user's profile picture.",
+			},
 			"force_delete": schema.BoolAttribute{
 				Optional:            true,
 				Computed:            true,
@@ -74,7 +87,12 @@ func (r *userResource) Create(ctx context.Context, req resource.CreateRequest, r
 
 	userName := plan.Name.ValueString()
 
-	user, err := r.client.CreateUser(ctx, userName)
+	user, err := r.client.CreateUser(ctx, service.CreateUserInput{
+		Name:        userName,
+		Email:       plan.Email.ValueString(),
+		DisplayName: plan.DisplayName.ValueString(),
+		PictureURL:  plan.ProfilePictureURL.ValueString(),
+	})
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error creating user",
@@ -84,10 +102,20 @@ func (r *userResource) Create(ctx context.Context, req resource.CreateRequest, r
 	}
 
 	m := userModel{
-		Id:          types.StringValue(user.ID),
+		ID:          types.StringValue(user.ID),
 		Name:        types.StringValue(user.Name),
 		ForceDelete: types.BoolValue(plan.ForceDelete.ValueBool()),
 		CreatedAt:   types.StringValue(user.CreatedAt.DeepCopy().String()),
+	}
+
+	if !plan.DisplayName.IsNull() {
+		m.DisplayName = types.StringValue(plan.DisplayName.ValueString())
+	}
+	if !plan.Email.IsNull() {
+		m.Email = types.StringValue(plan.Email.ValueString())
+	}
+	if !plan.ProfilePictureURL.IsNull() {
+		m.ProfilePictureURL = types.StringValue(plan.ProfilePictureURL.ValueString())
 	}
 
 	diags = resp.State.Set(ctx, &m)
@@ -112,13 +140,27 @@ func (r *userResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		return
 	}
 
+	checkIfInvalidParameterChanged := func(parameter string, changed bool) {
+		if changed {
+			resp.Diagnostics.AddError(
+				"Invalid Parameter Change",
+				"Changing the "+parameter+" of a user is not allowed. Please create a new user instead.",
+			)
+			return
+		}
+	}
+
+	checkIfInvalidParameterChanged("DisplayName", state.DisplayName.ValueString() != plan.DisplayName.ValueString())
+	checkIfInvalidParameterChanged("Email", state.Email.ValueString() != plan.Email.ValueString())
+	checkIfInvalidParameterChanged("ProfilePictureURL", state.ProfilePictureURL.ValueString() != plan.ProfilePictureURL.ValueString())
+
 	oldName := state.Name.ValueString()
 	newName := plan.Name.ValueString()
 
 	var user *models.V1User
 	var err error
 	if oldName != newName {
-		user, err = r.client.RenameUser(ctx, oldName, newName)
+		user, err = r.client.RenameUser(ctx, newName, state.ID.ValueString())
 		if err != nil {
 			resp.Diagnostics.AddError(
 				"Error updating user",
@@ -127,7 +169,9 @@ func (r *userResource) Update(ctx context.Context, req resource.UpdateRequest, r
 			return
 		}
 	} else {
-		user, err = r.client.GetUser(ctx, oldName)
+		user, err = r.client.GetUser(ctx, service.GetUserInput{
+			ID: utils.StrToPtr(state.ID.ValueString()),
+		})
 		if err != nil {
 			resp.Diagnostics.AddError(
 				"Unable to get user.",
@@ -139,10 +183,13 @@ func (r *userResource) Update(ctx context.Context, req resource.UpdateRequest, r
 	}
 
 	m := userModel{
-		Id:          types.StringValue(user.ID),
-		Name:        types.StringValue(user.Name),
-		ForceDelete: types.BoolValue(plan.ForceDelete.ValueBool()),
-		CreatedAt:   types.StringValue(user.CreatedAt.DeepCopy().String()),
+		ID:                types.StringValue(user.ID),
+		Name:              types.StringValue(user.Name),
+		DisplayName:       state.DisplayName,
+		Email:             state.Email,
+		ProfilePictureURL: state.ProfilePictureURL,
+		ForceDelete:       plan.ForceDelete,
+		CreatedAt:         types.StringValue(user.CreatedAt.DeepCopy().String()),
 	}
 
 	diags = resp.State.Set(ctx, &m)
@@ -189,7 +236,7 @@ func (r *userResource) Delete(ctx context.Context, req resource.DeleteRequest, r
 		}
 	}
 
-	err = r.client.DeleteUser(ctx, state.Name.ValueString())
+	err = r.client.DeleteUser(ctx, state.ID.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error deleting user",
@@ -207,8 +254,11 @@ func (r *userResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 		return
 	}
 
-	name := state.Name.ValueString()
-	user, err := r.client.GetUser(ctx, name)
+	user, err := r.client.GetUser(ctx, service.GetUserInput{
+		Name:  utils.StrToPtr(state.Name.ValueString()),
+		ID:    utils.StrToPtr(state.ID.ValueString()),
+		Email: utils.StrToPtr(state.Email.ValueString()),
+	})
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to get user.",
@@ -219,10 +269,20 @@ func (r *userResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 	}
 
 	m := userModel{
-		Id:          types.StringValue(user.ID),
+		ID:          types.StringValue(user.ID),
 		Name:        types.StringValue(user.Name),
-		ForceDelete: types.BoolValue(state.ForceDelete.ValueBool()),
+		ForceDelete: state.ForceDelete,
 		CreatedAt:   types.StringValue(user.CreatedAt.DeepCopy().String()),
+	}
+
+	if user.DisplayName != "" {
+		m.DisplayName = types.StringValue(user.DisplayName)
+	}
+	if user.Email != "" {
+		m.Email = types.StringValue(user.Email)
+	}
+	if user.ProfilePicURL != "" {
+		m.ProfilePictureURL = types.StringValue(user.ProfilePicURL)
 	}
 
 	diags = resp.State.Set(ctx, &m)
@@ -235,7 +295,9 @@ func (r *userResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 func (r *userResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 
-	user, err := r.client.GetUser(ctx, req.ID)
+	user, err := r.client.GetUser(ctx, service.GetUserInput{
+		ID: utils.StrToPtr(req.ID),
+	})
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to get user.",
@@ -246,10 +308,20 @@ func (r *userResource) ImportState(ctx context.Context, req resource.ImportState
 	}
 
 	m := userModel{
-		Id:          types.StringValue(user.ID),
+		ID:          types.StringValue(user.ID),
 		Name:        types.StringValue(user.Name),
 		ForceDelete: types.BoolValue(false),
 		CreatedAt:   types.StringValue(user.CreatedAt.DeepCopy().String()),
+	}
+
+	if user.DisplayName != "" {
+		m.DisplayName = types.StringValue(user.DisplayName)
+	}
+	if user.Email != "" {
+		m.Email = types.StringValue(user.Email)
+	}
+	if user.ProfilePicURL != "" {
+		m.ProfilePictureURL = types.StringValue(user.ProfilePicURL)
 	}
 
 	diags := resp.State.Set(ctx, &m)

@@ -3,6 +3,7 @@ HOSTNAME=github.com
 NAMESPACE=awlsring
 NAME=headscale
 BINARY=terraform-provider-${NAME}
+HEADSCALE_VERSION=25.0
 
 default: gen install terradocs
 
@@ -14,7 +15,7 @@ terradocs:
 	go generate
 
 gen:
-	swagger generate client -f models/headscale.23.0.json -A headscale -t ./internal/gen
+	swagger generate client -f models/headscale.$(HEADSCALE_VERSION).json -A headscale -t ./internal/gen
 	go mod tidy
 
 install:
