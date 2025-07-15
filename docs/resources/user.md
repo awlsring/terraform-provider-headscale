@@ -28,7 +28,10 @@ resource "headscale_user" "terraform_user" {
 
 ### Optional
 
+- `display_name` (String) The display name of the user.
+- `email` (String) The email address of the user.
 - `force_delete` (Boolean) If the user should be deleted even if it has nodes attached to it. Defaults to `false`.
+- `profile_picture_url` (String) The URL of the user's profile picture.
 
 ### Read-Only
 

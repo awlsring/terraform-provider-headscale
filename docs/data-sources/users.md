@@ -31,5 +31,8 @@ data "headscale_users" "all" {}
 Read-Only:
 
 - `created_at` (String) The time the user entry was created.
+- `display_name` (String) The display name of the user.
+- `email` (String) The user's email address.
 - `id` (String) The user's id.
 - `name` (String) The name of the user.
+- `profile_picture_url` (String) The URL of the user's profile picture.
