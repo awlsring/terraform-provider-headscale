@@ -11,10 +11,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-const (
-	defaultMininalPolicy = `"{"acls":[{"action":"accept"}]}"`
-)
-
 var (
 	_ datasource.DataSource              = &policyDataSource{}
 	_ datasource.DataSourceWithConfigure = &policyDataSource{}

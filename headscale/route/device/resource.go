@@ -86,12 +86,6 @@ func (r *deviceRoutesResource) Create(ctx context.Context, req resource.CreateRe
 		return
 	}
 
-	rr := []string{}
-	for _, r := range routes.Routes.Elements() {
-		conv := r.(types.String)
-		rr = append(rr, conv.ValueString())
-	}
-
 	diags = resp.State.Set(ctx, routes)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -114,12 +108,6 @@ func (r *deviceRoutesResource) Update(ctx context.Context, req resource.UpdateRe
 			"Could not update routes, unexpected error: "+err.Error(),
 		)
 		return
-	}
-
-	rr := []string{}
-	for _, r := range routes.Routes.Elements() {
-		conv := r.(types.String)
-		rr = append(rr, conv.ValueString())
 	}
 
 	diags = resp.State.Set(ctx, routes)
@@ -189,12 +177,6 @@ func (r *deviceRoutesResource) Read(ctx context.Context, req resource.ReadReques
 				err.Error(),
 		)
 		return
-	}
-
-	rr := []string{}
-	for _, r := range device.Routes.Elements() {
-		conv := r.(types.String)
-		rr = append(rr, conv.ValueString())
 	}
 
 	diags := resp.State.Set(ctx, device)
