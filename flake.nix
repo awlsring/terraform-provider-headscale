@@ -32,6 +32,7 @@
             terraform-plugin-docs
             go-swagger
             direnv
+            gh
           ];
         };
       });
