@@ -39,6 +39,9 @@ type Headscale interface {
 	CreateUser(ctx context.Context, input CreateUserInput) (*models.V1User, error)
 	DeleteUser(ctx context.Context, userId string) error
 	RenameUser(ctx context.Context, name string, userId string) (*models.V1User, error)
+
+	SetPolicy(ctx context.Context, policyData string) (*Policy, error)
+	GetPolicy(ctx context.Context) (*Policy, error)
 }
 
 type HeadscaleService struct {

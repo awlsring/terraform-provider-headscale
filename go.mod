@@ -4,7 +4,10 @@ go 1.23.7
 
 toolchain go1.23.11
 
-require github.com/hashicorp/terraform-plugin-framework v1.12.0
+require (
+	github.com/google/uuid v1.6.0
+	github.com/hashicorp/terraform-plugin-framework v1.12.0
+)
 
 require (
 	github.com/BurntSushi/toml v1.2.1 // indirect
@@ -20,7 +23,6 @@ require (
 	github.com/bmatcuk/doublestar/v4 v4.8.1 // indirect
 	github.com/cloudflare/circl v1.6.1 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
-	github.com/google/uuid v1.6.0 // indirect
 	github.com/hashicorp/cli v1.1.7 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-checkpoint v0.5.0 // indirect
