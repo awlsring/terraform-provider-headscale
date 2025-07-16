@@ -29,10 +29,8 @@
             gotools
             go-tools
             terraform
-            headscale
             terraform-plugin-docs
             go-swagger
-            direnv
             gh
           ];
         };
