@@ -17,7 +17,7 @@ The pre auth key data source allows you to list all pre auth keys that belong to
 
 ### Required
 
-- `user` (String) The user to get pre auth keys for.
+- `user` (String) The ID of the user to list pre auth keys for.
 
 ### Optional
 
@@ -42,4 +42,4 @@ Read-Only:
 - `key` (String, Sensitive) The generated key.
 - `reusable` (Boolean) If the key is reusable.
 - `used` (Boolean) If the key has been used.
-- `user` (String) The user who owns this key.
+- `user` (String) The ID of the user who owns this key.

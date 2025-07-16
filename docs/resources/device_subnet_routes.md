@@ -30,4 +30,4 @@ resource "headscale_device_subnet_routes" "device_1" {
 
 ### Read-Only
 
-- `id` (String) The Terrafrom Id of the resource.
+- `id` (String) The Terraform Id of the resource.

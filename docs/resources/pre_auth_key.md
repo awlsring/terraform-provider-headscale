@@ -43,7 +43,7 @@ resource "headscale_pre_auth_key" "tags" {
 
 ### Required
 
-- `user` (String) The user that owns the pre auth key.
+- `user` (String) The ID of the user that will own the pre auth key.
 
 ### Optional
 

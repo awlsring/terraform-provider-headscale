@@ -56,8 +56,8 @@ data "headscale_subnet_routes" "device_1_enabled_routes" {
 
 Read-Only:
 
-- `created_at` (String) The time the route entry was created.
 - `device_id` (String) The device id the route is advertised by.
+- `enabled` (Boolean) The status of the route.
 - `id` (String) The id of the route.
 - `route` (String) The subnet route.
 - `status` (String) The status of the route.
