@@ -5,6 +5,22 @@
 # Array to keep track of created containers for cleanup
 TAILSCALE_CONTAINERS=()
 
+# Cleanup function
+cleanup() {
+  echo "[*] Cleaning up tailscale containers"
+  for container in "${TAILSCALE_CONTAINERS[@]}"; do
+    echo "[*] Stopping container: $container"
+    docker stop "$container" 2>/dev/null || echo "Container $container already stopped"
+  done
+
+  echo "[*] Stopping headscale container and deleting data"
+  docker compose -f resources/docker-compose.yaml down
+  rm -rf resources/data
+}
+
+# Set up trap to ensure cleanup happens on script exit
+trap cleanup EXIT
+
 # Function to create and connect a tailscale container
 create_tailscale_container() {
   local container_name="$1"
@@ -54,13 +70,6 @@ create_tailscale_container() {
   echo "[*] Successfully created and connected $container_name"
 }
 
-# Setup
-## Ensure headscale network exists
-if ! docker network inspect headscale-test-network >/dev/null 2>&1; then
-  echo "[*] Creating headscale network"
-  docker network create --driver bridge headscale-test-network
-fi
-
 ## Start a headscale container
 echo "[*] Starting headscale container"
 docker compose -f resources/docker-compose.yaml up -d
@@ -75,8 +84,7 @@ echo "[*] Creating a user"
 TEST_USER=terraform
 USER_ID=$(docker exec headscale headscale user create $TEST_USER -o json | jq .id)
 
-## Create tailscale containers with different configurations
-# Example: Create a container with route advertisement
+# Create devices for tailnet
 create_tailscale_container "basic" ""
 create_tailscale_container "subnet-route" "--advertise-routes=10.0.10.0/24,192.168.1.0/24"
 create_tailscale_container "exit-node" "--advertise-exit-node"
@@ -85,14 +93,12 @@ create_tailscale_container "exit-node" "--advertise-exit-node"
 export TF_ACC=1
 echo "[*] Running tests"
 TF_ACC=1 go test ./headscale/test
+TEST_EXIT_CODE=$?
 
-# Clean up
-echo "[*] Cleaning up tailscale containers"
-for container in "${TAILSCALE_CONTAINERS[@]}"; do
-  echo "[*] Stopping container: $container"
-  docker stop "$container" 2>/dev/null || echo "Container $container already stopped"
-done
+# Check if tests failed
+if [ $TEST_EXIT_CODE -ne 0 ]; then
+  echo "[*] Tests failed with exit code $TEST_EXIT_CODE"
+  exit $TEST_EXIT_CODE
+fi
 
-echo "[*] Stopping headscale container and deleting data"
-docker compose -f resources/docker-compose.yaml down
-rm -rf resources/data
+echo "[*] All tests passed successfully"

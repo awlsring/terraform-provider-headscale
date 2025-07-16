@@ -136,7 +136,7 @@ func (d *preAuthKeyResource) Schema(_ context.Context, _ resource.SchemaRequest,
 				Validators: []validator.List{
 					listvalidator.UniqueValues(),
 					listvalidator.ValueStringsAre(
-						stringvalidator.RegexMatches(regexp.MustCompile(`tag:[\\w-]+`), "tag must follow scheme of `tag:<value>`"),
+						stringvalidator.RegexMatches(regexp.MustCompile(`tag:[\w-]+`), "tag must follow scheme of `tag:<value>`"),
 					),
 				},
 			},
