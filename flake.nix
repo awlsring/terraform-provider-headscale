@@ -27,11 +27,11 @@
           packages = with pkgs; [
             go_1_23
             gotools
+            go-tools
             terraform
             headscale
             terraform-plugin-docs
             go-swagger
-            staticcheck
             direnv
             gh
           ];
