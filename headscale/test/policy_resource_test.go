@@ -14,7 +14,7 @@ func Test_PolicyResource(t *testing.T) {
 				Config: ProviderConfig + `resource "headscale_policy" "test" {
 					policy = jsonencode({
 						"tagOwners": {
-							"tag:example": ["user1"],
+							"tag:example": ["user1@"],
 						},
 						"acls": [
 							{
@@ -61,7 +61,7 @@ func Test_PolicyResource_Update(t *testing.T) {
 				Config: ProviderConfig + `resource "headscale_policy" "test_update" {
 					policy = jsonencode({
 						"tagOwners": {
-							"tag:test": ["user1"],
+							"tag:test": ["user1@"],
 						},
 						"acls": [
 							{
@@ -82,7 +82,7 @@ func Test_PolicyResource_Update(t *testing.T) {
 				Config: ProviderConfig + `resource "headscale_policy" "test_update" {
 					policy = jsonencode({
 						"tagOwners": {
-							"tag:test": ["user1", "user2"],
+							"tag:test": ["user1@", "user2@"],
 						},
 						"acls": [
 							{
@@ -111,8 +111,8 @@ func Test_PolicyResource_ComplexPolicy(t *testing.T) {
 				Config: ProviderConfig + `resource "headscale_policy" "test_complex" {
 					policy = jsonencode({
 						"groups": {
-							"group:admin": ["user1", "user2"],
-							"group:dev": ["user3", "user4"],
+							"group:admin": ["user1@", "user2@"],
+							"group:dev": ["user3@", "user4@"],
 						},
 						"tagOwners": {
 							"tag:prod": ["group:admin"],

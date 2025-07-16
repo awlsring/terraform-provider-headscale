@@ -6,7 +6,6 @@ import (
 	"regexp"
 
 	"github.com/awlsring/terraform-provider-headscale/internal/service"
-	"github.com/awlsring/terraform-provider-headscale/internal/utils"
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -49,7 +48,7 @@ func (d *deviceRoutesResource) Schema(_ context.Context, _ resource.SchemaReques
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed:    true,
-				Description: "The Terrafrom Id of the resource.",
+				Description: "The Terraform Id of the resource.",
 			},
 			"device_id": schema.StringAttribute{
 				Required:    true,
@@ -87,6 +86,12 @@ func (r *deviceRoutesResource) Create(ctx context.Context, req resource.CreateRe
 		return
 	}
 
+	rr := []string{}
+	for _, r := range routes.Routes.Elements() {
+		conv := r.(types.String)
+		rr = append(rr, conv.ValueString())
+	}
+
 	diags = resp.State.Set(ctx, routes)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -111,6 +116,12 @@ func (r *deviceRoutesResource) Update(ctx context.Context, req resource.UpdateRe
 		return
 	}
 
+	rr := []string{}
+	for _, r := range routes.Routes.Elements() {
+		conv := r.(types.String)
+		rr = append(rr, conv.ValueString())
+	}
+
 	diags = resp.State.Set(ctx, routes)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -131,24 +142,13 @@ func (r *deviceRoutesResource) Delete(ctx context.Context, req resource.DeleteRe
 		return
 	}
 
-	routes, err := r.client.GetDeviceRoutes(ctx, state.DeviceId.ValueString())
+	err := r.client.DisableDeviceRoutes(ctx, state.DeviceId.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error deleting device routes",
-			"Could not remove tags, unexpected error: "+err.Error(),
+			"Could not remove routes, unexpected error: "+err.Error(),
 		)
 		return
-	}
-
-	for _, route := range routes {
-		err := r.client.DisableRoute(ctx, route.ID)
-		if err != nil {
-			resp.Diagnostics.AddError(
-				"Error disabling device routes",
-				"Could not remove tags, unexpected error: "+err.Error(),
-			)
-			return
-		}
 	}
 }
 
@@ -160,65 +160,16 @@ func (r *deviceRoutesResource) enableRoutes(ctx context.Context, m *deviceRouteM
 		routesRequested = append(routesRequested, conv.ValueString())
 	}
 
-	routes, err := r.client.GetDeviceRoutes(ctx, deviceId)
-	if err != nil {
-		return nil, err
+	if err := r.client.EnableDeviceRoutes(ctx, deviceId, routesRequested); err != nil {
+		return nil, fmt.Errorf("error enabling routes on device %s: %w", deviceId, err)
 	}
 
-	routeList := []string{}
-	for _, route := range routes {
-		routeList = append(routeList, route.Prefix)
-	}
+	// routes, diags := types.ListValueFrom(ctx, types.StringType, routesRequested)
+	// if diags.HasError() {
+	// 	return nil, fmt.Errorf("error creating list of routes")
+	// }
 
-	for _, route := range routesRequested {
-		if !utils.StringInList(route, routeList) {
-			return nil, fmt.Errorf("route %s is not available on device", route)
-		}
-	}
-
-	tflog.Debug(ctx, fmt.Sprintf("requested routes: %v", routesRequested))
-	for _, route := range routes {
-		tflog.Debug(ctx, fmt.Sprintf("checking route %s with ID %s", route.Prefix, route.ID))
-		if !utils.StringInList(route.Prefix, routesRequested) {
-			tflog.Debug(ctx, fmt.Sprintf("route %s is not in requested routes, checking if enabled", route.Prefix))
-			if route.Enabled {
-				tflog.Debug(ctx, fmt.Sprintf("route %s is enabled, disabling", route.Prefix))
-				err := r.client.DisableRoute(ctx, route.ID)
-				if err != nil {
-					return nil, err
-				}
-			}
-			continue
-		}
-
-		tflog.Debug(ctx, fmt.Sprintf("route %s should be enabled", route.Prefix))
-		if !route.Enabled {
-			tflog.Debug(ctx, fmt.Sprintf("route %s is not enabled, enabling", route.Prefix))
-			err := r.client.EnableRoute(ctx, route.ID)
-			if err != nil {
-				return nil, err
-			}
-		}
-
-		tflog.Debug(ctx, fmt.Sprintf("route %s is done, removing from requested routes", route.Prefix))
-		for i, item := range routesRequested {
-			if item == route.Prefix {
-				routesRequested = append(routesRequested[:i], routesRequested[i+1:]...)
-				break
-			}
-		}
-		tflog.Debug(ctx, fmt.Sprintf("remaining requested routes: %v", routesRequested))
-	}
-
-	if len(routesRequested) > 0 {
-		return nil, fmt.Errorf("routes requested are not available on device. routes: %v", routesRequested)
-	}
-
-	return &deviceRouteModel{
-		DeviceId: types.StringValue(deviceId),
-		Id:       types.StringValue(deviceId),
-		Routes:   m.Routes,
-	}, nil
+	return r.readDeviceRoutes(ctx, deviceId)
 }
 
 func (r *deviceRoutesResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -238,6 +189,12 @@ func (r *deviceRoutesResource) Read(ctx context.Context, req resource.ReadReques
 				err.Error(),
 		)
 		return
+	}
+
+	rr := []string{}
+	for _, r := range device.Routes.Elements() {
+		conv := r.(types.String)
+		rr = append(rr, conv.ValueString())
 	}
 
 	diags := resp.State.Set(ctx, device)
@@ -268,8 +225,9 @@ func (r *deviceRoutesResource) ImportState(ctx context.Context, req resource.Imp
 }
 
 func (r *deviceRoutesResource) readDeviceRoutes(ctx context.Context, id string) (*deviceRouteModel, error) {
-	routes, err := r.client.GetDeviceRoutes(ctx, id)
+	routes, err := r.client.ListDeviceRoutes(ctx, id)
 	if err != nil {
+		tflog.Error(ctx, fmt.Sprintf("Error reading routes for device %s: %s", id, err.Error()))
 		return nil, err
 	}
 

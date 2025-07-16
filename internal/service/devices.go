@@ -9,9 +9,9 @@ import (
 )
 
 func (h *HeadscaleService) ListDevices(ctx context.Context, user *string) ([]*models.V1Node, error) {
-	request := headscale_service.NewHeadscaleServiceListNodesParams()
-	request.SetContext(ctx)
-	request.SetUser(user)
+	request := headscale_service.NewHeadscaleServiceListNodesParams().
+		WithContext(ctx).
+		WithUser(user)
 
 	resp, err := h.client.HeadscaleService.HeadscaleServiceListNodes(request)
 	if err != nil {
@@ -110,24 +110,6 @@ func (h *HeadscaleService) RenameDevice(ctx context.Context, deviceId string, na
 	}
 
 	return resp.Payload.Node, nil
-}
-
-func (h *HeadscaleService) GetDeviceRoutes(ctx context.Context, deviceId string) ([]*models.V1Route, error) {
-	request := headscale_service.NewHeadscaleServiceGetNodeRoutesParams()
-	request.SetContext(ctx)
-	request.SetNodeID(deviceId)
-
-	resp, err := h.client.HeadscaleService.HeadscaleServiceGetNodeRoutes(request)
-	if err != nil {
-		return nil, handleRequestError(err)
-	}
-
-	err = resp.Payload.Validate(strfmt.Default)
-	if err != nil {
-		return nil, err
-	}
-
-	return resp.Payload.Routes, nil
 }
 
 func (h *HeadscaleService) TagDevice(ctx context.Context, deviceId string, tags []string) (*models.V1Node, error) {

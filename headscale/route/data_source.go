@@ -55,7 +55,7 @@ func (d *routeDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, 
 				Optional:            true,
 				MarkdownDescription: "Filters the route list to elements whose status matches what is provided. Can be `enabled` or `disabled`.",
 				Validators: []validator.String{
-					stringvalidator.OneOf("enabled", "disabled"),
+					stringvalidator.OneOf(RouteStatusEnabled, RouteStatusDisabled),
 				},
 			},
 			"routes": schema.ListNestedAttribute{
@@ -82,9 +82,9 @@ func (d *routeDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, 
 							Computed:    true,
 							Description: "The ID of the user who owns the device the route belong to.",
 						},
-						"created_at": schema.StringAttribute{
+						"enabled": schema.BoolAttribute{
 							Computed:    true,
-							Description: "The time the route entry was created.",
+							Description: "The status of the route.",
 						},
 					},
 				},
@@ -125,6 +125,7 @@ func (d *routeDataSource) Read(ctx context.Context, req datasource.ReadRequest, 
 		)
 		return
 	}
+	tflog.Debug(ctx, fmt.Sprintf("Found %d routes", len(routes)))
 
 	for _, route := range routes {
 		if device != nil {
@@ -133,11 +134,7 @@ func (d *routeDataSource) Read(ctx context.Context, req datasource.ReadRequest, 
 			}
 		}
 
-		stat := "disabled"
-		if route.Enabled {
-			stat = "enabled"
-		}
-
+		stat := ParseStatusFromModel(route)
 		if status != nil {
 			if stat != *status {
 				continue
@@ -145,12 +142,12 @@ func (d *routeDataSource) Read(ctx context.Context, req datasource.ReadRequest, 
 		}
 
 		r := routeModel{
-			Id:        types.StringValue(route.ID),
-			Route:     types.StringValue(route.Prefix),
-			Status:    types.StringValue(stat),
-			DeviceId:  types.StringValue(route.Node.ID),
-			UserId:    types.StringValue(route.Node.User.ID),
-			CreatedAt: types.StringValue(route.CreatedAt.DeepCopy().String()),
+			Id:       types.StringValue(route.ID),
+			Route:    types.StringValue(route.Prefix),
+			Status:   types.StringValue(stat),
+			DeviceId: types.StringValue(route.Node.ID),
+			UserId:   types.StringValue(route.Node.User.ID),
+			Enabled:  types.BoolValue(route.Enabled),
 		}
 
 		state.Routes = append(state.Routes, r)

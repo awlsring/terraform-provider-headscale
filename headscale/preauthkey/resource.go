@@ -68,9 +68,13 @@ func (d *preAuthKeyResource) Schema(_ context.Context, _ resource.SchemaRequest,
 			},
 			"user": schema.StringAttribute{
 				Required:    true,
-				Description: "The user that owns the pre auth key.",
+				Description: "The ID of the user that will own the pre auth key.",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
+				},
+				Validators: []validator.String{
+					stringvalidator.LengthBetween(1, 4),
+					stringvalidator.RegexMatches(regexp.MustCompile(`^\d+$`), "must be a valid user ID (uint only)"),
 				},
 			},
 			"key": schema.StringAttribute{
@@ -201,7 +205,7 @@ func (r *preAuthKeyResource) Create(ctx context.Context, req resource.CreateRequ
 	m := preAuthKeyResourceModel{
 		TimeToExpire: plan.TimeToExpire,
 		Id:           types.StringValue(key.ID),
-		User:         types.StringValue(key.User),
+		User:         types.StringValue(key.User.ID),
 		Key:          types.StringValue(key.Key),
 		Reusable:     types.BoolValue(key.Reusable),
 		Ephemeral:    types.BoolValue(key.Ephemeral),
@@ -291,7 +295,7 @@ func (r *preAuthKeyResource) Read(ctx context.Context, req resource.ReadRequest,
 			m = preAuthKeyResourceModel{
 				TimeToExpire: state.TimeToExpire,
 				Id:           types.StringValue(key.ID),
-				User:         types.StringValue(key.User),
+				User:         types.StringValue(key.User.ID),
 				Key:          types.StringValue(key.Key),
 				Reusable:     types.BoolValue(key.Reusable),
 				Ephemeral:    types.BoolValue(key.Ephemeral),

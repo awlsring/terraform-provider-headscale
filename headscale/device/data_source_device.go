@@ -3,6 +3,7 @@ package device
 import (
 	"context"
 
+	"github.com/awlsring/terraform-provider-headscale/internal/gen/models"
 	"github.com/awlsring/terraform-provider-headscale/internal/service"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -39,21 +40,32 @@ func (d *deviceDataSource) Schema(_ context.Context, _ datasource.SchemaRequest,
 		Description: "The device data source allows you to get information about a device registered on the Headscale instance.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
-				Required:    true,
+				Optional:    true,
+				Computed:    true,
 				Description: "The id of the device",
+			},
+			"name": schema.StringAttribute{
+				Optional:    true,
+				Computed:    true,
+				Description: "The device's name.",
+			},
+			"given_name": schema.StringAttribute{
+				Optional:    true,
+				Computed:    true,
+				Description: "The device's given name.",
 			},
 			"addresses": schema.ListAttribute{
 				Computed:    true,
 				ElementType: types.StringType,
 				Description: "List of the device's ip addresses.",
 			},
-			"name": schema.StringAttribute{
-				Computed:    true,
-				Description: "The device's name.",
-			},
-			"user": schema.StringAttribute{
+			"user_id": schema.StringAttribute{
 				Computed:    true,
 				Description: "The ID of the user who owns the device.",
+			},
+			"user_name": schema.StringAttribute{
+				Computed:    true,
+				Description: "The name of the user who owns the device.",
 			},
 			"expiry": schema.StringAttribute{
 				Computed:    true,
@@ -72,9 +84,15 @@ func (d *deviceDataSource) Schema(_ context.Context, _ datasource.SchemaRequest,
 				ElementType: types.StringType,
 				Description: "The tags applied to the device.",
 			},
-			"given_name": schema.StringAttribute{
+			"approved_routes": schema.ListAttribute{
 				Computed:    true,
-				Description: "The device's given name.",
+				ElementType: types.StringType,
+				Description: "The routes that the device is allowed to advertise.",
+			},
+			"available_routes": schema.ListAttribute{
+				Computed:    true,
+				ElementType: types.StringType,
+				Description: "The routes the device is advertising.",
 			},
 		},
 	}
@@ -87,27 +105,79 @@ func (d *deviceDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 		return
 	}
 
-	deviceId := state.Id.ValueString()
-
-	device, err := d.client.GetDevice(ctx, deviceId)
-	if err != nil {
+	if state.Id.ValueString() == "" && state.Name.ValueString() == "" && state.GivenName.ValueString() == "" {
 		resp.Diagnostics.AddError(
-			"Unable to get devices",
-			"An error was encountered retrieving the device.\n"+
-				err.Error(),
+			"Invalid device data source configuration",
+			"At least one of `id`, `name`, or `given_name` must be provided to read a device.",
 		)
 		return
 	}
 
+	var device *models.V1Node
+	var err error
+	if state.Id.IsNull() || state.Id.IsUnknown() {
+		deviceName := state.Name.ValueString()
+		deviceGivenName := state.GivenName.ValueString()
+
+		devices, err := d.client.ListDevices(ctx, nil)
+		if err != nil {
+			resp.Diagnostics.AddError(
+				"Unable to get devices",
+				"An error was encountered retrieving the devices.\n"+
+					err.Error(),
+			)
+			return
+		}
+
+		matches := 0
+
+		for _, d := range devices {
+			if d.Name == deviceName || d.GivenName == deviceGivenName {
+				device = d
+				matches++
+			}
+		}
+		if matches == 0 {
+			resp.Diagnostics.AddError(
+				"Device not found",
+				"An error was encountered retrieving the device.\n"+
+					"Please check the `name` or `given_name` provided in the data source configuration.",
+			)
+			return
+		} else if matches > 1 {
+			resp.Diagnostics.AddError(
+				"Multiple devices found",
+				"An error was encountered retrieving the device.\n"+
+					"Please check the `name` or `given_name` provided in the data source configuration.\n"+
+					"Multiple devices were found with the same name or given name.",
+			)
+			return
+		}
+	} else {
+		// we have an ID, so we'll try to get the device by ID
+		device, err = d.client.GetDevice(ctx, state.Id.ValueString())
+		if err != nil {
+			resp.Diagnostics.AddError(
+				"Unable to get device",
+				"An error was encountered retrieving the device.\n"+
+					err.Error(),
+			)
+			return
+		}
+	}
+
 	dm := deviceModel{
-		Id:        types.StringValue(device.ID),
-		Addresses: []types.String{},
-		Name:      types.StringValue(device.Name),
-		User:      types.StringValue(device.User.ID),
-		Expiry:    types.StringValue(device.Expiry.DeepCopy().String()),
-		CreatedAt: types.StringValue(device.CreatedAt.DeepCopy().String()),
-		Tags:      []types.String{},
-		GivenName: types.StringValue(device.GivenName),
+		Id:              types.StringValue(device.ID),
+		Addresses:       []types.String{},
+		Name:            types.StringValue(device.Name),
+		UserID:          types.StringValue(device.User.ID),
+		UserName:        types.StringValue(device.User.Name),
+		Expiry:          types.StringValue(device.Expiry.DeepCopy().String()),
+		CreatedAt:       types.StringValue(device.CreatedAt.DeepCopy().String()),
+		Tags:            []types.String{},
+		GivenName:       types.StringValue(device.GivenName),
+		ApprovedRoutes:  []types.String{},
+		AvailableRoutes: []types.String{},
 	}
 
 	for _, add := range device.IPAddresses {
@@ -122,15 +192,21 @@ func (d *deviceDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 		dm.Tags = append(dm.Tags, types.StringValue(t))
 	}
 
+	for _, route := range device.ApprovedRoutes {
+		dm.ApprovedRoutes = append(dm.ApprovedRoutes, types.StringValue(route))
+	}
+
+	for _, route := range device.AvailableRoutes {
+		dm.AvailableRoutes = append(dm.AvailableRoutes, types.StringValue(route))
+	}
+
 	if device.RegisterMethod != nil {
 		dm.RegisterMethod = types.StringValue(string(*device.RegisterMethod))
 	} else {
 		dm.RegisterMethod = types.StringValue("unknown")
 	}
 
-	state = dm
-
-	diags := resp.State.Set(ctx, &state)
+	diags := resp.State.Set(ctx, &dm)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return

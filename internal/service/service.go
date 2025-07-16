@@ -21,7 +21,6 @@ type Headscale interface {
 	ExpireDevice(ctx context.Context, deviceId string) (*models.V1Node, error)
 	DeleteDevice(ctx context.Context, deviceId string) error
 	RenameDevice(ctx context.Context, deviceId string, newName string) (*models.V1Node, error)
-	GetDeviceRoutes(ctx context.Context, deviceId string) ([]*models.V1Route, error)
 	TagDevice(ctx context.Context, deviceId string, tags []string) (*models.V1Node, error)
 	MoveDevice(ctx context.Context, deviceId string, newOwner string) (*models.V1Node, error)
 
@@ -29,10 +28,10 @@ type Headscale interface {
 	CreatePreAuthKey(ctx context.Context, input CreatePreAuthKeyInput) (*models.V1PreAuthKey, error)
 	ExpirePreAuthKey(ctx context.Context, user string, key string) error
 
-	ListRoutes(ctx context.Context) ([]*models.V1Route, error)
-	DeleteRoute(ctx context.Context, routeId string) error
-	DisableRoute(ctx context.Context, routeId string) error
-	EnableRoute(ctx context.Context, routeId string) error
+	ListRoutes(ctx context.Context) ([]*Route, error)
+	ListDeviceRoutes(ctx context.Context, deviceId string) ([]*Route, error)
+	EnableDeviceRoutes(ctx context.Context, deviceId string, routes []string) error
+	DisableDeviceRoutes(ctx context.Context, deviceId string) error
 
 	GetUser(ctx context.Context, input GetUserInput) (*models.V1User, error)
 	ListUsers(ctx context.Context) ([]*models.V1User, error)

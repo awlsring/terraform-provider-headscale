@@ -46,9 +46,9 @@ func (d *devicesDataSource) Schema(_ context.Context, _ datasource.SchemaRequest
 				Computed:    true,
 				Description: "The ID of the Terraform resource.",
 			},
-			"user": schema.StringAttribute{
+			"user_name": schema.StringAttribute{
 				Optional:    true,
-				Description: "Filters the device list to elements belonging to the user with the provided ID.",
+				Description: "Filters the device list to elements belonging to the user with the provided name.",
 			},
 			"name_prefix": schema.StringAttribute{
 				Optional:    true,
@@ -71,9 +71,13 @@ func (d *devicesDataSource) Schema(_ context.Context, _ datasource.SchemaRequest
 							Computed:    true,
 							Description: "The device's name.",
 						},
-						"user": schema.StringAttribute{
+						"user_id": schema.StringAttribute{
 							Computed:    true,
 							Description: "The ID of the user who owns the device.",
+						},
+						"user_name": schema.StringAttribute{
+							Computed:    true,
+							Description: "The name of the user who owns the device.",
 						},
 						"expiry": schema.StringAttribute{
 							Computed:    true,
@@ -95,6 +99,16 @@ func (d *devicesDataSource) Schema(_ context.Context, _ datasource.SchemaRequest
 						"given_name": schema.StringAttribute{
 							Computed:    true,
 							Description: "The device's given name.",
+						},
+						"approved_routes": schema.ListAttribute{
+							Computed:    true,
+							ElementType: types.StringType,
+							Description: "The routes that the device is allowed to advertise.",
+						},
+						"available_routes": schema.ListAttribute{
+							Computed:    true,
+							ElementType: types.StringType,
+							Description: "The routes the device is advertising.",
 						},
 					},
 				},
@@ -120,8 +134,8 @@ func (d *devicesDataSource) Read(ctx context.Context, req datasource.ReadRequest
 	}
 
 	var user *string
-	if state.User.ValueString() != "" {
-		u := state.User.ValueString()
+	if state.UserName.ValueString() != "" {
+		u := state.UserName.ValueString()
 		user = &u
 		tflog.Debug(ctx, fmt.Sprintf("user: %v", *user))
 	}
@@ -150,7 +164,8 @@ func (d *devicesDataSource) Read(ctx context.Context, req datasource.ReadRequest
 			Id:        types.StringValue(device.ID),
 			Addresses: []types.String{},
 			Name:      types.StringValue(device.Name),
-			User:      types.StringValue(device.User.ID),
+			UserID:    types.StringValue(device.User.ID),
+			UserName:  types.StringValue(device.User.Name),
 			Expiry:    types.StringValue(device.Expiry.DeepCopy().String()),
 			CreatedAt: types.StringValue(device.CreatedAt.DeepCopy().String()),
 			Tags:      []types.String{},
@@ -167,6 +182,14 @@ func (d *devicesDataSource) Read(ctx context.Context, req datasource.ReadRequest
 
 		for _, t := range device.ForcedTags {
 			dm.Tags = append(dm.Tags, types.StringValue(t))
+		}
+
+		for _, route := range device.ApprovedRoutes {
+			dm.ApprovedRoutes = append(dm.ApprovedRoutes, types.StringValue(route))
+		}
+
+		for _, route := range device.AvailableRoutes {
+			dm.AvailableRoutes = append(dm.AvailableRoutes, types.StringValue(route))
 		}
 
 		if device.RegisterMethod != nil {

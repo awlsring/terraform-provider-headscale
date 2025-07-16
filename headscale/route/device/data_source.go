@@ -2,15 +2,14 @@ package device_route
 
 import (
 	"context"
-	"fmt"
 
+	"github.com/awlsring/terraform-provider-headscale/headscale/route"
 	"github.com/awlsring/terraform-provider-headscale/internal/service"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
 var (
@@ -94,10 +93,9 @@ func (d *deviceDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 	if state.Status.ValueString() != "" {
 		s := state.Status.ValueString()
 		status = &s
-		tflog.Debug(ctx, fmt.Sprintf("Status: %v", *status))
 	}
 
-	routes, err := d.client.GetDeviceRoutes(ctx, device)
+	routes, err := d.client.ListDeviceRoutes(ctx, device)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to get routes",
@@ -107,11 +105,8 @@ func (d *deviceDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 		return
 	}
 
-	for _, route := range routes {
-		stat := "disabled"
-		if route.Enabled {
-			stat = "enabled"
-		}
+	for _, r := range routes {
+		stat := route.ParseStatusFromModel(r)
 
 		if status != nil {
 			if stat != *status {
@@ -120,9 +115,9 @@ func (d *deviceDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 		}
 
 		r := routeModel{
-			Id:      types.StringValue(route.ID),
-			Route:   types.StringValue(route.Prefix),
-			Enabled: types.BoolValue(route.Enabled),
+			Id:      types.StringValue(r.ID),
+			Route:   types.StringValue(r.Prefix),
+			Enabled: types.BoolValue(r.Enabled),
 		}
 
 		state.Routes = append(state.Routes, r)

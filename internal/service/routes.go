@@ -2,60 +2,80 @@ package service
 
 import (
 	"context"
+	"slices"
 
 	"github.com/awlsring/terraform-provider-headscale/internal/gen/client/headscale_service"
 	"github.com/awlsring/terraform-provider-headscale/internal/gen/models"
-	"github.com/go-openapi/strfmt"
 )
 
-func (h *HeadscaleService) ListRoutes(ctx context.Context) ([]*models.V1Route, error) {
-	request := headscale_service.NewHeadscaleServiceGetRoutesParams()
-	request.SetContext(ctx)
+type Route struct {
+	ID      string
+	Prefix  string
+	Enabled bool
+	Node    *models.V1Node
+}
 
-	resp, err := h.client.HeadscaleService.HeadscaleServiceGetRoutes(request)
+func (h *HeadscaleService) ListRoutes(ctx context.Context) ([]*Route, error) {
+	nodes, err := h.ListDevices(ctx, nil)
 	if err != nil {
-		return nil, handleRequestError(err)
+		return nil, err
 	}
+	var routes []*Route
+	for _, node := range nodes {
+		nodeRoutes, err := h.ListDeviceRoutes(ctx, node.ID)
+		if err != nil {
+			return nil, err
+		}
+		routes = append(routes, nodeRoutes...)
+	}
+	return routes, nil
+}
 
-	err = resp.Payload.Validate(strfmt.Default)
+func (h *HeadscaleService) ListDeviceRoutes(ctx context.Context, deviceId string) ([]*Route, error) {
+	device, err := h.GetDevice(ctx, deviceId)
 	if err != nil {
 		return nil, err
 	}
 
-	return resp.Payload.Routes, nil
+	var routes []*Route
+
+	for _, prefix := range device.AvailableRoutes {
+		routes = append(routes, &Route{
+			ID:      prefix,
+			Prefix:  prefix,
+			Enabled: slices.Contains(device.ApprovedRoutes, prefix),
+			Node:    device,
+		})
+	}
+
+	return routes, nil
 }
 
-func (h *HeadscaleService) DeleteRoute(ctx context.Context, route string) error {
-	request := headscale_service.NewHeadscaleServiceDeleteRouteParams()
-	request.SetContext(ctx)
-	request.SetRouteID(route)
+func (h *HeadscaleService) EnableDeviceRoutes(ctx context.Context, deviceId string, routes []string) error {
+	request := headscale_service.NewHeadscaleServiceSetApprovedRoutesParams().
+		WithContext(ctx).
+		WithNodeID(deviceId).
+		WithBody(&models.HeadscaleServiceSetApprovedRoutesBody{
+			Routes: routes,
+		})
 
-	_, err := h.client.HeadscaleService.HeadscaleServiceDeleteRoute(request)
+	_, err := h.client.HeadscaleService.HeadscaleServiceSetApprovedRoutes(request)
 	if err != nil {
 		return handleRequestError(err)
 	}
-	return nil
-}
-
-func (h *HeadscaleService) DisableRoute(ctx context.Context, route string) error {
-	request := headscale_service.NewHeadscaleServiceDisableRouteParams()
-	request.SetContext(ctx)
-	request.SetRouteID(route)
-
-	_, err := h.client.HeadscaleService.HeadscaleServiceDisableRoute(request)
-	if err != nil {
-		return handleRequestError(err)
-	}
 
 	return nil
 }
 
-func (h *HeadscaleService) EnableRoute(ctx context.Context, route string) error {
-	request := headscale_service.NewHeadscaleServiceEnableRouteParams()
-	request.SetContext(ctx)
-	request.SetRouteID(route)
+func (h *HeadscaleService) DisableDeviceRoutes(ctx context.Context, deviceId string) error {
+	request := headscale_service.NewHeadscaleServiceSetApprovedRoutesParams().
+		WithContext(ctx).
+		WithNodeID(deviceId).
+		WithBody(&models.HeadscaleServiceSetApprovedRoutesBody{
+			Routes: []string{},
+		})
 
-	_, err := h.client.HeadscaleService.HeadscaleServiceEnableRoute(request)
+	_, err := h.client.HeadscaleService.HeadscaleServiceSetApprovedRoutes(request)
 	if err != nil {
 		return handleRequestError(err)
 	}

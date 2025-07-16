@@ -2,6 +2,58 @@
 
 # set -e;
 
+# Array to keep track of created containers for cleanup
+TAILSCALE_CONTAINERS=()
+
+# Function to create and connect a tailscale container
+create_tailscale_container() {
+  local container_name="$1"
+  local tailscale_flags="$2"
+  
+  echo "[*] Creating and connecting test device: $container_name"
+  
+  # Create the tailscale container
+  docker run -d --rm \
+    --name "$container_name" \
+    --hostname "$container_name" \
+    --network headscale-test-network \
+    --cap-add=NET_ADMIN \
+    --cap-add=SYS_MODULE \
+    --device=/dev/net/tun \
+    -v /dev/net/tun:/dev/net/tun \
+    tailscale/tailscale \
+    tailscaled
+  
+  if [ $? -ne 0 ]; then
+    echo "Error: Failed to create container $container_name"
+    return 1
+  fi
+  
+  # Add container to tracking array
+  TAILSCALE_CONTAINERS+=("$container_name")
+  
+  echo "[*] Connecting $container_name to headscale container"
+
+  local preauthkey=$(docker exec headscale headscale preauthkeys create --user "$USER_ID")
+  if [ -z "$preauthkey" ]; then
+    echo "Error: Failed to create preauth key for user $TEST_USER"
+    return 1
+  fi
+  
+  # Connect to headscale with the specified flags
+  docker exec "$container_name" tailscale up --authkey "$preauthkey" --login-server "$HEADSCALE_INTERNAL_ENDPOINT" $tailscale_flags
+  
+  if [ $? -ne 0 ]; then
+    echo "Error: Failed to connect $container_name to headscale"
+    return 1
+  fi
+  
+  echo "[*] Checking tailscale status for $container_name"
+  docker exec "$container_name" tailscale status
+  
+  echo "[*] Successfully created and connected $container_name"
+}
+
 # Setup
 ## Ensure headscale network exists
 if ! docker network inspect headscale-test-network >/dev/null 2>&1; then
@@ -21,45 +73,25 @@ export HEADSCALE_API_KEY=$(docker exec headscale headscale apikeys create)
 ## Create a user
 echo "[*] Creating a user"
 TEST_USER=terraform
-docker exec headscale headscale user create $TEST_USER -o json
+USER_ID=$(docker exec headscale headscale user create $TEST_USER -o json | jq .id)
 
-# Create a preauth key for the user
-echo "[*] Creating a preauth key"
-PREAUTHKEY=$(docker exec headscale headscale preauthkeys create --user $TEST_USER)
-if [ -z "$PREAUTHKEY" ]; then
-  echo "Failed to create preauth key for user $TEST_USER"
-  exit 1
-fi
-echo "[*] Preauth key created: $PREAUTHKEY"
+## Create tailscale containers with different configurations
+# Example: Create a container with route advertisement
+create_tailscale_container "basic" ""
+create_tailscale_container "subnet-route" "--advertise-routes=10.0.10.0/24,192.168.1.0/24"
+create_tailscale_container "exit-node" "--advertise-exit-node"
 
-## Run tailscale container and connect a node
-echo "[*] Creating and connecting test device"
-docker run -d --rm \
-  --name tailscale-container \
-  --hostname tailscale-container \
-  --network headscale-test-network \
-  --cap-add=NET_ADMIN \
-  --cap-add=SYS_MODULE \
-  --device=/dev/net/tun \
-  -v /dev/net/tun:/dev/net/tun \
-  tailscale/tailscale \
-  tailscaled
-
-echo "[*] Connecting tailscale container to headscale container"
-
-docker exec tailscale-container tailscale up --authkey $PREAUTHKEY --login-server $HEADSCALE_INTERNAL_ENDPOINT
-
-echo "[*] Checking tailscale status"
-docker exec tailscale-container tailscale status
-
-# Run tests
+# # Run tests
 export TF_ACC=1
 echo "[*] Running tests"
 TF_ACC=1 go test ./headscale/test
 
 # Clean up
-echo "[*] Cleaning up tailscale container"
-docker stop tailscale-container
+echo "[*] Cleaning up tailscale containers"
+for container in "${TAILSCALE_CONTAINERS[@]}"; do
+  echo "[*] Stopping container: $container"
+  docker stop "$container" 2>/dev/null || echo "Container $container already stopped"
+done
 
 echo "[*] Stopping headscale container and deleting data"
 docker compose -f resources/docker-compose.yaml down

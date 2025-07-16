@@ -12,10 +12,10 @@ func Test_PreAuthKeyDataSource(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: ProviderConfig + `data "headscale_pre_auth_keys" "test" {
-					user = "terraform"
+					user = "1"
 				  }`,
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("data.headscale_pre_auth_keys.test", "user", "terraform"),
+					resource.TestCheckResourceAttr("data.headscale_pre_auth_keys.test", "user", "1"),
 				),
 			},
 		},

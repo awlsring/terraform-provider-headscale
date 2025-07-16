@@ -2,11 +2,14 @@ package preauthkey
 
 import (
 	"context"
+	"regexp"
 
 	"github.com/awlsring/terraform-provider-headscale/internal/service"
 	"github.com/awlsring/terraform-provider-headscale/internal/utils"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
@@ -45,7 +48,11 @@ func (d *preAuthKeyDataSource) Schema(_ context.Context, _ datasource.SchemaRequ
 			},
 			"user": schema.StringAttribute{
 				Required:            true,
-				MarkdownDescription: "The user to get pre auth keys for.",
+				MarkdownDescription: "The ID of the user to list pre auth keys for.",
+				Validators: []validator.String{
+					stringvalidator.LengthBetween(1, 4),
+					stringvalidator.RegexMatches(regexp.MustCompile(`^\d+$`), "must be a valid user ID (uint only)"),
+				},
 			},
 			"all": schema.BoolAttribute{
 				Optional:            true,
@@ -61,7 +68,7 @@ func (d *preAuthKeyDataSource) Schema(_ context.Context, _ datasource.SchemaRequ
 						},
 						"user": schema.StringAttribute{
 							Computed:    true,
-							Description: "The user who owns this key.",
+							Description: "The ID of the user who owns this key.",
 						},
 						"key": schema.StringAttribute{
 							Computed:    true,
@@ -142,7 +149,7 @@ func (d *preAuthKeyDataSource) Read(ctx context.Context, req datasource.ReadRequ
 
 		m := preAuthKeyModel{
 			Id:         types.StringValue(key.ID),
-			User:       types.StringValue(key.User),
+			User:       types.StringValue(key.User.ID),
 			Key:        types.StringValue(key.Key),
 			Reusable:   types.BoolValue(key.Reusable),
 			Ephemeral:  types.BoolValue(key.Ephemeral),

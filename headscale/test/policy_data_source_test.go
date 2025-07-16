@@ -15,7 +15,7 @@ func Test_PolicyDataSource(t *testing.T) {
 					resource "headscale_policy" "test" {
 						policy = jsonencode({
 							"tagOwners": {
-								"tag:example": ["user1"],
+								"tag:example": ["user1@"],
 							},
 							"acls": [
 								{
@@ -74,8 +74,8 @@ func Test_PolicyDataSource_ComplexPolicy(t *testing.T) {
 					resource "headscale_policy" "test_complex" {
 						policy = jsonencode({
 							"groups": {
-								"group:admin": ["user1", "user2"],
-								"group:dev": ["user3", "user4"],
+								"group:admin": ["user1@", "user2@"],
+								"group:dev": ["user3@", "user4@"],
 							},
 							"tagOwners": {
 								"tag:prod": ["group:admin"],
