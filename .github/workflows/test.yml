@@ -18,28 +18,25 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Set up Go
-        uses: actions/setup-go@v5
+      - name: Install Nix
+        uses: cachix/install-nix-action@v27
         with:
-          go-version-file: "go.mod"
-          cache: true
+          nix_path: nixpkgs=channel:nixos-unstable
 
       - name: Download dependencies
-        run: go mod download
+        run: nix develop --command go mod download
 
       - name: Generate code
-        run: make gen
+        run: nix develop --command make gen
 
       - name: Run tests
-        run: make test
+        run: nix develop --command make test
 
       - name: Run vet
-        run: go vet ./...
+        run: nix develop --command go vet ./...
 
       - name: Run staticcheck
-        uses: dominikh/staticcheck-action@v1.3.0
-        with:
-          version: "2023.1.7"
+        run: nix develop --command staticcheck ./...
 
   acceptance-test:
     runs-on: ubuntu-latest
@@ -48,23 +45,22 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Go
-        uses: actions/setup-go@v5
+      - name: Install Nix
+        uses: cachix/install-nix-action@v27
         with:
-          go-version-file: "go.mod"
-          cache: true
+          nix_path: nixpkgs=channel:nixos-unstable
 
       - name: Download dependencies
-        run: go mod download
+        run: nix develop --command go mod download
 
       - name: Generate code
-        run: make gen
+        run: nix develop --command make gen
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
       - name: Run acceptance tests
-        run: make testacc
+        run: nix develop --command make testacc
         env:
           TF_ACC: "1"
 
@@ -75,23 +71,22 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Go
-        uses: actions/setup-go@v5
+      - name: Install Nix
+        uses: cachix/install-nix-action@v27
         with:
-          go-version-file: "go.mod"
-          cache: true
+          nix_path: nixpkgs=channel:nixos-unstable
 
       - name: Download dependencies
-        run: go mod download
+        run: nix develop --command go mod download
 
       - name: Generate code
-        run: make gen
+        run: nix develop --command make gen
 
       - name: Build
-        run: go build -v ./...
+        run: nix develop --command go build -v ./...
 
       - name: Install
-        run: make install
+        run: nix develop --command make install
 
   docs:
     runs-on: ubuntu-latest
@@ -100,20 +95,19 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Go
-        uses: actions/setup-go@v5
+      - name: Install Nix
+        uses: cachix/install-nix-action@v27
         with:
-          go-version-file: "go.mod"
-          cache: true
+          nix_path: nixpkgs=channel:nixos-unstable
 
       - name: Download dependencies
-        run: go mod download
+        run: nix develop --command go mod download
 
       - name: Generate code
-        run: make gen
+        run: nix develop --command make gen
 
       - name: Generate docs
-        run: make terradocs
+        run: nix develop --command make terradocs
 
       - name: Check for doc changes
         run: |

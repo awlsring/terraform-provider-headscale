@@ -31,6 +31,7 @@
             headscale
             terraform-plugin-docs
             go-swagger
+            staticcheck
             direnv
             gh
           ];
