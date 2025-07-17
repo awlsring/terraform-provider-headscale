@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"regexp"
+	"slices"
 
 	"github.com/awlsring/terraform-provider-headscale/internal/service"
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
@@ -61,7 +62,7 @@ func (d *deviceRoutesResource) Schema(_ context.Context, _ resource.SchemaReques
 				Validators: []validator.List{
 					listvalidator.UniqueValues(),
 					listvalidator.ValueStringsAre(
-						stringvalidator.RegexMatches(regexp.MustCompile(`^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\/([0-9]|[1-2][0-9]|3[0-2])$`), "tag must follow scheme like `10.0.10.0/24`"),
+						stringvalidator.RegexMatches(regexp.MustCompile(`^(((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\/([0-9]|[1-2][0-9]|3[0-2])|([0-9a-fA-F]{0,4}:){2,7}[0-9a-fA-F]{0,4}\/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$`), "route must be a valid IPv4 CIDR (e.g., 10.0.10.0/24, 0.0.0.0/0) or IPv6 CIDR (e.g., 2001:db8::/32, ::/0)"),
 					),
 				},
 			},
@@ -77,7 +78,7 @@ func (r *deviceRoutesResource) Create(ctx context.Context, req resource.CreateRe
 		return
 	}
 
-	routes, err := r.enableRoutes(ctx, &plan)
+	routes, err := r.enableRoutes(ctx, plan.DeviceId.ValueString(), plan.Routes)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error enabling routes on device",
@@ -101,7 +102,7 @@ func (r *deviceRoutesResource) Update(ctx context.Context, req resource.UpdateRe
 		return
 	}
 
-	routes, err := r.enableRoutes(ctx, &plan)
+	routes, err := r.enableRoutes(ctx, plan.DeviceId.ValueString(), plan.Routes)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error updating routes on device",
@@ -140,26 +141,6 @@ func (r *deviceRoutesResource) Delete(ctx context.Context, req resource.DeleteRe
 	}
 }
 
-func (r *deviceRoutesResource) enableRoutes(ctx context.Context, m *deviceRouteModel) (*deviceRouteModel, error) {
-	deviceId := m.DeviceId.ValueString()
-	routesRequested := []string{}
-	for _, r := range m.Routes.Elements() {
-		conv := r.(types.String)
-		routesRequested = append(routesRequested, conv.ValueString())
-	}
-
-	if err := r.client.EnableDeviceRoutes(ctx, deviceId, routesRequested); err != nil {
-		return nil, fmt.Errorf("error enabling routes on device %s: %w", deviceId, err)
-	}
-
-	// routes, diags := types.ListValueFrom(ctx, types.StringType, routesRequested)
-	// if diags.HasError() {
-	// 	return nil, fmt.Errorf("error creating list of routes")
-	// }
-
-	return r.readDeviceRoutes(ctx, deviceId)
-}
-
 func (r *deviceRoutesResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var state deviceRouteModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
@@ -169,7 +150,7 @@ func (r *deviceRoutesResource) Read(ctx context.Context, req resource.ReadReques
 
 	deviceId := state.DeviceId.ValueString()
 
-	device, err := r.readDeviceRoutes(ctx, deviceId)
+	deviceRoutes, err := r.readDeviceRoutes(ctx, deviceId)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to get device routes",
@@ -179,7 +160,20 @@ func (r *deviceRoutesResource) Read(ctx context.Context, req resource.ReadReques
 		return
 	}
 
-	diags := resp.State.Set(ctx, device)
+	originalRoutes := tfStringListToStringList(state.Routes)
+	enabledRoutesStrList := tfStringListToStringList(deviceRoutes.Routes)
+	sanitizedRoutes := filterOutUnspecifiedExitNodeRoutes(originalRoutes, enabledRoutesStrList)
+	deviceRoutes.Routes, err = stringListToTFStringList(ctx, sanitizedRoutes)
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Unable to get device routes",
+			"An error was encountered when handling routes.\n"+
+				err.Error(),
+		)
+		return
+	}
+
+	diags := resp.State.Set(ctx, deviceRoutes)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -204,6 +198,76 @@ func (r *deviceRoutesResource) ImportState(ctx context.Context, req resource.Imp
 	if resp.Diagnostics.HasError() {
 		return
 	}
+}
+
+func stringListToTFStringList(ctx context.Context, list []string) (types.List, error) {
+	c, diags := types.ListValueFrom(ctx, types.StringType, list)
+	if diags.HasError() {
+		return types.List{}, fmt.Errorf("error creating list of routes: %s", diags.Errors())
+	}
+	return c, nil
+}
+
+func tfStringListToStringList(list types.List) []string {
+	if list.IsNull() || list.IsUnknown() {
+		return []string{}
+	}
+	strList := []string{}
+	for _, s := range list.Elements() {
+		conv := s.(types.String)
+		strList = append(strList, conv.ValueString())
+	}
+
+	return strList
+}
+
+func (r *deviceRoutesResource) enableRoutes(ctx context.Context, deviceId string, routes types.List) (*deviceRouteModel, error) {
+	routesRequested := tfStringListToStringList(routes)
+
+	if err := r.client.EnableDeviceRoutes(ctx, deviceId, routesRequested); err != nil {
+		return nil, fmt.Errorf("error enabling routes on device %s: %w", deviceId, err)
+	}
+
+	enabledRoutesModel, err := r.readDeviceRoutes(ctx, deviceId)
+	if err != nil {
+		return nil, fmt.Errorf("error reading enabled routes on device %s: %w", deviceId, err)
+	}
+
+	// filter out any routes that were not specified in the request
+	enabledRoutesStrList := tfStringListToStringList(enabledRoutesModel.Routes)
+	sanitizedRoutes := filterOutUnspecifiedExitNodeRoutes(routesRequested, enabledRoutesStrList)
+	enabledRoutesModel.Routes, err = stringListToTFStringList(ctx, sanitizedRoutes)
+	if err != nil {
+		return nil, fmt.Errorf("error converting enabled routes to TF string list: %w", err)
+	}
+
+	return enabledRoutesModel, nil
+}
+
+// there is bespoke behavior with 0.0.0.0/0 and ::/0 routes, so we need to filter them out. If one is specified, the other will be enabled in the backend. We need to be sure to only return the one that was specified and not both.
+func filterOutUnspecifiedExitNodeRoutes(specifiedRoutes []string, detectedRoutes []string) []string {
+	ipv4ExitNode := "0.0.0.0/0"
+	ipv6ExitNode := "::/0"
+
+	hasIPv4Specified := slices.Contains(specifiedRoutes, ipv4ExitNode)
+	hasIPv6Specified := slices.Contains(specifiedRoutes, ipv6ExitNode)
+
+	if hasIPv4Specified && hasIPv6Specified {
+		return detectedRoutes
+	}
+
+	filteredRoutes := make([]string, 0, len(detectedRoutes))
+	for _, route := range detectedRoutes {
+		if route == ipv4ExitNode && !hasIPv4Specified {
+			continue
+		}
+		if route == ipv6ExitNode && !hasIPv6Specified {
+			continue
+		}
+		filteredRoutes = append(filteredRoutes, route)
+	}
+
+	return filteredRoutes
 }
 
 func (r *deviceRoutesResource) readDeviceRoutes(ctx context.Context, id string) (*deviceRouteModel, error) {

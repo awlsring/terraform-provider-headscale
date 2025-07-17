@@ -13,7 +13,6 @@ func Test_DeviceRouteResource_BasicWithKnownDevice(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: ProviderConfig + `
-				# Use known device ID 2 (subnet-route container)
 				resource "headscale_device_subnet_routes" "test" {
 					device_id = "2"
 					routes = ["10.0.10.0/24"]
@@ -23,6 +22,54 @@ func Test_DeviceRouteResource_BasicWithKnownDevice(t *testing.T) {
 					resource.TestCheckResourceAttr("headscale_device_subnet_routes.test", "device_id", "2"),
 					resource.TestCheckResourceAttr("headscale_device_subnet_routes.test", "routes.#", "1"),
 					resource.TestCheckResourceAttr("headscale_device_subnet_routes.test", "routes.0", "10.0.10.0/24"),
+				),
+			},
+		},
+	})
+}
+
+func Test_DeviceRouteResource_ExitNodeDevice(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		ProtoV6ProviderFactories: TestAccProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: ProviderConfig + `
+				resource "headscale_device_subnet_routes" "single-ipv4" {
+					device_id = "3"
+					routes = ["0.0.0.0/0"]
+				}`,
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttrSet("headscale_device_subnet_routes.single-ipv4", "id"),
+					resource.TestCheckResourceAttr("headscale_device_subnet_routes.single-ipv4", "device_id", "3"),
+					resource.TestCheckResourceAttr("headscale_device_subnet_routes.single-ipv4", "routes.#", "1"),
+					resource.TestCheckTypeSetElemAttr("headscale_device_subnet_routes.single-ipv4", "routes.*", "0.0.0.0/0"),
+				),
+			},
+			{
+				Config: ProviderConfig + `
+				resource "headscale_device_subnet_routes" "single-ipv6" {
+					device_id = "3"
+					routes = ["::/0"]
+				}`,
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttrSet("headscale_device_subnet_routes.single-ipv6", "id"),
+					resource.TestCheckResourceAttr("headscale_device_subnet_routes.single-ipv6", "device_id", "3"),
+					resource.TestCheckResourceAttr("headscale_device_subnet_routes.single-ipv6", "routes.#", "1"),
+					resource.TestCheckTypeSetElemAttr("headscale_device_subnet_routes.single-ipv6", "routes.*", "::/0"),
+				),
+			},
+			{
+				Config: ProviderConfig + `
+				resource "headscale_device_subnet_routes" "both" {
+					device_id = "3"
+					routes = ["0.0.0.0/0", "::/0"]
+				}`,
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttrSet("headscale_device_subnet_routes.both", "id"),
+					resource.TestCheckResourceAttr("headscale_device_subnet_routes.both", "device_id", "3"),
+					resource.TestCheckResourceAttr("headscale_device_subnet_routes.both", "routes.#", "2"),
+					resource.TestCheckTypeSetElemAttr("headscale_device_subnet_routes.both", "routes.*", "0.0.0.0/0"),
+					resource.TestCheckTypeSetElemAttr("headscale_device_subnet_routes.both", "routes.*", "::/0"),
 				),
 			},
 		},
