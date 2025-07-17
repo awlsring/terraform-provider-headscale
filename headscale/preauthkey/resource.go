@@ -156,9 +156,11 @@ func (r *preAuthKeyResource) Create(ctx context.Context, req resource.CreateRequ
 	reusable := plan.Reusable.ValueBool()
 	ephemeral := plan.Ephemeral.ValueBool()
 	aclTags := []string{}
-	for _, r := range plan.ACLTags.Elements() {
-		conv := r.(types.String)
-		aclTags = append(aclTags, conv.ValueString())
+	if !plan.ACLTags.IsNull() && !plan.ACLTags.IsUnknown() {
+		for _, r := range plan.ACLTags.Elements() {
+			conv := r.(types.String)
+			aclTags = append(aclTags, conv.ValueString())
+		}
 	}
 
 	expireDuration := "1d"
@@ -186,8 +188,8 @@ func (r *preAuthKeyResource) Create(ctx context.Context, req resource.CreateRequ
 	key, err := r.client.CreatePreAuthKey(ctx, input)
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Error creating api key",
-			"Could not create api key, unexpected error: "+err.Error(),
+			"Error creating pre auth key",
+			"Could not create pre auth key, unexpected error: "+err.Error(),
 		)
 		return
 	}
@@ -196,8 +198,8 @@ func (r *preAuthKeyResource) Create(ctx context.Context, req resource.CreateRequ
 	isExpired, err := utils.IsExpired(expiresAt)
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Error creating api key",
-			"Could not create api key, unexpected error: "+err.Error(),
+			"Error creating pre auth key",
+			"Could not create pre auth key, unexpected error: "+err.Error(),
 		)
 		return
 	}
@@ -238,7 +240,7 @@ func (r *preAuthKeyResource) Create(ctx context.Context, req resource.CreateRequ
 func (r *preAuthKeyResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	resp.Diagnostics.AddError(
 		"Error updating pre auth key",
-		"Api keys cannot be updated",
+		"pre auth keys cannot be updated",
 	)
 }
 
@@ -272,8 +274,8 @@ func (r *preAuthKeyResource) Read(ctx context.Context, req resource.ReadRequest,
 	keys, err := r.client.ListPreAuthKeys(ctx, user)
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to get api key",
-			"An error was encountered retrieving the api key.\n"+
+			"Unable to get pre auth key",
+			"An error was encountered retrieving the pre auth key.\n"+
 				err.Error(),
 		)
 		return
