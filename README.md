@@ -12,9 +12,10 @@ Here is a table illustrating provider versions and the Headscale versions they s
 
 | Provider Version                                                             | Headscale Version |
 | ---------------------------------------------------------------------------- | ----------------- |
-| [0.1.x](https://github.com/awlsring/terraform-provider-headscale/tree/0.1.x) | 20-22             |
-| [0.2.x](https://github.com/awlsring/terraform-provider-headscale/tree/0.2.x) | 23-24             |
-| [0.3.x](https://github.com/awlsring/terraform-provider-headscale/tree/0.3.x) | 25                |
+| [0.1.x](https://github.com/awlsring/terraform-provider-headscale/tree/0.1.x) | 0.20.x-0.22.x     |
+| [0.2.x](https://github.com/awlsring/terraform-provider-headscale/tree/0.2.x) | 0.23.x-0.24.x     |
+| [0.3.x](https://github.com/awlsring/terraform-provider-headscale/tree/0.3.x) | 0.25.x            |
+| [0.4.x](https://github.com/awlsring/terraform-provider-headscale/tree/0.4.x) | 0.26.x            |
 
 ## Differences between the Tailscale and Headscale Providers
 
