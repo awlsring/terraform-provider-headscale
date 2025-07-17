@@ -13,10 +13,16 @@ The device tags resource allows setting tags on a device registered on the Heads
 ## Example Usage
 
 ```terraform
-# Sets the tag `tag:terrafrom` to the device with ID 1
+# Sets the tag `tag:terraform` to the device with ID 1
 resource "headscale_device_tags" "device_1_tags" {
     device_id = "1"
-    tags = [ "tag:terrafrom" ]
+    tags = [ "tag:terraform" ]
+}
+
+# Applies multiple tags to a device
+resource "headscale_device_tags" "device_tags" {
+    device_id = "1"
+    tags = ["tag:server", "tag:production"]
 }
 ```
 
