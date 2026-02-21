@@ -3,7 +3,7 @@ HOSTNAME=github.com
 NAMESPACE=awlsring
 NAME=headscale
 BINARY=terraform-provider-${NAME}
-HEADSCALE_VERSION=26.0
+HEADSCALE_VERSION=28.0
 
 default: gen install terradocs
 

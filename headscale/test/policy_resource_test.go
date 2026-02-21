@@ -139,7 +139,7 @@ func Test_PolicyResource_ComplexPolicy(t *testing.T) {
 							{
 								"action": "accept",
 								"src": ["group:admin"],
-								"dst": ["*"],
+								"dst": ["autogroup:member"],
 								"users": ["root", "ubuntu"],
 							},
 						],

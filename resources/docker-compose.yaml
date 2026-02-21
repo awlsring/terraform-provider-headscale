@@ -2,7 +2,7 @@ version: "3"
 services:
   headscale:
     container_name: headscale
-    image: "headscale/headscale:0.26.1"
+    image: "headscale/headscale:0.28.0"
     command: serve
     networks:
       - headscale-network

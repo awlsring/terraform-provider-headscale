@@ -7,13 +7,13 @@ import (
 
 	"github.com/awlsring/terraform-provider-headscale/internal/service"
 	"github.com/awlsring/terraform-provider-headscale/internal/utils"
-	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -125,17 +125,16 @@ func (d *preAuthKeyResource) Schema(_ context.Context, _ resource.SchemaRequest,
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
-			"acl_tags": schema.ListAttribute{
+			"acl_tags": schema.SetAttribute{
 				Computed:    true,
 				Optional:    true,
 				ElementType: types.StringType,
 				Description: "ACL tags on the pre auth key.",
-				PlanModifiers: []planmodifier.List{
-					listplanmodifier.RequiresReplace(),
+				PlanModifiers: []planmodifier.Set{
+					setplanmodifier.RequiresReplace(),
 				},
-				Validators: []validator.List{
-					listvalidator.UniqueValues(),
-					listvalidator.ValueStringsAre(
+				Validators: []validator.Set{
+					setvalidator.ValueStringsAre(
 						stringvalidator.RegexMatches(regexp.MustCompile(`tag:[\w-]+`), "tag must follow scheme of `tag:<value>`"),
 					),
 				},
@@ -219,7 +218,7 @@ func (r *preAuthKeyResource) Create(ctx context.Context, req resource.CreateRequ
 
 	// API method doesn't return the list of tags so we need to set it from the plan if any were defined
 	if plan.ACLTags.IsNull() || plan.ACLTags.IsUnknown() {
-		tags, diags := types.ListValueFrom(ctx, types.StringType, key.ACLTags)
+		tags, diags := types.SetValueFrom(ctx, types.StringType, key.ACLTags)
 		if diags.HasError() {
 			resp.Diagnostics.Append(diags...)
 			return
@@ -252,7 +251,7 @@ func (r *preAuthKeyResource) Delete(ctx context.Context, req resource.DeleteRequ
 		return
 	}
 
-	err := r.client.ExpirePreAuthKey(ctx, state.User.ValueString(), state.Key.ValueString())
+	err := r.client.ExpirePreAuthKey(ctx, state.Id.ValueString(), state.User.ValueString(), state.Key.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error deleting pre auth key",
@@ -281,9 +280,13 @@ func (r *preAuthKeyResource) Read(ctx context.Context, req resource.ReadRequest,
 		return
 	}
 
-	var m preAuthKeyResourceModel
+	var (
+		found bool
+		m     preAuthKeyResourceModel
+	)
 	for _, key := range keys {
 		if key.ID == id {
+			found = true
 			expiresAt := key.Expiration.DeepCopy().String()
 			isExpired, err := utils.IsExpired(expiresAt)
 			if err != nil {
@@ -307,14 +310,19 @@ func (r *preAuthKeyResource) Read(ctx context.Context, req resource.ReadRequest,
 				CreatedAt:    types.StringValue(key.CreatedAt.DeepCopy().String()),
 			}
 
-			tags, diags := types.ListValueFrom(ctx, types.StringType, key.ACLTags)
+			tags, diags := types.SetValueFrom(ctx, types.StringType, key.ACLTags)
 			if diags.HasError() {
 				resp.Diagnostics.Append(diags...)
 				return
 			}
-
 			m.ACLTags = tags
+			break
 		}
+	}
+
+	if !found {
+		resp.State.RemoveResource(ctx)
+		return
 	}
 
 	diags := resp.State.Set(ctx, m)

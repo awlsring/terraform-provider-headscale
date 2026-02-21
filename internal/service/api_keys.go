@@ -47,12 +47,18 @@ func (h *HeadscaleService) CreateAPIKey(ctx context.Context, expiration *strfmt.
 	return resp.Payload.APIKey, nil
 }
 
-func (h *HeadscaleService) ExpireAPIKey(ctx context.Context, key string) error {
+func (h *HeadscaleService) ExpireAPIKey(ctx context.Context, id string, prefix string) error {
 	request := headscale_service.NewHeadscaleServiceExpireAPIKeyParams()
 	request.SetContext(ctx)
-	request.SetBody(&models.V1ExpireAPIKeyRequest{
-		Prefix: key,
-	})
+
+	body := &models.V1ExpireAPIKeyRequest{}
+	if id != "" {
+		body.ID = id
+	} else {
+		body.Prefix = prefix
+	}
+	request.SetBody(body)
+
 	_, err := h.client.HeadscaleService.HeadscaleServiceExpireAPIKey(request)
 	if err != nil {
 		return handleRequestError(err)

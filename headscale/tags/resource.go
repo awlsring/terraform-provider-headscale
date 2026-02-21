@@ -138,34 +138,15 @@ func (r *deviceTagsResource) tagDevice(ctx context.Context, m *deviceTagModel) (
 	dm := deviceTagModel{
 		DeviceId: types.StringValue(device.ID),
 		Id:       types.StringValue(device.ID),
+		Tags:     m.Tags,
 	}
-
-	c, diags := types.ListValueFrom(ctx, types.StringType, device.ForcedTags)
-	if diags.HasError() {
-		return nil, fmt.Errorf("error creating list of tags")
-	}
-
-	dm.Tags = c
 
 	return &dm, nil
 }
 
 func (r *deviceTagsResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var state deviceTagModel
-	diags := req.State.Get(ctx, &state)
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	_, err := r.client.TagDevice(ctx, state.DeviceId.ValueString(), []string{})
-	if err != nil {
-		resp.Diagnostics.AddError(
-			"Error deleting device tags",
-			"Could not remove tags, unexpected error: "+err.Error(),
-		)
-		return
-	}
+	// Headscale 0.28.0 requires at least one tag on already-tagged nodes and rejects clearing all tags.
+	// Since this resource only models assignment, destroy only removes the resource from Terraform state.
 }
 
 func (r *deviceTagsResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -185,6 +166,10 @@ func (r *deviceTagsResource) Read(ctx context.Context, req resource.ReadRequest,
 				err.Error(),
 		)
 		return
+	}
+
+	if (device.Tags.IsNull() || device.Tags.IsUnknown()) && !state.Tags.IsNull() && !state.Tags.IsUnknown() {
+		device.Tags = state.Tags
 	}
 
 	diags := resp.State.Set(ctx, device)
@@ -225,7 +210,7 @@ func (r *deviceTagsResource) readDevice(ctx context.Context, id string) (*device
 		Id:       types.StringValue(device.ID),
 	}
 
-	c, diags := types.ListValueFrom(ctx, types.StringType, device.ForcedTags)
+	c, diags := types.ListValueFrom(ctx, types.StringType, device.Tags)
 	if diags.HasError() {
 		return nil, fmt.Errorf("error creating list of tags")
 	}

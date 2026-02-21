@@ -68,6 +68,8 @@ type ClientService interface {
 
 	HeadscaleServiceDeleteNode(params *HeadscaleServiceDeleteNodeParams, opts ...ClientOption) (*HeadscaleServiceDeleteNodeOK, error)
 
+	HeadscaleServiceDeletePreAuthKey(params *HeadscaleServiceDeletePreAuthKeyParams, opts ...ClientOption) (*HeadscaleServiceDeletePreAuthKeyOK, error)
+
 	HeadscaleServiceDeleteUser(params *HeadscaleServiceDeleteUserParams, opts ...ClientOption) (*HeadscaleServiceDeleteUserOK, error)
 
 	HeadscaleServiceExpireAPIKey(params *HeadscaleServiceExpireAPIKeyParams, opts ...ClientOption) (*HeadscaleServiceExpireAPIKeyOK, error)
@@ -80,6 +82,8 @@ type ClientService interface {
 
 	HeadscaleServiceGetPolicy(params *HeadscaleServiceGetPolicyParams, opts ...ClientOption) (*HeadscaleServiceGetPolicyOK, error)
 
+	HeadscaleServiceHealth(params *HeadscaleServiceHealthParams, opts ...ClientOption) (*HeadscaleServiceHealthOK, error)
+
 	HeadscaleServiceListAPIKeys(params *HeadscaleServiceListAPIKeysParams, opts ...ClientOption) (*HeadscaleServiceListAPIKeysOK, error)
 
 	HeadscaleServiceListNodes(params *HeadscaleServiceListNodesParams, opts ...ClientOption) (*HeadscaleServiceListNodesOK, error)
@@ -87,8 +91,6 @@ type ClientService interface {
 	HeadscaleServiceListPreAuthKeys(params *HeadscaleServiceListPreAuthKeysParams, opts ...ClientOption) (*HeadscaleServiceListPreAuthKeysOK, error)
 
 	HeadscaleServiceListUsers(params *HeadscaleServiceListUsersParams, opts ...ClientOption) (*HeadscaleServiceListUsersOK, error)
-
-	HeadscaleServiceMoveNode(params *HeadscaleServiceMoveNodeParams, opts ...ClientOption) (*HeadscaleServiceMoveNodeOK, error)
 
 	HeadscaleServiceRegisterNode(params *HeadscaleServiceRegisterNodeParams, opts ...ClientOption) (*HeadscaleServiceRegisterNodeOK, error)
 
@@ -365,6 +367,43 @@ func (a *Client) HeadscaleServiceDeleteNode(params *HeadscaleServiceDeleteNodePa
 }
 
 /*
+HeadscaleServiceDeletePreAuthKey headscale service delete pre auth key API
+*/
+func (a *Client) HeadscaleServiceDeletePreAuthKey(params *HeadscaleServiceDeletePreAuthKeyParams, opts ...ClientOption) (*HeadscaleServiceDeletePreAuthKeyOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewHeadscaleServiceDeletePreAuthKeyParams()
+	}
+	op := &runtime.ClientOperation{
+		ID:                 "HeadscaleService_DeletePreAuthKey",
+		Method:             "DELETE",
+		PathPattern:        "/api/v1/preauthkey",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http"},
+		Params:             params,
+		Reader:             &HeadscaleServiceDeletePreAuthKeyReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*HeadscaleServiceDeletePreAuthKeyOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	unexpectedSuccess := result.(*HeadscaleServiceDeletePreAuthKeyDefault)
+	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
+}
+
+/*
 HeadscaleServiceDeleteUser headscale service delete user API
 */
 func (a *Client) HeadscaleServiceDeleteUser(params *HeadscaleServiceDeleteUserParams, opts ...ClientOption) (*HeadscaleServiceDeleteUserOK, error) {
@@ -587,6 +626,43 @@ func (a *Client) HeadscaleServiceGetPolicy(params *HeadscaleServiceGetPolicyPara
 }
 
 /*
+HeadscaleServiceHealth healths start
+*/
+func (a *Client) HeadscaleServiceHealth(params *HeadscaleServiceHealthParams, opts ...ClientOption) (*HeadscaleServiceHealthOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewHeadscaleServiceHealthParams()
+	}
+	op := &runtime.ClientOperation{
+		ID:                 "HeadscaleService_Health",
+		Method:             "GET",
+		PathPattern:        "/api/v1/health",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http"},
+		Params:             params,
+		Reader:             &HeadscaleServiceHealthReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*HeadscaleServiceHealthOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	unexpectedSuccess := result.(*HeadscaleServiceHealthDefault)
+	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
+}
+
+/*
 HeadscaleServiceListAPIKeys headscale service list Api keys API
 */
 func (a *Client) HeadscaleServiceListAPIKeys(params *HeadscaleServiceListAPIKeysParams, opts ...ClientOption) (*HeadscaleServiceListAPIKeysOK, error) {
@@ -731,43 +807,6 @@ func (a *Client) HeadscaleServiceListUsers(params *HeadscaleServiceListUsersPara
 	}
 	// unexpected success response
 	unexpectedSuccess := result.(*HeadscaleServiceListUsersDefault)
-	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
-}
-
-/*
-HeadscaleServiceMoveNode headscale service move node API
-*/
-func (a *Client) HeadscaleServiceMoveNode(params *HeadscaleServiceMoveNodeParams, opts ...ClientOption) (*HeadscaleServiceMoveNodeOK, error) {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewHeadscaleServiceMoveNodeParams()
-	}
-	op := &runtime.ClientOperation{
-		ID:                 "HeadscaleService_MoveNode",
-		Method:             "POST",
-		PathPattern:        "/api/v1/node/{nodeId}/user",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http"},
-		Params:             params,
-		Reader:             &HeadscaleServiceMoveNodeReader{formats: a.formats},
-		Context:            params.Context,
-		Client:             params.HTTPClient,
-	}
-	for _, opt := range opts {
-		opt(op)
-	}
-
-	result, err := a.transport.Submit(op)
-	if err != nil {
-		return nil, err
-	}
-	success, ok := result.(*HeadscaleServiceMoveNodeOK)
-	if ok {
-		return success, nil
-	}
-	// unexpected success response
-	unexpectedSuccess := result.(*HeadscaleServiceMoveNodeDefault)
 	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
 }
 

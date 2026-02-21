@@ -3,8 +3,10 @@ package apikey
 import (
 	"context"
 	"regexp"
+	"strconv"
 	"strings"
 
+	"github.com/awlsring/terraform-provider-headscale/internal/gen/models"
 	"github.com/awlsring/terraform-provider-headscale/internal/service"
 	"github.com/awlsring/terraform-provider-headscale/internal/utils"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
@@ -117,6 +119,15 @@ func (r *apiKeyResource) Create(ctx context.Context, req resource.CreateRequest,
 		return
 	}
 
+	existingKeys, err := r.client.ListAPIKeys(ctx)
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Error creating api key",
+			"Could not create api key, unexpected error: "+err.Error(),
+		)
+		return
+	}
+
 	apiKey, err := r.client.CreateAPIKey(ctx, expireAt)
 	if err != nil {
 		resp.Diagnostics.AddError(
@@ -135,29 +146,22 @@ func (r *apiKeyResource) Create(ctx context.Context, req resource.CreateRequest,
 		return
 	}
 
-	var m apikeyResourceModel
-	for _, key := range apiKeys {
-		if strings.Contains(apiKey, key.Prefix) {
-			expiresAt := key.Expiration.DeepCopy().String()
-			isExpired, err := utils.IsExpired(expiresAt)
-			if err != nil {
-				resp.Diagnostics.AddError(
-					"Error creating api key",
-					"Could not create api key, unexpected error: "+err.Error(),
-				)
-				return
-			}
+	createdKey := findCreatedAPIKey(apiKey, existingKeys, apiKeys)
+	if createdKey == nil {
+		resp.Diagnostics.AddError(
+			"Error creating api key",
+			"Could not resolve key metadata after creation.",
+		)
+		return
+	}
 
-			m = apikeyResourceModel{
-				TimeToExpire: plan.TimeToExpire,
-				Id:           types.StringValue(key.ID),
-				Prefix:       types.StringValue(key.Prefix),
-				Key:          types.StringValue(apiKey),
-				Expiration:   types.StringValue(expiresAt),
-				Expired:      types.BoolValue(isExpired),
-				CreatedAt:    types.StringValue(key.CreatedAt.DeepCopy().String()),
-			}
-		}
+	m, err := apiKeyResourceModelFromAPIKey(plan.TimeToExpire, types.StringValue(apiKey), createdKey)
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Error creating api key",
+			"Could not create api key, unexpected error: "+err.Error(),
+		)
+		return
 	}
 
 	diags = resp.State.Set(ctx, &m)
@@ -182,7 +186,7 @@ func (r *apiKeyResource) Delete(ctx context.Context, req resource.DeleteRequest,
 		return
 	}
 
-	err := r.client.ExpireAPIKey(ctx, state.Prefix.ValueString())
+	err := r.client.ExpireAPIKey(ctx, state.Id.ValueString(), state.Prefix.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error deleting api key",
@@ -199,7 +203,8 @@ func (r *apiKeyResource) Read(ctx context.Context, req resource.ReadRequest, res
 		return
 	}
 
-	apiKey := state.Prefix.ValueString()
+	apiKeyID := state.Id.ValueString()
+	apiKeyPrefix := state.Prefix.ValueString()
 	apiKeys, err := r.client.ListAPIKeys(ctx)
 	if err != nil {
 		resp.Diagnostics.AddError(
@@ -210,29 +215,28 @@ func (r *apiKeyResource) Read(ctx context.Context, req resource.ReadRequest, res
 		return
 	}
 
-	var m apikeyResourceModel
+	var (
+		found bool
+		m     apikeyResourceModel
+	)
 	for _, key := range apiKeys {
-		if key.Prefix == apiKey {
-			expiresAt := key.Expiration.DeepCopy().String()
-			isExpired, err := utils.IsExpired(expiresAt)
+		if key.ID == apiKeyID || key.Prefix == apiKeyPrefix {
+			found = true
+			m, err = apiKeyResourceModelFromAPIKey(state.TimeToExpire, state.Key, key)
 			if err != nil {
 				resp.Diagnostics.AddError(
-					"Error creating api key",
-					"Could not create api key, unexpected error: "+err.Error(),
+					"Error reading api key",
+					"Could not read api key, unexpected error: "+err.Error(),
 				)
 				return
 			}
-
-			m = apikeyResourceModel{
-				TimeToExpire: state.TimeToExpire,
-				Id:           types.StringValue(key.ID),
-				Key:          state.Key,
-				Prefix:       types.StringValue(key.Prefix),
-				Expiration:   types.StringValue(expiresAt),
-				Expired:      types.BoolValue(isExpired),
-				CreatedAt:    types.StringValue(key.CreatedAt.DeepCopy().String()),
-			}
+			break
 		}
+	}
+
+	if !found {
+		resp.State.RemoveResource(ctx)
+		return
 	}
 
 	diags := resp.State.Set(ctx, m)
@@ -240,4 +244,85 @@ func (r *apiKeyResource) Read(ctx context.Context, req resource.ReadRequest, res
 	if resp.Diagnostics.HasError() {
 		return
 	}
+}
+
+func apiKeyResourceModelFromAPIKey(timeToExpire types.String, apiKey types.String, key *models.V1APIKey) (apikeyResourceModel, error) {
+	expiresAt := key.Expiration.DeepCopy().String()
+	isExpired, err := utils.IsExpired(expiresAt)
+	if err != nil {
+		return apikeyResourceModel{}, err
+	}
+
+	return apikeyResourceModel{
+		TimeToExpire: timeToExpire,
+		Id:           types.StringValue(key.ID),
+		Key:          apiKey,
+		Prefix:       types.StringValue(key.Prefix),
+		Expiration:   types.StringValue(expiresAt),
+		Expired:      types.BoolValue(isExpired),
+		CreatedAt:    types.StringValue(key.CreatedAt.DeepCopy().String()),
+	}, nil
+}
+
+func findCreatedAPIKey(createdKey string, before, after []*models.V1APIKey) *models.V1APIKey {
+	beforeIDs := make(map[string]struct{}, len(before))
+	for _, key := range before {
+		beforeIDs[key.ID] = struct{}{}
+	}
+
+	var newKeys []*models.V1APIKey
+	for _, key := range after {
+		if _, exists := beforeIDs[key.ID]; !exists {
+			newKeys = append(newKeys, key)
+		}
+	}
+
+	if len(newKeys) == 1 {
+		return newKeys[0]
+	}
+	if len(newKeys) > 1 {
+		if key := matchAPIKeyBySecret(createdKey, newKeys); key != nil {
+			return key
+		}
+		return newestAPIKeyByID(newKeys)
+	}
+
+	if key := matchAPIKeyBySecret(createdKey, after); key != nil {
+		return key
+	}
+	return newestAPIKeyByID(after)
+}
+
+func matchAPIKeyBySecret(createdKey string, keys []*models.V1APIKey) *models.V1APIKey {
+	for _, key := range keys {
+		if strings.HasPrefix(createdKey, key.Prefix) || strings.Contains(createdKey, key.Prefix) {
+			return key
+		}
+	}
+	return nil
+}
+
+func newestAPIKeyByID(keys []*models.V1APIKey) *models.V1APIKey {
+	if len(keys) == 0 {
+		return nil
+	}
+
+	newest := keys[0]
+	newestID, err := strconv.ParseUint(newest.ID, 10, 64)
+	if err != nil {
+		return newest
+	}
+
+	for _, key := range keys[1:] {
+		id, err := strconv.ParseUint(key.ID, 10, 64)
+		if err != nil {
+			continue
+		}
+		if id > newestID {
+			newest = key
+			newestID = id
+		}
+	}
+
+	return newest
 }

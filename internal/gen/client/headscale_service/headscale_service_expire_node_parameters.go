@@ -61,6 +61,11 @@ HeadscaleServiceExpireNodeParams contains all the parameters to send to the API 
 */
 type HeadscaleServiceExpireNodeParams struct {
 
+	// Expiry.
+	//
+	// Format: date-time
+	Expiry *strfmt.DateTime
+
 	// NodeID.
 	//
 	// Format: uint64
@@ -119,6 +124,17 @@ func (o *HeadscaleServiceExpireNodeParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
+// WithExpiry adds the expiry to the headscale service expire node params
+func (o *HeadscaleServiceExpireNodeParams) WithExpiry(expiry *strfmt.DateTime) *HeadscaleServiceExpireNodeParams {
+	o.SetExpiry(expiry)
+	return o
+}
+
+// SetExpiry adds the expiry to the headscale service expire node params
+func (o *HeadscaleServiceExpireNodeParams) SetExpiry(expiry *strfmt.DateTime) {
+	o.Expiry = expiry
+}
+
 // WithNodeID adds the nodeID to the headscale service expire node params
 func (o *HeadscaleServiceExpireNodeParams) WithNodeID(nodeID string) *HeadscaleServiceExpireNodeParams {
 	o.SetNodeID(nodeID)
@@ -137,6 +153,23 @@ func (o *HeadscaleServiceExpireNodeParams) WriteToRequest(r runtime.ClientReques
 		return err
 	}
 	var res []error
+
+	if o.Expiry != nil {
+
+		// query param expiry
+		var qrExpiry strfmt.DateTime
+
+		if o.Expiry != nil {
+			qrExpiry = *o.Expiry
+		}
+		qExpiry := qrExpiry.String()
+		if qExpiry != "" {
+
+			if err := r.SetQueryParam("expiry", qExpiry); err != nil {
+				return err
+			}
+		}
+	}
 
 	// path param nodeId
 	if err := r.SetPathParam("nodeId", o.NodeID); err != nil {

@@ -17,6 +17,9 @@ import (
 // swagger:model v1ExpireApiKeyRequest
 type V1ExpireAPIKeyRequest struct {
 
+	// id
+	ID string `json:"id,omitempty"`
+
 	// prefix
 	Prefix string `json:"prefix,omitempty"`
 }

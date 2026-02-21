@@ -36,17 +36,14 @@ type V1Node struct {
 	// Format: date-time
 	Expiry strfmt.DateTime `json:"expiry,omitempty"`
 
-	// forced tags
-	ForcedTags []string `json:"forcedTags"`
-
-	// given name
+	// Deprecated
+	// repeated string forced_tags = 18;
+	// repeated string invalid_tags = 19;
+	// repeated string valid_tags = 20;
 	GivenName string `json:"givenName,omitempty"`
 
 	// id
 	ID string `json:"id,omitempty"`
-
-	// invalid tags
-	InvalidTags []string `json:"invalidTags"`
 
 	// ip addresses
 	IPAddresses []string `json:"ipAddresses"`
@@ -76,11 +73,11 @@ type V1Node struct {
 	// subnet routes
 	SubnetRoutes []string `json:"subnetRoutes"`
 
+	// tags
+	Tags []string `json:"tags"`
+
 	// user
 	User *V1User `json:"user,omitempty"`
-
-	// valid tags
-	ValidTags []string `json:"validTags"`
 }
 
 // Validate validates this v1 node

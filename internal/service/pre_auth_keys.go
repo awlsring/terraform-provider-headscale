@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	"github.com/awlsring/terraform-provider-headscale/internal/gen/client/headscale_service"
@@ -12,7 +13,6 @@ import (
 func (h *HeadscaleService) ListPreAuthKeys(ctx context.Context, user string) ([]*models.V1PreAuthKey, error) {
 	request := headscale_service.NewHeadscaleServiceListPreAuthKeysParams()
 	request.SetContext(ctx)
-	request.SetUser(&user)
 
 	resp, err := h.client.HeadscaleService.HeadscaleServiceListPreAuthKeys(request)
 	if err != nil {
@@ -24,7 +24,22 @@ func (h *HeadscaleService) ListPreAuthKeys(ctx context.Context, user string) ([]
 		return nil, err
 	}
 
-	return resp.Payload.PreAuthKeys, nil
+	if user == "" {
+		return resp.Payload.PreAuthKeys, nil
+	}
+
+	filtered := make([]*models.V1PreAuthKey, 0, len(resp.Payload.PreAuthKeys))
+	for _, preAuthKey := range resp.Payload.PreAuthKeys {
+		if preAuthKey.User == nil {
+			continue
+		}
+
+		if preAuthKey.User.ID == user || preAuthKey.User.Name == user {
+			filtered = append(filtered, preAuthKey)
+		}
+	}
+
+	return filtered, nil
 }
 
 type CreatePreAuthKeyInput struct {
@@ -63,12 +78,30 @@ func (h *HeadscaleService) CreatePreAuthKey(ctx context.Context, input CreatePre
 	return resp.Payload.PreAuthKey, nil
 }
 
-func (h *HeadscaleService) ExpirePreAuthKey(ctx context.Context, user string, key string) error {
+func (h *HeadscaleService) ExpirePreAuthKey(ctx context.Context, id string, user string, key string) error {
+	resolvedID := id
+	if resolvedID == "" {
+		keys, err := h.ListPreAuthKeys(ctx, user)
+		if err != nil {
+			return err
+		}
+
+		for _, existingKey := range keys {
+			if existingKey.Key == key || existingKey.ID == key {
+				resolvedID = existingKey.ID
+				break
+			}
+		}
+	}
+
+	if resolvedID == "" {
+		return fmt.Errorf("unable to resolve pre-auth key id for key %q", key)
+	}
+
 	request := headscale_service.NewHeadscaleServiceExpirePreAuthKeyParams()
 	request.SetContext(ctx)
 	request.SetBody(&models.V1ExpirePreAuthKeyRequest{
-		User: user,
-		Key:  key,
+		ID: resolvedID,
 	})
 
 	_, err := h.client.HeadscaleService.HeadscaleServiceExpirePreAuthKey(request)

@@ -61,6 +61,11 @@ HeadscaleServiceDeleteAPIKeyParams contains all the parameters to send to the AP
 */
 type HeadscaleServiceDeleteAPIKeyParams struct {
 
+	// ID.
+	//
+	// Format: uint64
+	ID *string
+
 	// Prefix.
 	Prefix string
 
@@ -117,6 +122,17 @@ func (o *HeadscaleServiceDeleteAPIKeyParams) SetHTTPClient(client *http.Client) 
 	o.HTTPClient = client
 }
 
+// WithID adds the id to the headscale service delete Api key params
+func (o *HeadscaleServiceDeleteAPIKeyParams) WithID(id *string) *HeadscaleServiceDeleteAPIKeyParams {
+	o.SetID(id)
+	return o
+}
+
+// SetID adds the id to the headscale service delete Api key params
+func (o *HeadscaleServiceDeleteAPIKeyParams) SetID(id *string) {
+	o.ID = id
+}
+
 // WithPrefix adds the prefix to the headscale service delete Api key params
 func (o *HeadscaleServiceDeleteAPIKeyParams) WithPrefix(prefix string) *HeadscaleServiceDeleteAPIKeyParams {
 	o.SetPrefix(prefix)
@@ -135,6 +151,23 @@ func (o *HeadscaleServiceDeleteAPIKeyParams) WriteToRequest(r runtime.ClientRequ
 		return err
 	}
 	var res []error
+
+	if o.ID != nil {
+
+		// query param id
+		var qrID string
+
+		if o.ID != nil {
+			qrID = *o.ID
+		}
+		qID := qrID
+		if qID != "" {
+
+			if err := r.SetQueryParam("id", qID); err != nil {
+				return err
+			}
+		}
+	}
 
 	// path param prefix
 	if err := r.SetPathParam("prefix", o.Prefix); err != nil {

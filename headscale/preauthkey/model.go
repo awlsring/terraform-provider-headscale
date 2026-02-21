@@ -33,5 +33,5 @@ type preAuthKeyResourceModel struct {
 	Expired      types.Bool   `tfsdk:"expired"`
 	Expiration   types.String `tfsdk:"expiration"`
 	CreatedAt    types.String `tfsdk:"created_at"`
-	ACLTags      types.List   `tfsdk:"acl_tags"`
+	ACLTags      types.Set    `tfsdk:"acl_tags"`
 }
