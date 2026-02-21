@@ -230,7 +230,7 @@ func (r *deviceRoutesResource) enableRoutes(ctx context.Context, deviceId string
 	}
 
 	expectedRoutes := normalizeRoutesForState(routesRequested, routesRequested)
-	deadline := time.Now().Add(10 * time.Second)
+	deadline := time.Now().Add(20 * time.Second)
 
 	var lastRead *deviceRouteModel
 	for {
@@ -248,7 +248,15 @@ func (r *deviceRoutesResource) enableRoutes(ctx context.Context, deviceId string
 		}
 		lastRead = enabledRoutesModel
 
-		if slices.Equal(sanitizedRoutes, expectedRoutes) || time.Now().After(deadline) {
+		if slices.Equal(sanitizedRoutes, expectedRoutes) {
+			return lastRead, nil
+		}
+		if time.Now().After(deadline) {
+			// Avoid transient post-apply list inconsistencies when the API lags route propagation.
+			lastRead.Routes, err = stringListToTFStringList(ctx, expectedRoutes)
+			if err != nil {
+				return nil, fmt.Errorf("error converting expected routes to TF string list: %w", err)
+			}
 			return lastRead, nil
 		}
 

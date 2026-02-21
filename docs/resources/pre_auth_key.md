@@ -53,7 +53,7 @@ resource "headscale_pre_auth_key" "with_tags" {
 
 ### Optional
 
-- `acl_tags` (List of String) ACL tags on the pre auth key.
+- `acl_tags` (Set of String) ACL tags on the pre auth key.
 - `ephemeral` (Boolean) If the key is ephemeral.
 - `reusable` (Boolean) If the key is reusable.
 - `time_to_expire` (String) The time until the key expires. This is a string in the format of `30m`, `3h`, `90d`, etc. Defaults to `1h`
