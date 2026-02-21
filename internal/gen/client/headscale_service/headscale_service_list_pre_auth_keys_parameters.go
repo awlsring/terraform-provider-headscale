@@ -60,12 +60,6 @@ HeadscaleServiceListPreAuthKeysParams contains all the parameters to send to the
 	Typically these are written to a http.Request.
 */
 type HeadscaleServiceListPreAuthKeysParams struct {
-
-	// User.
-	//
-	// Format: uint64
-	User *string
-
 	timeout    time.Duration
 	Context    context.Context
 	HTTPClient *http.Client
@@ -119,17 +113,6 @@ func (o *HeadscaleServiceListPreAuthKeysParams) SetHTTPClient(client *http.Clien
 	o.HTTPClient = client
 }
 
-// WithUser adds the user to the headscale service list pre auth keys params
-func (o *HeadscaleServiceListPreAuthKeysParams) WithUser(user *string) *HeadscaleServiceListPreAuthKeysParams {
-	o.SetUser(user)
-	return o
-}
-
-// SetUser adds the user to the headscale service list pre auth keys params
-func (o *HeadscaleServiceListPreAuthKeysParams) SetUser(user *string) {
-	o.User = user
-}
-
 // WriteToRequest writes these params to a swagger request
 func (o *HeadscaleServiceListPreAuthKeysParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Registry) error {
 
@@ -137,23 +120,6 @@ func (o *HeadscaleServiceListPreAuthKeysParams) WriteToRequest(r runtime.ClientR
 		return err
 	}
 	var res []error
-
-	if o.User != nil {
-
-		// query param user
-		var qrUser string
-
-		if o.User != nil {
-			qrUser = *o.User
-		}
-		qUser := qrUser
-		if qUser != "" {
-
-			if err := r.SetQueryParam("user", qUser); err != nil {
-				return err
-			}
-		}
-	}
 
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)

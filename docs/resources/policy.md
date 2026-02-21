@@ -52,7 +52,7 @@ resource "headscale_policy" "complex" {
       {
         "action" : "accept",
         "src" : ["group:admin"],
-        "dst" : ["*"],
+        "dst" : ["autogroup:member"],
         "users" : ["root", "ubuntu"]
       }
     ]

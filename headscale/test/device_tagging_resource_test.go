@@ -11,7 +11,17 @@ func Test_DeviceTaggingResource(t *testing.T) {
 		ProtoV6ProviderFactories: TestAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: ProviderConfig + `resource "headscale_device_tags" "test" {
+				Config: ProviderConfig + `resource "headscale_policy" "tags" {
+					policy = jsonencode({
+						"tagOwners": {
+							"tag:terraform": ["terraform@"],
+							"tag:terraform:tests": ["terraform@"],
+						},
+					})
+				  }
+
+				  resource "headscale_device_tags" "test" {
+					depends_on = [headscale_policy.tags]
 					device_id = 1
 					tags = ["tag:terraform"]
 				  }`,
@@ -20,7 +30,17 @@ func Test_DeviceTaggingResource(t *testing.T) {
 				),
 			},
 			{
-				Config: ProviderConfig + `resource "headscale_device_tags" "test" {
+				Config: ProviderConfig + `resource "headscale_policy" "tags" {
+					policy = jsonencode({
+						"tagOwners": {
+							"tag:terraform": ["terraform@"],
+							"tag:terraform:tests": ["terraform@"],
+						},
+					})
+				  }
+
+				  resource "headscale_device_tags" "test" {
+					depends_on = [headscale_policy.tags]
 					device_id = 1
 					tags = ["tag:terraform:tests"]
 				  }`,

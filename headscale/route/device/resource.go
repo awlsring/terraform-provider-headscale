@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"regexp"
 	"slices"
+	"time"
 
 	"github.com/awlsring/terraform-provider-headscale/internal/service"
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
@@ -162,7 +163,7 @@ func (r *deviceRoutesResource) Read(ctx context.Context, req resource.ReadReques
 
 	originalRoutes := tfStringListToStringList(state.Routes)
 	enabledRoutesStrList := tfStringListToStringList(deviceRoutes.Routes)
-	sanitizedRoutes := filterOutUnspecifiedExitNodeRoutes(originalRoutes, enabledRoutesStrList)
+	sanitizedRoutes := normalizeRoutesForState(originalRoutes, enabledRoutesStrList)
 	deviceRoutes.Routes, err = stringListToTFStringList(ctx, sanitizedRoutes)
 	if err != nil {
 		resp.Diagnostics.AddError(
@@ -228,35 +229,42 @@ func (r *deviceRoutesResource) enableRoutes(ctx context.Context, deviceId string
 		return nil, fmt.Errorf("error enabling routes on device %s: %w", deviceId, err)
 	}
 
-	enabledRoutesModel, err := r.readDeviceRoutes(ctx, deviceId)
-	if err != nil {
-		return nil, fmt.Errorf("error reading enabled routes on device %s: %w", deviceId, err)
-	}
+	expectedRoutes := normalizeRoutesForState(routesRequested, routesRequested)
+	deadline := time.Now().Add(10 * time.Second)
 
-	// filter out any routes that were not specified in the request
-	enabledRoutesStrList := tfStringListToStringList(enabledRoutesModel.Routes)
-	sanitizedRoutes := filterOutUnspecifiedExitNodeRoutes(routesRequested, enabledRoutesStrList)
-	enabledRoutesModel.Routes, err = stringListToTFStringList(ctx, sanitizedRoutes)
-	if err != nil {
-		return nil, fmt.Errorf("error converting enabled routes to TF string list: %w", err)
-	}
+	var lastRead *deviceRouteModel
+	for {
+		enabledRoutesModel, err := r.readDeviceRoutes(ctx, deviceId)
+		if err != nil {
+			return nil, fmt.Errorf("error reading enabled routes on device %s: %w", deviceId, err)
+		}
 
-	return enabledRoutesModel, nil
+		// normalize routes and keep requested order for deterministic list state.
+		enabledRoutesStrList := tfStringListToStringList(enabledRoutesModel.Routes)
+		sanitizedRoutes := normalizeRoutesForState(routesRequested, enabledRoutesStrList)
+		enabledRoutesModel.Routes, err = stringListToTFStringList(ctx, sanitizedRoutes)
+		if err != nil {
+			return nil, fmt.Errorf("error converting enabled routes to TF string list: %w", err)
+		}
+		lastRead = enabledRoutesModel
+
+		if slices.Equal(sanitizedRoutes, expectedRoutes) || time.Now().After(deadline) {
+			return lastRead, nil
+		}
+
+		time.Sleep(250 * time.Millisecond)
+	}
 }
 
-// there is bespoke behavior with 0.0.0.0/0 and ::/0 routes, so we need to filter them out. If one is specified, the other will be enabled in the backend. We need to be sure to only return the one that was specified and not both.
-func filterOutUnspecifiedExitNodeRoutes(specifiedRoutes []string, detectedRoutes []string) []string {
+// Keep state deterministic by preserving requested order while filtering out implicit exit-node pair routes.
+func normalizeRoutesForState(specifiedRoutes []string, detectedRoutes []string) []string {
 	ipv4ExitNode := "0.0.0.0/0"
 	ipv6ExitNode := "::/0"
 
 	hasIPv4Specified := slices.Contains(specifiedRoutes, ipv4ExitNode)
 	hasIPv6Specified := slices.Contains(specifiedRoutes, ipv6ExitNode)
 
-	if hasIPv4Specified && hasIPv6Specified {
-		return detectedRoutes
-	}
-
-	filteredRoutes := make([]string, 0, len(detectedRoutes))
+	routeDetected := make(map[string]struct{}, len(detectedRoutes))
 	for _, route := range detectedRoutes {
 		if route == ipv4ExitNode && !hasIPv4Specified {
 			continue
@@ -264,7 +272,15 @@ func filterOutUnspecifiedExitNodeRoutes(specifiedRoutes []string, detectedRoutes
 		if route == ipv6ExitNode && !hasIPv6Specified {
 			continue
 		}
-		filteredRoutes = append(filteredRoutes, route)
+		routeDetected[route] = struct{}{}
+	}
+
+	// Return in user-specified order to avoid list-order drift when API ordering differs.
+	filteredRoutes := make([]string, 0, len(specifiedRoutes))
+	for _, route := range specifiedRoutes {
+		if _, ok := routeDetected[route]; ok {
+			filteredRoutes = append(filteredRoutes, route)
+		}
 	}
 
 	return filteredRoutes

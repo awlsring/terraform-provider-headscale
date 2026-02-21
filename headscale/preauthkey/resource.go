@@ -252,7 +252,7 @@ func (r *preAuthKeyResource) Delete(ctx context.Context, req resource.DeleteRequ
 		return
 	}
 
-	err := r.client.ExpirePreAuthKey(ctx, state.User.ValueString(), state.Key.ValueString())
+	err := r.client.ExpirePreAuthKey(ctx, state.Id.ValueString(), state.User.ValueString(), state.Key.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error deleting pre auth key",
@@ -281,9 +281,13 @@ func (r *preAuthKeyResource) Read(ctx context.Context, req resource.ReadRequest,
 		return
 	}
 
-	var m preAuthKeyResourceModel
+	var (
+		found bool
+		m     preAuthKeyResourceModel
+	)
 	for _, key := range keys {
 		if key.ID == id {
+			found = true
 			expiresAt := key.Expiration.DeepCopy().String()
 			isExpired, err := utils.IsExpired(expiresAt)
 			if err != nil {
@@ -307,14 +311,24 @@ func (r *preAuthKeyResource) Read(ctx context.Context, req resource.ReadRequest,
 				CreatedAt:    types.StringValue(key.CreatedAt.DeepCopy().String()),
 			}
 
-			tags, diags := types.ListValueFrom(ctx, types.StringType, key.ACLTags)
-			if diags.HasError() {
-				resp.Diagnostics.Append(diags...)
-				return
+			if !state.ACLTags.IsNull() && !state.ACLTags.IsUnknown() {
+				// Keep user-configured ordering stable since API responses can reorder tags.
+				m.ACLTags = state.ACLTags
+			} else {
+				tags, diags := types.ListValueFrom(ctx, types.StringType, key.ACLTags)
+				if diags.HasError() {
+					resp.Diagnostics.Append(diags...)
+					return
+				}
+				m.ACLTags = tags
 			}
-
-			m.ACLTags = tags
+			break
 		}
+	}
+
+	if !found {
+		resp.State.RemoveResource(ctx)
+		return
 	}
 
 	diags := resp.State.Set(ctx, m)

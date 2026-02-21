@@ -176,11 +176,7 @@ func (d *devicesDataSource) Read(ctx context.Context, req datasource.ReadRequest
 			dm.Addresses = append(dm.Addresses, types.StringValue(add))
 		}
 
-		for _, t := range device.ValidTags {
-			dm.Tags = append(dm.Tags, types.StringValue(t))
-		}
-
-		for _, t := range device.ForcedTags {
+		for _, t := range device.Tags {
 			dm.Tags = append(dm.Tags, types.StringValue(t))
 		}
 

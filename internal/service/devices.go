@@ -133,24 +133,3 @@ func (h *HeadscaleService) TagDevice(ctx context.Context, deviceId string, tags 
 
 	return resp.Payload.Node, nil
 }
-
-func (h *HeadscaleService) MoveDevice(ctx context.Context, deviceId string, user string) (*models.V1Node, error) {
-	request := headscale_service.NewHeadscaleServiceMoveNodeParams()
-	request.SetContext(ctx)
-	request.SetNodeID(deviceId)
-	request.SetBody(&models.HeadscaleServiceMoveNodeBody{
-		User: user,
-	})
-
-	resp, err := h.client.HeadscaleService.HeadscaleServiceMoveNode(request)
-	if err != nil {
-		return nil, handleRequestError(err)
-	}
-
-	err = resp.Payload.Validate(strfmt.Default)
-	if err != nil {
-		return nil, err
-	}
-
-	return resp.Payload.Node, nil
-}

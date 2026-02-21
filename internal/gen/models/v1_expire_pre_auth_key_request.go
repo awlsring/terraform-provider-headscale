@@ -17,11 +17,8 @@ import (
 // swagger:model v1ExpirePreAuthKeyRequest
 type V1ExpirePreAuthKeyRequest struct {
 
-	// key
-	Key string `json:"key,omitempty"`
-
-	// user
-	User string `json:"user,omitempty"`
+	// id
+	ID string `json:"id,omitempty"`
 }
 
 // Validate validates this v1 expire pre auth key request
