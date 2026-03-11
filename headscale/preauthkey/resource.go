@@ -301,13 +301,18 @@ func (r *preAuthKeyResource) Read(ctx context.Context, req resource.ReadRequest,
 				TimeToExpire: state.TimeToExpire,
 				Id:           types.StringValue(key.ID),
 				User:         types.StringValue(key.User.ID),
-				Key:          types.StringValue(key.Key),
-				Reusable:     types.BoolValue(key.Reusable),
-				Ephemeral:    types.BoolValue(key.Ephemeral),
-				Used:         types.BoolValue(key.Used),
-				Expired:      types.BoolValue(isExpired),
-				Expiration:   types.StringValue(expiresAt),
-				CreatedAt:    types.StringValue(key.CreatedAt.DeepCopy().String()),
+				// Preserve the key from state: the List API returns a masked value
+				// (hskey-auth-{prefix}-***) on Headscale ≥ v0.28 because the server
+				// bcrypt-hashes secrets and cannot reconstruct the plaintext after
+				// creation. The only correct source is the Create response, which is
+				// already stored in state.
+				Key:        state.Key,
+				Reusable:   types.BoolValue(key.Reusable),
+				Ephemeral:  types.BoolValue(key.Ephemeral),
+				Used:       types.BoolValue(key.Used),
+				Expired:    types.BoolValue(isExpired),
+				Expiration: types.StringValue(expiresAt),
+				CreatedAt:  types.StringValue(key.CreatedAt.DeepCopy().String()),
 			}
 
 			tags, diags := types.SetValueFrom(ctx, types.StringType, key.ACLTags)

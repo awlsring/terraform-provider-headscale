@@ -161,6 +161,41 @@ func Test_PreAuthKeyResource_InvalidDuration(t *testing.T) {
 	})
 }
 
+// Test_PreAuthKeyResource_KeyPreservedAfterRefresh verifies that the plaintext
+// key stored in state during Create is not overwritten by the masked value
+// (hskey-auth-{prefix}-***) that the Headscale List API returns on
+// Headscale ≥ v0.28.0.  The second step uses RefreshState=true which
+// exercises exactly the same Read code-path as `tofu refresh`.
+func Test_PreAuthKeyResource_KeyPreservedAfterRefresh(t *testing.T) {
+	var capturedKey string
+
+	resource.Test(t, resource.TestCase{
+		ProtoV6ProviderFactories: TestAccProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Step 1: create the key and capture its plaintext value.
+			{
+				Config: ProviderConfig + `resource "headscale_pre_auth_key" "test" {
+					user     = "1"
+					reusable = true
+				}`,
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttrSet("headscale_pre_auth_key.test", "key"),
+					testAccCheckResourceAttrCapturedPreAuth("headscale_pre_auth_key.test", "key", &capturedKey),
+				),
+			},
+			// Step 2: refresh state only (no config change).  The Read function
+			// must preserve the plaintext key; if it overwrites with the masked
+			// value the captured-vs-current check will fail.
+			{
+				RefreshState: true,
+				Check: resource.ComposeAggregateTestCheckFunc(
+					testAccCheckResourceAttrUnchangedPreAuth("headscale_pre_auth_key.test", "key", &capturedKey),
+				),
+			},
+		},
+	})
+}
+
 func Test_PreAuthKeyResource_InvalidUserID(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		ProtoV6ProviderFactories: TestAccProtoV6ProviderFactories,
