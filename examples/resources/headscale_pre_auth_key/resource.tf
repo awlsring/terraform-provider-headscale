@@ -22,8 +22,8 @@ resource "headscale_pre_auth_key" "tags" {
     acl_tags = ["tag:test"]
 }
 
-# Creates a pre-auth key with multiple tags
+# Creates a tags-only pre-auth key for infrastructure nodes on Headscale v0.28.0+
 resource "headscale_pre_auth_key" "with_tags" {
-    user = "1"
+    reusable = true
     acl_tags = ["tag:server", "tag:production"]
 }
