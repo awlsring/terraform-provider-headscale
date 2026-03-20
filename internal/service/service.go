@@ -25,6 +25,7 @@ type Headscale interface {
 
 	ListPreAuthKeys(ctx context.Context, user string) ([]*models.V1PreAuthKey, error)
 	CreatePreAuthKey(ctx context.Context, input CreatePreAuthKeyInput) (*models.V1PreAuthKey, error)
+	DeletePreAuthKey(ctx context.Context, id string, user string, key string) error
 	ExpirePreAuthKey(ctx context.Context, id string, user string, key string) error
 
 	ListRoutes(ctx context.Context) ([]*Route, error)

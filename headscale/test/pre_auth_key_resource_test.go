@@ -68,6 +68,40 @@ func Test_PreAuthKeyResource(t *testing.T) {
 	})
 }
 
+func Test_PreAuthKeyResource_Issue30_TaggedKeyWithoutUser(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		ProtoV6ProviderFactories: TestAccProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: ProviderConfig + `resource "headscale_pre_auth_key" "tagged" {
+					reusable = true
+					acl_tags = ["tag:server"]
+				  }`,
+				Check: resource.ComposeAggregateTestCheckFunc(
+					testAccCheckResourceAttrMissingOrEmptyPreAuth("headscale_pre_auth_key.tagged", "user"),
+					resource.TestCheckResourceAttr("headscale_pre_auth_key.tagged", "reusable", "true"),
+					resource.TestCheckResourceAttr("headscale_pre_auth_key.tagged", "ephemeral", "false"),
+					resource.TestCheckResourceAttr("headscale_pre_auth_key.tagged", "expired", "false"),
+					resource.TestCheckResourceAttr("headscale_pre_auth_key.tagged", "acl_tags.#", "1"),
+					resource.TestCheckTypeSetElemAttr("headscale_pre_auth_key.tagged", "acl_tags.*", "tag:server"),
+					resource.TestCheckResourceAttrSet("headscale_pre_auth_key.tagged", "id"),
+					resource.TestCheckResourceAttrSet("headscale_pre_auth_key.tagged", "key"),
+				),
+			},
+			{
+				RefreshState: true,
+				Check: resource.ComposeAggregateTestCheckFunc(
+					testAccCheckResourceAttrMissingOrEmptyPreAuth("headscale_pre_auth_key.tagged", "user"),
+					resource.TestCheckResourceAttr("headscale_pre_auth_key.tagged", "acl_tags.#", "1"),
+					resource.TestCheckTypeSetElemAttr("headscale_pre_auth_key.tagged", "acl_tags.*", "tag:server"),
+					resource.TestCheckResourceAttrSet("headscale_pre_auth_key.tagged", "id"),
+					resource.TestCheckResourceAttrSet("headscale_pre_auth_key.tagged", "key"),
+				),
+			},
+		},
+	})
+}
+
 func Test_PreAuthKeyResource_Issue24_ACLTagsReorderedNoReplacement(t *testing.T) {
 	var firstID string
 
@@ -277,6 +311,22 @@ func testAccCheckResourceAttrChangedPreAuth(resourceName string, attrName string
 		}
 
 		*previous = current
+		return nil
+	}
+}
+
+func testAccCheckResourceAttrMissingOrEmptyPreAuth(resourceName string, attrName string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[resourceName]
+		if !ok {
+			return fmt.Errorf("resource %s not found in state", resourceName)
+		}
+
+		current, ok := rs.Primary.Attributes[attrName]
+		if ok && current != "" {
+			return fmt.Errorf("expected %s on resource %s to be missing or empty, got %q", attrName, resourceName, current)
+		}
+
 		return nil
 	}
 }

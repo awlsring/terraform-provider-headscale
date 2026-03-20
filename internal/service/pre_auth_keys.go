@@ -78,12 +78,12 @@ func (h *HeadscaleService) CreatePreAuthKey(ctx context.Context, input CreatePre
 	return resp.Payload.PreAuthKey, nil
 }
 
-func (h *HeadscaleService) ExpirePreAuthKey(ctx context.Context, id string, user string, key string) error {
+func (h *HeadscaleService) resolvePreAuthKeyID(ctx context.Context, id string, user string, key string) (string, error) {
 	resolvedID := id
 	if resolvedID == "" {
 		keys, err := h.ListPreAuthKeys(ctx, user)
 		if err != nil {
-			return err
+			return "", err
 		}
 
 		for _, existingKey := range keys {
@@ -95,7 +95,34 @@ func (h *HeadscaleService) ExpirePreAuthKey(ctx context.Context, id string, user
 	}
 
 	if resolvedID == "" {
-		return fmt.Errorf("unable to resolve pre-auth key id for key %q", key)
+		return "", fmt.Errorf("unable to resolve pre-auth key id for key %q", key)
+	}
+
+	return resolvedID, nil
+}
+
+func (h *HeadscaleService) DeletePreAuthKey(ctx context.Context, id string, user string, key string) error {
+	resolvedID, err := h.resolvePreAuthKeyID(ctx, id, user, key)
+	if err != nil {
+		return err
+	}
+
+	request := headscale_service.NewHeadscaleServiceDeletePreAuthKeyParams()
+	request.SetContext(ctx)
+	request.SetID(&resolvedID)
+
+	_, err = h.client.HeadscaleService.HeadscaleServiceDeletePreAuthKey(request)
+	if err != nil {
+		return handleRequestError(err)
+	}
+
+	return nil
+}
+
+func (h *HeadscaleService) ExpirePreAuthKey(ctx context.Context, id string, user string, key string) error {
+	resolvedID, err := h.resolvePreAuthKeyID(ctx, id, user, key)
+	if err != nil {
+		return err
 	}
 
 	request := headscale_service.NewHeadscaleServiceExpirePreAuthKeyParams()
@@ -104,7 +131,7 @@ func (h *HeadscaleService) ExpirePreAuthKey(ctx context.Context, id string, user
 		ID: resolvedID,
 	})
 
-	_, err := h.client.HeadscaleService.HeadscaleServiceExpirePreAuthKey(request)
+	_, err = h.client.HeadscaleService.HeadscaleServiceExpirePreAuthKey(request)
 	if err != nil {
 		if e, ok := err.(*headscale_service.HeadscaleServiceExpirePreAuthKeyDefault); ok {
 			if strings.Contains(e.Payload.Message, "AuthKey expired") {
