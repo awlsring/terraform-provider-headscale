@@ -31,4 +31,5 @@ All notable changes to this project will be documented in this file.
 
 - Issue #24: ACL tag ordering instability on `headscale_pre_auth_key`.
 - Issue #25: `time_to_expire` stability during `create_before_destroy` replacement flows.
+- Issue #30: `headscale_pre_auth_key.user` is now optional for tags-only keys.
 - Intermittent acceptance inconsistency when applying dual-stack exit-node routes.

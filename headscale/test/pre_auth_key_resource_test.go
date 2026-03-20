@@ -68,6 +68,40 @@ func Test_PreAuthKeyResource(t *testing.T) {
 	})
 }
 
+func Test_PreAuthKeyResource_Issue30_TaggedKeyWithoutUser(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		ProtoV6ProviderFactories: TestAccProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: ProviderConfig + `resource "headscale_pre_auth_key" "tagged" {
+					reusable = true
+					acl_tags = ["tag:server"]
+				  }`,
+				Check: resource.ComposeAggregateTestCheckFunc(
+					testAccCheckResourceAttrMissingOrEmptyPreAuth("headscale_pre_auth_key.tagged", "user"),
+					resource.TestCheckResourceAttr("headscale_pre_auth_key.tagged", "reusable", "true"),
+					resource.TestCheckResourceAttr("headscale_pre_auth_key.tagged", "ephemeral", "false"),
+					resource.TestCheckResourceAttr("headscale_pre_auth_key.tagged", "expired", "false"),
+					resource.TestCheckResourceAttr("headscale_pre_auth_key.tagged", "acl_tags.#", "1"),
+					resource.TestCheckTypeSetElemAttr("headscale_pre_auth_key.tagged", "acl_tags.*", "tag:server"),
+					resource.TestCheckResourceAttrSet("headscale_pre_auth_key.tagged", "id"),
+					resource.TestCheckResourceAttrSet("headscale_pre_auth_key.tagged", "key"),
+				),
+			},
+			{
+				RefreshState: true,
+				Check: resource.ComposeAggregateTestCheckFunc(
+					testAccCheckResourceAttrMissingOrEmptyPreAuth("headscale_pre_auth_key.tagged", "user"),
+					resource.TestCheckResourceAttr("headscale_pre_auth_key.tagged", "acl_tags.#", "1"),
+					resource.TestCheckTypeSetElemAttr("headscale_pre_auth_key.tagged", "acl_tags.*", "tag:server"),
+					resource.TestCheckResourceAttrSet("headscale_pre_auth_key.tagged", "id"),
+					resource.TestCheckResourceAttrSet("headscale_pre_auth_key.tagged", "key"),
+				),
+			},
+		},
+	})
+}
+
 func Test_PreAuthKeyResource_Issue24_ACLTagsReorderedNoReplacement(t *testing.T) {
 	var firstID string
 
@@ -161,6 +195,41 @@ func Test_PreAuthKeyResource_InvalidDuration(t *testing.T) {
 	})
 }
 
+// Test_PreAuthKeyResource_KeyPreservedAfterRefresh verifies that the plaintext
+// key stored in state during Create is not overwritten by the masked value
+// (hskey-auth-{prefix}-***) that the Headscale List API returns on
+// Headscale ≥ v0.28.0.  The second step uses RefreshState=true which
+// exercises exactly the same Read code-path as `tofu refresh`.
+func Test_PreAuthKeyResource_KeyPreservedAfterRefresh(t *testing.T) {
+	var capturedKey string
+
+	resource.Test(t, resource.TestCase{
+		ProtoV6ProviderFactories: TestAccProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Step 1: create the key and capture its plaintext value.
+			{
+				Config: ProviderConfig + `resource "headscale_pre_auth_key" "test" {
+					user     = "1"
+					reusable = true
+				}`,
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttrSet("headscale_pre_auth_key.test", "key"),
+					testAccCheckResourceAttrCapturedPreAuth("headscale_pre_auth_key.test", "key", &capturedKey),
+				),
+			},
+			// Step 2: refresh state only (no config change).  The Read function
+			// must preserve the plaintext key; if it overwrites with the masked
+			// value the captured-vs-current check will fail.
+			{
+				RefreshState: true,
+				Check: resource.ComposeAggregateTestCheckFunc(
+					testAccCheckResourceAttrUnchangedPreAuth("headscale_pre_auth_key.test", "key", &capturedKey),
+				),
+			},
+		},
+	})
+}
+
 func Test_PreAuthKeyResource_InvalidUserID(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		ProtoV6ProviderFactories: TestAccProtoV6ProviderFactories,
@@ -242,6 +311,22 @@ func testAccCheckResourceAttrChangedPreAuth(resourceName string, attrName string
 		}
 
 		*previous = current
+		return nil
+	}
+}
+
+func testAccCheckResourceAttrMissingOrEmptyPreAuth(resourceName string, attrName string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[resourceName]
+		if !ok {
+			return fmt.Errorf("resource %s not found in state", resourceName)
+		}
+
+		current, ok := rs.Primary.Attributes[attrName]
+		if ok && current != "" {
+			return fmt.Errorf("expected %s on resource %s to be missing or empty, got %q", attrName, resourceName, current)
+		}
+
 		return nil
 	}
 }

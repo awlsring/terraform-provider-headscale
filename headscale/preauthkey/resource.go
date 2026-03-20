@@ -47,7 +47,7 @@ func (d *preAuthKeyResource) Configure(_ context.Context, req resource.Configure
 
 func (d *preAuthKeyResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "The pre auth key resource allows you to create a pre auth key that can be used to register a new device on the Headscale instance. By default keys that are created with this resource will be not reusable, not ephemeral, and expire in 1 hour. Keys cannot be modified, so any change to the input on this resource will cause the key to be expired and a new key to be created.",
+		MarkdownDescription: "The pre auth key resource allows you to create a pre auth key that can be used to register a new device on the Headscale instance. By default keys that are created with this resource will be not reusable, not ephemeral, and expire in 1 hour. Keys cannot be modified, so any change to the input on this resource will cause the key to be replaced.",
 		Attributes: map[string]schema.Attribute{
 			"time_to_expire": schema.StringAttribute{
 				Optional:            true,
@@ -67,9 +67,11 @@ func (d *preAuthKeyResource) Schema(_ context.Context, _ resource.SchemaRequest,
 				},
 			},
 			"user": schema.StringAttribute{
-				Required:    true,
-				Description: "The ID of the user that will own the pre auth key.",
+				Optional:    true,
+				Computed:    true,
+				Description: "The ID of the user that will own the pre auth key. Omit this for tags-only keys on Headscale v0.28.0+.",
 				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
 					stringplanmodifier.RequiresReplace(),
 				},
 				Validators: []validator.String{
@@ -151,7 +153,10 @@ func (r *preAuthKeyResource) Create(ctx context.Context, req resource.CreateRequ
 		return
 	}
 
-	user := plan.User.ValueString()
+	user := ""
+	if !plan.User.IsNull() && !plan.User.IsUnknown() {
+		user = plan.User.ValueString()
+	}
 	reusable := plan.Reusable.ValueBool()
 	ephemeral := plan.Ephemeral.ValueBool()
 	aclTags := []string{}
@@ -206,7 +211,6 @@ func (r *preAuthKeyResource) Create(ctx context.Context, req resource.CreateRequ
 	m := preAuthKeyResourceModel{
 		TimeToExpire: plan.TimeToExpire,
 		Id:           types.StringValue(key.ID),
-		User:         types.StringValue(key.User.ID),
 		Key:          types.StringValue(key.Key),
 		Reusable:     types.BoolValue(key.Reusable),
 		Ephemeral:    types.BoolValue(key.Ephemeral),
@@ -214,6 +218,11 @@ func (r *preAuthKeyResource) Create(ctx context.Context, req resource.CreateRequ
 		Expired:      types.BoolValue(isExpired),
 		Expiration:   types.StringValue(expiresAt),
 		CreatedAt:    types.StringValue(key.CreatedAt.DeepCopy().String()),
+	}
+	if key.User != nil {
+		m.User = types.StringValue(key.User.ID)
+	} else {
+		m.User = types.StringNull()
 	}
 
 	// API method doesn't return the list of tags so we need to set it from the plan if any were defined
@@ -251,11 +260,11 @@ func (r *preAuthKeyResource) Delete(ctx context.Context, req resource.DeleteRequ
 		return
 	}
 
-	err := r.client.ExpirePreAuthKey(ctx, state.Id.ValueString(), state.User.ValueString(), state.Key.ValueString())
+	err := r.client.DeletePreAuthKey(ctx, state.Id.ValueString(), state.User.ValueString(), state.Key.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error deleting pre auth key",
-			"Could not expire key, unexpected error: "+err.Error(),
+			"Could not delete key, unexpected error: "+err.Error(),
 		)
 		return
 	}
@@ -300,14 +309,23 @@ func (r *preAuthKeyResource) Read(ctx context.Context, req resource.ReadRequest,
 			m = preAuthKeyResourceModel{
 				TimeToExpire: state.TimeToExpire,
 				Id:           types.StringValue(key.ID),
-				User:         types.StringValue(key.User.ID),
-				Key:          types.StringValue(key.Key),
-				Reusable:     types.BoolValue(key.Reusable),
-				Ephemeral:    types.BoolValue(key.Ephemeral),
-				Used:         types.BoolValue(key.Used),
-				Expired:      types.BoolValue(isExpired),
-				Expiration:   types.StringValue(expiresAt),
-				CreatedAt:    types.StringValue(key.CreatedAt.DeepCopy().String()),
+				// Preserve the key from state: the List API returns a masked value
+				// (hskey-auth-{prefix}-***) on Headscale ≥ v0.28 because the server
+				// bcrypt-hashes secrets and cannot reconstruct the plaintext after
+				// creation. The only correct source is the Create response, which is
+				// already stored in state.
+				Key:        state.Key,
+				Reusable:   types.BoolValue(key.Reusable),
+				Ephemeral:  types.BoolValue(key.Ephemeral),
+				Used:       types.BoolValue(key.Used),
+				Expired:    types.BoolValue(isExpired),
+				Expiration: types.StringValue(expiresAt),
+				CreatedAt:  types.StringValue(key.CreatedAt.DeepCopy().String()),
+			}
+			if key.User != nil {
+				m.User = types.StringValue(key.User.ID)
+			} else {
+				m.User = types.StringNull()
 			}
 
 			tags, diags := types.SetValueFrom(ctx, types.StringType, key.ACLTags)

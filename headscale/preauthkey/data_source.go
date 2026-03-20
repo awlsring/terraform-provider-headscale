@@ -149,7 +149,6 @@ func (d *preAuthKeyDataSource) Read(ctx context.Context, req datasource.ReadRequ
 
 		m := preAuthKeyModel{
 			Id:         types.StringValue(key.ID),
-			User:       types.StringValue(key.User.ID),
 			Key:        types.StringValue(key.Key),
 			Reusable:   types.BoolValue(key.Reusable),
 			Ephemeral:  types.BoolValue(key.Ephemeral),
@@ -157,6 +156,11 @@ func (d *preAuthKeyDataSource) Read(ctx context.Context, req datasource.ReadRequ
 			Expiration: types.StringValue(key.Expiration.DeepCopy().String()),
 			Expired:    types.BoolValue(isExpired),
 			CreatedAt:  types.StringValue(key.CreatedAt.DeepCopy().String()),
+		}
+		if key.User != nil {
+			m.User = types.StringValue(key.User.ID)
+		} else {
+			m.User = types.StringNull()
 		}
 
 		tags, diags := types.ListValueFrom(ctx, types.StringType, key.ACLTags)
